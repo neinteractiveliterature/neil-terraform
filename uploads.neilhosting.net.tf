@@ -2,11 +2,6 @@ locals {
   uploads_neilhosting_net_origin = "S3-intercode2-production"
 }
 
-resource "aws_s3_bucket" "intercode2_production" {
-  acl    = "private"
-  bucket = "intercode2-production"
-}
-
 resource "aws_acm_certificate" "uploads_neilhosting_net" {
   domain_name = "uploads.neilhosting.net"
 }

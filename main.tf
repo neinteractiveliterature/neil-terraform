@@ -14,6 +14,9 @@ terraform {
   }
 }
 
+data "aws_caller_identity" "current" {}
+data "aws_region" "current" {}
+
 resource "aws_kms_key" "neil-terraform-state" {
   description = "Encryption key for Terraform state"
 }
