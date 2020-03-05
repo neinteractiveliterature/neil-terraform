@@ -3,6 +3,25 @@ resource "aws_s3_bucket" "intercode2_production" {
   bucket = "intercode2-production"
 }
 
+resource "aws_db_instance" "intercode_production" {
+  instance_class = "db.t2.micro"
+  engine         = "postgres"
+  engine_version = "10.9"
+  username       = "neiladmin"
+  deletion_protection = true
+  publicly_accessible = true
+
+  monitoring_interval = 60
+  performance_insights_enabled = true
+
+  copy_tags_to_snapshot = true
+  skip_final_snapshot = true
+
+  tags = {
+    "workload-type" = "other"
+  }
+}
+
 resource "aws_sqs_queue" "intercode_production_dead_letter" {
   name = "intercode_production_dead_letter"
 }
