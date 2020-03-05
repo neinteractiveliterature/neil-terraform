@@ -8,7 +8,7 @@ resource "aws_s3_bucket" "neilhosting_net" {
 }
 
 locals {
-  s3_bucket_origin = "S3-neilhosting.net"
+  neilhosting_net_origin = "S3-neilhosting.net"
   intercode_subdomains = ["www.neilhosting.net", "template.neilhosting.net"]
 }
 
@@ -111,7 +111,7 @@ resource "aws_cloudfront_distribution" "neilhosting_net" {
 
   origin {
     domain_name = aws_s3_bucket.neilhosting_net.website_endpoint
-    origin_id   = local.s3_bucket_origin
+    origin_id   = local.neilhosting_net_origin
 
     custom_origin_config {
       http_port = 80
@@ -127,7 +127,7 @@ resource "aws_cloudfront_distribution" "neilhosting_net" {
   default_cache_behavior {
     allowed_methods        = ["GET", "HEAD"]
     cached_methods         = ["GET", "HEAD"]
-    target_origin_id       = local.s3_bucket_origin
+    target_origin_id       = local.neilhosting_net_origin
     viewer_protocol_policy = "redirect-to-https"
 
     forwarded_values {
