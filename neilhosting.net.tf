@@ -3,7 +3,7 @@ resource "aws_s3_bucket" "neilhosting_net" {
   bucket = "neilhosting.net"
 
   website {
-    redirect_all_requests_to = "www.neilhosting.net"
+    redirect_all_requests_to = "https://www.neilhosting.net"
   }
 }
 
