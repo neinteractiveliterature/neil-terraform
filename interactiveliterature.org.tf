@@ -3,7 +3,7 @@ locals {
     "D", "E", "F", "G", "H", "I", "J", # the Chelmsford years, part I
     "K", # that one year in Waltham
     "L", "M", "N", "O", # the Chelmsford years, part II
-    "P", # that one year in Framingham
+    "P", # that one year in Westborough
     "Q", "R", "S", "T", "U" # the Warwick years
   ]
 }
