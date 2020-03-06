@@ -94,17 +94,5 @@ module "neilhosting_net_cloudfront" {
   origin_id = "S3-neilhosting.net"
   origin_domain_name = aws_s3_bucket.neilhosting_net.website_endpoint
   add_security_headers_arn = aws_lambda_function.addSecurityHeaders.qualified_arn
-}
-
-resource "aws_route53_record" "neilhosting_net_cert_validation" {
-  name    = module.neilhosting_net_cloudfront.acm_certificate.domain_validation_options.0.resource_record_name
-  type    = module.neilhosting_net_cloudfront.acm_certificate.domain_validation_options.0.resource_record_type
-  zone_id = aws_route53_zone.neilhosting_net.zone_id
-  records = [module.neilhosting_net_cloudfront.acm_certificate.domain_validation_options.0.resource_record_value]
-  ttl     = 300
-}
-
-resource "aws_acm_certificate_validation" "neilhosting_net" {
-  certificate_arn         = module.neilhosting_net_cloudfront.acm_certificate.arn
-  validation_record_fqdns = [aws_route53_record.neilhosting_net_cert_validation.fqdn]
+  route53_zone_id = aws_route53_zone.neilhosting_net.zone_id
 }
