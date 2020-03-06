@@ -1,6 +1,7 @@
 provider "aws" {
   profile = "neil"
   region = "us-east-1"
+  version = "~> 2.51"
 }
 
 terraform {

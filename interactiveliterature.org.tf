@@ -107,7 +107,7 @@ resource "aws_iam_group_policy" "interactiveliterature_org_cloudfront" {
         "cloudfront:*"
       ],
       "Resource": [
-        "${aws_cloudfront_distribution.interactiveliterature_org.arn}"
+        "${module.interactiveliterature_org_cloudfront.cloudfront_distribution.arn}"
       ]
     }
   ]
@@ -115,66 +115,12 @@ resource "aws_iam_group_policy" "interactiveliterature_org_cloudfront" {
   EOF
 }
 
-resource "aws_acm_certificate" "interactiveliterature_org" {
-  domain_name               = "interactiveliterature.org"
-  subject_alternative_names = [
-    "www.interactiveliterature.org",
-  ]
-}
+module "interactiveliterature_org_cloudfront" {
+  source = "./modules/cloudfront_with_acm"
 
-locals {
-  interactiveliterature_org_orgin = "S3-Website-www.interactiveliterature.org.s3-website-us-east-1.amazonaws.com"
-}
-
-resource "aws_cloudfront_distribution" "interactiveliterature_org" {
-  enabled = true
-
-  origin {
-    domain_name = aws_s3_bucket.www_interactiveliterature_org.website_endpoint
-    origin_id   = local.interactiveliterature_org_orgin
-
-    custom_origin_config {
-      http_port = 80
-      https_port = 443
-      origin_protocol_policy = "http-only"
-      origin_ssl_protocols = ["TLSv1", "TLSv1.1", "TLSv1.2"]
-    }
-  }
-
-  aliases = ["interactiveliterature.org", "www.interactiveliterature.org"]
-  is_ipv6_enabled = true
-
-  default_cache_behavior {
-    allowed_methods        = ["GET", "HEAD"]
-    cached_methods         = ["GET", "HEAD"]
-    target_origin_id       = local.interactiveliterature_org_orgin
-    viewer_protocol_policy = "redirect-to-https"
-
-    forwarded_values {
-      headers = []
-      query_string = false
-
-      cookies {
-        forward = "none"
-      }
-    }
-
-    lambda_function_association {
-      event_type = "origin-response"
-      include_body = false
-      lambda_arn = aws_lambda_function.addSecurityHeaders.qualified_arn
-    }
-  }
-
-  restrictions {
-    geo_restriction {
-      restriction_type = "none"
-    }
-  }
-
-  viewer_certificate {
-    acm_certificate_arn = aws_acm_certificate.interactiveliterature_org.arn
-    minimum_protocol_version = "TLSv1.1_2016"
-    ssl_support_method = "sni-only"
-  }
+  domain_name = "interactiveliterature.org"
+  alternative_names = ["www.interactiveliterature.org"]
+  origin_id = "S3-Website-www.interactiveliterature.org.s3-website-us-east-1.amazonaws.com"
+  origin_domain_name = aws_s3_bucket.www_interactiveliterature_org.website_endpoint
+  add_security_headers_arn = aws_lambda_function.addSecurityHeaders.qualified_arn
 }

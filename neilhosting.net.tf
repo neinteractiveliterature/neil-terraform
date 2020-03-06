@@ -8,7 +8,6 @@ resource "aws_s3_bucket" "neilhosting_net" {
 }
 
 locals {
-  neilhosting_net_origin = "S3-neilhosting.net"
   intercode_subdomains = ["www.neilhosting.net", "template.neilhosting.net"]
 }
 
@@ -22,8 +21,8 @@ resource "aws_route53_record" "neilhosting_net_alias" {
   type = "A"
 
   alias {
-    name = aws_cloudfront_distribution.neilhosting_net.domain_name
-    zone_id = aws_cloudfront_distribution.neilhosting_net.hosted_zone_id
+    name = module.neilhosting_net_cloudfront.cloudfront_distribution.domain_name
+    zone_id = module.neilhosting_net_cloudfront.cloudfront_distribution.hosted_zone_id
     evaluate_target_health = false
   }
 }
@@ -88,73 +87,24 @@ resource "aws_route53_record" "neilhosting_net_template" {
   records = ["peaceful-tortoise-a9lwi8zf1skj973tyemrono5.herokudns.com."]
 }
 
-resource "aws_acm_certificate" "neilhosting_net" {
+module "neilhosting_net_cloudfront" {
+  source = "./modules/cloudfront_with_acm"
+
   domain_name = "neilhosting.net"
-  validation_method = "DNS"
+  origin_id = "S3-neilhosting.net"
+  origin_domain_name = aws_s3_bucket.neilhosting_net.website_endpoint
+  add_security_headers_arn = aws_lambda_function.addSecurityHeaders.qualified_arn
 }
 
 resource "aws_route53_record" "neilhosting_net_cert_validation" {
-  name    = aws_acm_certificate.neilhosting_net.domain_validation_options.0.resource_record_name
-  type    = aws_acm_certificate.neilhosting_net.domain_validation_options.0.resource_record_type
+  name    = module.neilhosting_net_cloudfront.acm_certificate.domain_validation_options.0.resource_record_name
+  type    = module.neilhosting_net_cloudfront.acm_certificate.domain_validation_options.0.resource_record_type
   zone_id = aws_route53_zone.neilhosting_net.zone_id
-  records = [aws_acm_certificate.neilhosting_net.domain_validation_options.0.resource_record_value]
+  records = [module.neilhosting_net_cloudfront.acm_certificate.domain_validation_options.0.resource_record_value]
   ttl     = 300
 }
 
 resource "aws_acm_certificate_validation" "neilhosting_net" {
-  certificate_arn         = aws_acm_certificate.neilhosting_net.arn
+  certificate_arn         = module.neilhosting_net_cloudfront.acm_certificate.arn
   validation_record_fqdns = [aws_route53_record.neilhosting_net_cert_validation.fqdn]
-}
-
-resource "aws_cloudfront_distribution" "neilhosting_net" {
-  enabled = true
-
-  origin {
-    domain_name = aws_s3_bucket.neilhosting_net.website_endpoint
-    origin_id   = local.neilhosting_net_origin
-
-    custom_origin_config {
-      http_port = 80
-      https_port = 443
-      origin_protocol_policy = "http-only"
-      origin_ssl_protocols = ["TLSv1", "TLSv1.1", "TLSv1.2"]
-    }
-  }
-
-  aliases = ["neilhosting.net"]
-  is_ipv6_enabled = true
-
-  default_cache_behavior {
-    allowed_methods        = ["GET", "HEAD"]
-    cached_methods         = ["GET", "HEAD"]
-    target_origin_id       = local.neilhosting_net_origin
-    viewer_protocol_policy = "redirect-to-https"
-
-    forwarded_values {
-      headers = []
-      query_string = false
-
-      cookies {
-        forward = "none"
-      }
-    }
-
-    lambda_function_association {
-      event_type = "origin-response"
-      include_body = false
-      lambda_arn = aws_lambda_function.addSecurityHeaders.qualified_arn
-    }
-  }
-
-  restrictions {
-    geo_restriction {
-      restriction_type = "none"
-    }
-  }
-
-  viewer_certificate {
-    acm_certificate_arn = aws_acm_certificate.neilhosting_net.arn
-    minimum_protocol_version = "TLSv1.1_2016"
-    ssl_support_method = "sni-only"
-  }
 }

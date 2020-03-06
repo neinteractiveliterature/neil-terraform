@@ -10,14 +10,6 @@ resource "aws_s3_bucket" "gamewrap_interactiveliterature_org" {
   }
 }
 
-resource "aws_acm_certificate" "gamewrap_interactiveliterature_org" {
-  domain_name               = "gamewrap.interactiveliterature.org"
-}
-
-locals {
-  gamewrap_interactiveliterature_org_origin = "S3-gamewrap.interactiveliterature.org"
-}
-
 resource "aws_iam_group" "gamewrap_s3" {
   name = "gamewrap-s3"
 }
@@ -71,7 +63,7 @@ resource "aws_iam_group_policy" "gamewrap_cloudfront" {
         "cloudfront:GetDistribution"
       ],
       "Resource": [
-        "${aws_cloudfront_distribution.gamewrap_interactiveliterature_org.arn}"
+        "${module.gamewrap_cloudfront.cloudfront_distribution.arn}"
       ]
     }
   ]
@@ -88,50 +80,13 @@ resource "aws_iam_user_group_membership" "gamewrap_s3" {
   groups = [aws_iam_group.gamewrap_s3.name]
 }
 
-resource "aws_cloudfront_distribution" "gamewrap_interactiveliterature_org" {
-  enabled = true
+module "gamewrap_cloudfront" {
+  source = "./modules/cloudfront_with_acm"
 
-  origin {
-    domain_name = aws_s3_bucket.gamewrap_interactiveliterature_org.website_endpoint
-    origin_id   = local.gamewrap_interactiveliterature_org_origin
-
-    custom_origin_config {
-      http_port = 80
-      https_port = 443
-      origin_protocol_policy = "http-only"
-      origin_ssl_protocols = ["TLSv1", "TLSv1.1", "TLSv1.2"]
-    }
-  }
-
-  aliases = ["gamewrap.interactiveliterature.org"]
-  is_ipv6_enabled = true
+  domain_name = "gamewrap.interactiveliterature.org"
+  origin_id = "S3-gamewrap.interactiveliterature.org"
   default_root_object = "index.html"
-
-  default_cache_behavior {
-    allowed_methods        = ["GET", "HEAD"]
-    cached_methods         = ["GET", "HEAD"]
-    target_origin_id       = local.gamewrap_interactiveliterature_org_origin
-    viewer_protocol_policy = "redirect-to-https"
-
-    forwarded_values {
-      headers = []
-      query_string = false
-
-      cookies {
-        forward = "none"
-      }
-    }
-  }
-
-  restrictions {
-    geo_restriction {
-      restriction_type = "none"
-    }
-  }
-
-  viewer_certificate {
-    acm_certificate_arn = aws_acm_certificate.gamewrap_interactiveliterature_org.arn
-    minimum_protocol_version = "TLSv1.1_2016"
-    ssl_support_method = "sni-only"
-  }
+  validation_method = "NONE"
+  origin_domain_name = aws_s3_bucket.gamewrap_interactiveliterature_org.website_endpoint
+  add_security_headers_arn = aws_lambda_function.addSecurityHeaders.qualified_arn
 }

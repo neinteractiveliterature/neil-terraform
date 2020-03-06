@@ -38,66 +38,13 @@ resource "aws_s3_bucket" "interconlarp_org" {
   }
 }
 
-resource "aws_acm_certificate" "interconlarp_org" {
-  domain_name               = "interconlarp.org"
-  subject_alternative_names = [
-    "www.interconlarp.org",
-  ]
-}
+module "interconlarp_org_cloudfront" {
+  source = "./modules/cloudfront_with_acm"
 
-locals {
-  interconlarp_org_orgin = "S3-interconlarp.org"
-}
-
-resource "aws_cloudfront_distribution" "interconlarp_org" {
-  enabled = true
-
-  origin {
-    domain_name = aws_s3_bucket.interconlarp_org.website_endpoint
-    origin_id   = local.interconlarp_org_orgin
-
-    custom_origin_config {
-      http_port = 80
-      https_port = 443
-      origin_protocol_policy = "http-only"
-      origin_ssl_protocols = ["TLSv1", "TLSv1.1", "TLSv1.2"]
-    }
-  }
-
-  aliases = ["interconlarp.org", "www.interconlarp.org"]
-  is_ipv6_enabled = true
-
-  default_cache_behavior {
-    allowed_methods        = ["GET", "HEAD"]
-    cached_methods         = ["GET", "HEAD"]
-    target_origin_id       = local.interconlarp_org_orgin
-    viewer_protocol_policy = "redirect-to-https"
-
-    forwarded_values {
-      headers = []
-      query_string = false
-
-      cookies {
-        forward = "none"
-      }
-    }
-
-    lambda_function_association {
-      event_type = "origin-response"
-      include_body = false
-      lambda_arn = aws_lambda_function.addSecurityHeaders.qualified_arn
-    }
-  }
-
-  restrictions {
-    geo_restriction {
-      restriction_type = "none"
-    }
-  }
-
-  viewer_certificate {
-    acm_certificate_arn = aws_acm_certificate.interconlarp_org.arn
-    minimum_protocol_version = "TLSv1.1_2016"
-    ssl_support_method = "sni-only"
-  }
+  domain_name = "interconlarp.org"
+  alternative_names = ["www.interconlarp.org"]
+  validation_method = "NONE"
+  origin_id = "S3-interconlarp.org"
+  origin_domain_name = aws_s3_bucket.interconlarp_org.website_endpoint
+  add_security_headers_arn = aws_lambda_function.addSecurityHeaders.qualified_arn
 }
