@@ -1,3 +1,42 @@
+variable "intercode_production_db_password" {
+  type = string
+}
+
+# The Heroku app itself
+resource "heroku_app" "intercode" {
+  name = "intercode"
+  region = "us"
+  stack = "container"
+
+  organization {
+    name = "neinteractiveliterature"
+  }
+
+  # we do our own cert management shenanigans using scheduled jobs
+  acm = false
+
+  config_vars = {
+    INTERCODE_CERTS_NO_WILDCARD_DOMAINS = "5pi-con.natbudin.com"
+    INTERCODE_HOST = "neilhosting.net"
+    RACK_ENV = "production"
+    RAILS_ENV = "production"
+    RAILS_LOG_TO_STDOUT = "enabled"
+    RAILS_MAX_THREADS = "4"
+    RAILS_SERVE_STATIC_FILES = "enabled"
+    UPLOADS_HOST = "https://uploads.neilhosting.net"
+    WEB_CONCURRENCY = "1"
+    YARN_PRODUCTION = "true"
+  }
+
+  sensitive_config_vars = {
+    AWS_ACCESS_KEY_ID = aws_iam_access_key.intercode2_production.id
+    AWS_REGION = data.aws_region.current.name
+    AWS_SECRET_ACCESS_KEY = aws_iam_access_key.intercode2_production.secret
+    AWS_S3_BUCKET = aws_s3_bucket.intercode2_production.bucket
+    DATABASE_URL = "postgres://intercode_production:${var.intercode_production_db_password}@${aws_db_instance.intercode_production.endpoint}/intercode_production?sslrootcert=rds-combined-ca-bundle-2019.pem"
+  }
+}
+
 # The production Postgres database
 resource "aws_db_instance" "intercode_production" {
   instance_class = "db.t2.micro"
@@ -180,4 +219,8 @@ resource "aws_iam_user" "intercode2_production" {
 resource "aws_iam_user_group_membership" "intercode2_production" {
   user = aws_iam_user.intercode2_production.name
   groups = [aws_iam_group.intercode2_production.name]
+}
+
+resource "aws_iam_access_key" "intercode2_production" {
+  user = aws_iam_user.intercode2_production.name
 }

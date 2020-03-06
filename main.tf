@@ -4,6 +4,10 @@ provider "aws" {
   version = "~> 2.51"
 }
 
+provider "heroku" {
+  version = "~> 2.2"
+}
+
 terraform {
   backend "s3" {
     profile = "neil"
