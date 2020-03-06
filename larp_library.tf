@@ -1,3 +1,30 @@
+# The Heroku app itself
+resource "heroku_app" "larp_library" {
+  name = "larp-library"
+  region = "us"
+  stack = "heroku-18"
+  acm = true
+
+  organization {
+    name = "neinteractiveliterature"
+  }
+
+  config_vars = {
+    RACK_ENV = "production"
+    RAILS_ENV = "production"
+    RAILS_LOG_TO_STDOUT = "enabled"
+    RAILS_MAX_THREADS = "4"
+    RAILS_SERVE_STATIC_FILES = "enabled"
+  }
+
+  sensitive_config_vars = {
+    AWS_ACCESS_KEY_ID = aws_iam_access_key.larp_library.id
+    AWS_REGION = data.aws_region.current.name
+    AWS_SECRET_ACCESS_KEY = aws_iam_access_key.larp_library.secret
+    AWS_S3_BUCKET = aws_s3_bucket.larp_library_production.bucket
+  }
+}
+
 resource "aws_s3_bucket" "larp_library_production" {
   acl    = "private"
   bucket = "larp-library-production"
@@ -67,4 +94,17 @@ resource "aws_iam_group_policy" "larp_library_s3" {
   ]
 }
   EOF
+}
+
+resource "aws_iam_user" "larp_library" {
+  name = "larp-library"
+}
+
+resource "aws_iam_user_group_membership" "larp_library" {
+  user = aws_iam_user.larp_library.name
+  groups = [aws_iam_group.larp_library.name]
+}
+
+resource "aws_iam_access_key" "larp_library" {
+  user = aws_iam_user.larp_library.name
 }
