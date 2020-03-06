@@ -1,4 +1,3 @@
-
 resource "aws_iam_role" "lambda_edge_role" {
   assume_role_policy    = jsonencode(
     {
