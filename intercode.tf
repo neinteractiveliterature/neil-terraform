@@ -1,8 +1,4 @@
-resource "aws_s3_bucket" "intercode2_production" {
-  acl    = "private"
-  bucket = "intercode2-production"
-}
-
+# The production Postgres database
 resource "aws_db_instance" "intercode_production" {
   instance_class = "db.t2.micro"
   engine         = "postgres"
@@ -22,6 +18,7 @@ resource "aws_db_instance" "intercode_production" {
   }
 }
 
+# SQS queues used by Shoryuken for background processing
 resource "aws_sqs_queue" "intercode_production_dead_letter" {
   name = "intercode_production_dead_letter"
 }
@@ -46,6 +43,53 @@ resource "aws_sqs_queue" "intercode_production_mailers" {
   )
 }
 
+# uploads.neilhosting.net, aka intercode2_production, is the Cloudfront-served S3 bucket we use
+# for uploaded CMS content and product images
+resource "aws_s3_bucket" "intercode2_production" {
+  acl    = "private"
+  bucket = "intercode2-production"
+}
+
+resource "aws_route53_record" "uploads_neilhosting_net" {
+  zone_id = aws_route53_zone.neilhosting_net.zone_id
+  name = "uploads.neilhosting.net"
+  type = "CNAME"
+  ttl = 300
+  records = ["${module.uploads_neilhosting_net_cloudfront.cloudfront_distribution.domain_name}."]
+}
+
+module "uploads_neilhosting_net_cloudfront" {
+  source = "./modules/cloudfront_with_acm"
+
+  domain_name = "uploads.neilhosting.net"
+  origin_id = "S3-intercode2-production"
+  origin_domain_name = aws_s3_bucket.intercode2_production.bucket_domain_name
+  add_security_headers_arn = aws_lambda_function.addSecurityHeaders.qualified_arn
+  route53_zone_id = aws_route53_zone.neilhosting_net.zone_id
+}
+
+# assets.neilhosting.net is a CloudFront distribution that caches whatever neilhosting.net is
+# serving.  Intercode points asset URLs at that domain so that they can be served over CDN
+resource "aws_route53_record" "assets_neilhosting_net" {
+  zone_id = aws_route53_zone.neilhosting_net.zone_id
+  name = "assets.neilhosting.net"
+  type = "CNAME"
+  ttl = 300
+  records = ["${module.assets_neilhosting_net_cloudfront.cloudfront_distribution.domain_name}."]
+}
+
+module "assets_neilhosting_net_cloudfront" {
+  source = "./modules/cloudfront_with_acm"
+
+  domain_name = "assets.neilhosting.net"
+  origin_id = "intercode"
+  origin_domain_name = "www.neilhosting.net"
+  origin_protocol_policy = "https-only"
+  add_security_headers_arn = aws_lambda_function.addSecurityHeaders.qualified_arn
+  route53_zone_id = aws_route53_zone.neilhosting_net.zone_id
+}
+
+# IAM policy so that Intercode can access the stuff it needs to access in AWS
 resource "aws_iam_group" "intercode2_production" {
   name = "intercode2-production"
 }
@@ -127,4 +171,13 @@ resource "aws_iam_group_policy" "intercode2_production" {
   ]
 }
   EOF
+}
+
+resource "aws_iam_user" "intercode2_production" {
+  name = "intercode2-production"
+}
+
+resource "aws_iam_user_group_membership" "intercode2_production" {
+  user = aws_iam_user.intercode2_production.name
+  groups = [aws_iam_group.intercode2_production.name]
 }
