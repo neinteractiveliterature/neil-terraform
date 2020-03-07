@@ -2,7 +2,7 @@ resource "aws_iam_group" "terraform_admin" {
   name = "terraform-admin"
 }
 
-resource "aws_iam_group_policy" "terraform_admin_s3" {
+resource "aws_iam_group_policy" "terraform_admin" {
   group = aws_iam_group.terraform_admin.name
   policy = <<-EOF
   {
@@ -23,18 +23,7 @@ resource "aws_iam_group_policy" "terraform_admin_s3" {
           "s3:PutObject"
         ],
         "Resource": "arn:aws:s3:::neil-terraform-state/*"
-      }
-    ]
-  }
-  EOF
-}
-
-resource "aws_iam_group_policy" "terraform_admin_dynamodb" {
-  group = aws_iam_group.terraform_admin.name
-  policy = <<-EOF
-  {
-    "Version": "2012-10-17",
-    "Statement": [
+      },
       {
         "Effect": "Allow",
         "Action": [
@@ -53,52 +42,7 @@ resource "aws_iam_group" "ops_admin" {
   name = "ops-admin"
 }
 
-resource "aws_iam_group_policy_attachment" "ops_admin_acm" {
+resource "aws_iam_group_policy_attachment" "ops_admin_administrator_access" {
   group = aws_iam_group.ops_admin.name
-  policy_arn = "arn:aws:iam::aws:policy/AWSCertificateManagerFullAccess"
-}
-
-resource "aws_iam_group_policy_attachment" "ops_admin_cloudfront" {
-  group = aws_iam_group.ops_admin.name
-  policy_arn = "arn:aws:iam::aws:policy/CloudFrontFullAccess"
-}
-
-resource "aws_iam_group_policy_attachment" "ops_admin_dynamodb" {
-  group = aws_iam_group.ops_admin.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonDynamoDBFullAccess"
-}
-
-resource "aws_iam_group_policy_attachment" "ops_admin_iam" {
-  group = aws_iam_group.ops_admin.name
-  policy_arn = "arn:aws:iam::aws:policy/IAMFullAccess"
-}
-
-resource "aws_iam_group_policy_attachment" "ops_admin_kms" {
-  group = aws_iam_group.ops_admin.name
-  policy_arn = "arn:aws:iam::aws:policy/AWSKeyManagementServicePowerUser"
-}
-
-resource "aws_iam_group_policy_attachment" "ops_admin_lambda" {
-  group = aws_iam_group.ops_admin.name
-  policy_arn = "arn:aws:iam::aws:policy/AWSLambdaFullAccess"
-}
-
-resource "aws_iam_group_policy_attachment" "ops_admin_rds" {
-  group = aws_iam_group.ops_admin.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonRDSFullAccess"
-}
-
-resource "aws_iam_group_policy_attachment" "ops_admin_route53" {
-  group = aws_iam_group.ops_admin.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonRoute53FullAccess"
-}
-
-resource "aws_iam_group_policy_attachment" "ops_admin_s3" {
-  group = aws_iam_group.ops_admin.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonS3FullAccess"
-}
-
-resource "aws_iam_group_policy_attachment" "ops_admin_sqs" {
-  group = aws_iam_group.ops_admin.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonSQSFullAccess"
+  policy_arn = "arn:aws:iam::aws:policy/AdministratorAccess"
 }
