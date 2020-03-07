@@ -16,6 +16,7 @@ terraform {
     key    = "terraform.tfstate"
     encrypt = true
     kms_key_id = "arn:aws:kms:us-east-1:689053117832:key/9c5f29f3-3d5d-4d9d-a16f-d081ecb3b152"
+    dynamodb_table = "terraform_state_locks"
   }
 }
 
