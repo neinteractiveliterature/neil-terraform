@@ -68,6 +68,18 @@ resource "aws_iam_group_policy" "interactiveliterature_org_s3" {
   "Version": "2012-10-17",
   "Statement": [
     {
+      "Sid": "BucketLevelAccess",
+      "Effect": "Allow",
+      "Action": [
+        "s3:GetBucketLocation",
+        "s3:ListAllMyBuckets",
+        "s3:ListBucket"
+      ],
+      "Resource": [
+        "arn:aws:s3:::*"
+      ]
+    },
+    {
       "Sid": "bucket",
       "Effect": "Allow",
       "Action": [
@@ -100,6 +112,15 @@ resource "aws_iam_group_policy" "interactiveliterature_org_cloudfront" {
 {
   "Version": "2012-10-17",
   "Statement": [
+    {
+      "Sid": "DistributionLevelAccess",
+      "Effect": "Allow",
+      "Action": [
+        "cloudfront:ListDistributions",
+        "cloudfront:ListStreamingDistributions"
+      ],
+      "Resource": ["*"]
+    },
     {
       "Sid": "Stmt1545167594000",
       "Effect": "Allow",

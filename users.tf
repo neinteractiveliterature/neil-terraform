@@ -35,6 +35,17 @@ resource "aws_iam_user_group_membership" "nbudin" {
   ]
 }
 
+resource "aws_iam_user" "nbudin_ilorgtest" {
+  name = "nbudin-ilorgtest"
+}
+
+resource "aws_iam_user_group_membership" "nbudin-ilorgtest" {
+  user = aws_iam_user.nbudin_ilorgtest.name
+  groups = [
+    aws_iam_group.interactiveliterature_org_admin.name
+  ]
+}
+
 resource "aws_iam_user" "jdiewald" {
   name = "jdiewald"
 }
