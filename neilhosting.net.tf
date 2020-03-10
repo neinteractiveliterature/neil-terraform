@@ -43,7 +43,7 @@ resource "aws_route53_record" "neilhosting_net_spf" {
   name = "neilhosting.net"
   type = "TXT"
   ttl = 300
-  records = ["v=spf1 include:mailgun.org ~all"]
+  records = ["v=spf1 include:mailgun.org include:amazonses.com ~all"]
 }
 
 resource "aws_route53_record" "neilhosting_net_dkim" {
@@ -52,14 +52,6 @@ resource "aws_route53_record" "neilhosting_net_dkim" {
   type = "TXT"
   ttl = 300
   records = ["k=rsa; p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDgeXF6lftRwGanqYdLvBYPZpntiZSjRL2jXPO8g9uZuxOiySGifWZIPkIQGzqSjY/BMSg5yFn5x88/rKlqilr7+g+m1sj+8t5l/TYdrzVPg7XKwysSOYKzd8WCBOsEhEay+V7w4h+KsjKB0oFGUMDRe+Cxq1M1NffR8W8rCys3awIDAQAB"]
-}
-
-resource "aws_route53_record" "neilhosting_net_amazonses" {
-  zone_id = aws_route53_zone.neilhosting_net.zone_id
-  name = "_amazonses.neilhosting.net"
-  type = "TXT"
-  ttl = 1800
-  records = ["LEgL3GeA6W0aInKMomh4M7hIGmfNgWSTPYDZBKtqOtk="]
 }
 
 resource "aws_route53_record" "neilhosting_net_email" {

@@ -206,6 +206,12 @@ resource "aws_iam_group_policy" "intercode2_production" {
         "route53:ListResourceRecordSets"
       ],
       "Resource": "arn:aws:route53:::hostedzone/${aws_route53_zone.neilhosting_net.zone_id}"
+    },
+    {
+      "Sid": "SesAccess",
+      "Effect":"Allow",
+      "Action":"ses:SendRawEmail",
+      "Resource":"*"
     }
   ]
 }

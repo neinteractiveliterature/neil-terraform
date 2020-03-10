@@ -90,6 +90,12 @@ resource "aws_iam_group_policy" "larp_library_s3" {
       "Resource": [
         "arn:aws:s3:::*"
       ]
+    },
+    {
+      "Sid": "SesAccess",
+      "Effect":"Allow",
+      "Action":"ses:SendRawEmail",
+      "Resource":"*"
     }
   ]
 }
