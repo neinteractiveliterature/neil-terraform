@@ -1,9 +1,25 @@
+resource "aws_ses_domain_identity" "concentral_net" {
+  domain = "concentral.net"
+}
+
+resource "aws_ses_domain_dkim" "concentral_net" {
+  domain = aws_ses_domain_identity.concentral_net.domain
+}
+
 resource "aws_ses_domain_identity" "convention_host" {
   domain = "convention.host"
 }
 
 resource "aws_ses_domain_dkim" "convention_host" {
   domain = aws_ses_domain_identity.convention_host.domain
+}
+
+resource "aws_ses_domain_identity" "festivalofthelarps_com" {
+  domain = "festivalofthelarps.com"
+}
+
+resource "aws_ses_domain_dkim" "festivalofthelarps_com" {
+  domain = aws_ses_domain_identity.festivalofthelarps_com.domain
 }
 
 resource "aws_ses_domain_identity" "interactiveliterature_org" {
@@ -28,6 +44,14 @@ resource "aws_ses_domain_identity" "larplibrary_org" {
 
 resource "aws_ses_domain_dkim" "larplibrary_org" {
   domain = aws_ses_domain_identity.larplibrary_org.domain
+}
+
+resource "aws_ses_domain_identity" "natbudin_com" {
+  domain = "natbudin.com"
+}
+
+resource "aws_ses_domain_dkim" "natbudin_com" {
+  domain = aws_ses_domain_identity.natbudin_com.domain
 }
 
 resource "aws_ses_domain_identity" "neilhosting_net" {
