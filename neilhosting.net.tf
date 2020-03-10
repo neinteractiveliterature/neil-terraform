@@ -1,30 +1,9 @@
-resource "aws_s3_bucket" "neilhosting_net" {
-  acl    = "public-read"
-  bucket = "neilhosting.net"
-
-  website {
-    redirect_all_requests_to = "https://www.neilhosting.net"
-  }
-}
-
 locals {
   intercode_subdomains = ["www.neilhosting.net", "template.neilhosting.net"]
 }
 
 resource "aws_route53_zone" "neilhosting_net" {
   name = "neilhosting.net"
-}
-
-resource "aws_route53_record" "neilhosting_net_alias" {
-  zone_id = aws_route53_zone.neilhosting_net.zone_id
-  name = "neilhosting.net"
-  type = "A"
-
-  alias {
-    name = module.neilhosting_net_cloudfront.cloudfront_distribution.domain_name
-    zone_id = module.neilhosting_net_cloudfront.cloudfront_distribution.hosted_zone_id
-    evaluate_target_health = false
-  }
 }
 
 resource "aws_route53_record" "neilhosting_net_mx" {
@@ -62,29 +41,20 @@ resource "aws_route53_record" "neilhosting_net_email" {
   records = ["mailgun.org."]
 }
 
-# TODO: refactor to use resource for_each against locals.intercode_subdomains
-# once Hashicorp releases a version of Terraform that supports it
-resource "aws_route53_record" "neilhosting_net_www" {
+resource "aws_route53_record" "neilhosting_net_intercode" {
+  count = length(local.intercode_subdomains)
   zone_id = aws_route53_zone.neilhosting_net.zone_id
-  name = "www.neilhosting.net"
-  type = "CNAME"
-  ttl = 300
-  records = ["peaceful-tortoise-a9lwi8zf1skj973tyemrono5.herokudns.com."]
-}
-resource "aws_route53_record" "neilhosting_net_template" {
-  zone_id = aws_route53_zone.neilhosting_net.zone_id
-  name = "template.neilhosting.net"
+  name = local.intercode_subdomains[count.index]
   type = "CNAME"
   ttl = 300
   records = ["peaceful-tortoise-a9lwi8zf1skj973tyemrono5.herokudns.com."]
 }
 
 module "neilhosting_net_cloudfront" {
-  source = "./modules/cloudfront_with_acm"
+  source = "./modules/cloudfront_apex_redirect"
 
   domain_name = "neilhosting.net"
-  origin_id = "S3-neilhosting.net"
-  origin_domain_name = aws_s3_bucket.neilhosting_net.website_endpoint
+  redirect_destination = "https://www.neilhosting.net"
   add_security_headers_arn = aws_lambda_function.addSecurityHeaders.qualified_arn
   route53_zone_id = aws_route53_zone.neilhosting_net.zone_id
 }
