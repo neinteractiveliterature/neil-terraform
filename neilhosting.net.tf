@@ -53,8 +53,7 @@ resource "aws_route53_record" "neilhosting_net_intercode" {
 module "neilhosting_net_cloudfront" {
   source = "./modules/cloudfront_apex_redirect"
 
-  domain_name = "neilhosting.net"
+  route53_zone = aws_route53_zone.neilhosting_net
   redirect_destination = "https://www.neilhosting.net"
   add_security_headers_arn = aws_lambda_function.addSecurityHeaders.qualified_arn
-  route53_zone_id = aws_route53_zone.neilhosting_net.zone_id
 }

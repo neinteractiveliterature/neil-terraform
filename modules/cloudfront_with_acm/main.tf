@@ -34,8 +34,10 @@ variable "add_security_headers_arn" {
   type = string
 }
 
-variable "route53_zone_id" {
-  type = string
+variable "route53_zone" {
+  type = object({
+    zone_id = string
+  })
   default = null
 }
 
@@ -100,18 +102,18 @@ resource "aws_cloudfront_distribution" "cloudfront_distribution" {
 }
 
 resource "aws_acm_certificate_validation" "cert_validation" {
-  count   = var.route53_zone_id != null ? 1 : 0
+  count   = var.route53_zone != null ? 1 : 0
 
   certificate_arn         = aws_acm_certificate.cloudfront_cert.arn
   validation_record_fqdns = [aws_route53_record.cert_validation_record[count.index].fqdn]
 }
 
 resource "aws_route53_record" "cert_validation_record" {
-  count   = var.route53_zone_id != null ? 1 : 0
+  count   = var.route53_zone != null ? 1 : 0
 
   name    = aws_acm_certificate.cloudfront_cert.domain_validation_options.0.resource_record_name
   type    = aws_acm_certificate.cloudfront_cert.domain_validation_options.0.resource_record_type
-  zone_id = var.route53_zone_id
+  zone_id = var.route53_zone.zone_id
   records = [aws_acm_certificate.cloudfront_cert.domain_validation_options.0.resource_record_value]
   ttl     = 300
 }

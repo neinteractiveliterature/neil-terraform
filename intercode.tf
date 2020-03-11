@@ -104,7 +104,7 @@ module "uploads_neilhosting_net_cloudfront" {
   origin_id = "S3-intercode2-production"
   origin_domain_name = aws_s3_bucket.intercode2_production.bucket_domain_name
   add_security_headers_arn = aws_lambda_function.addSecurityHeaders.qualified_arn
-  route53_zone_id = aws_route53_zone.neilhosting_net.zone_id
+  route53_zone = aws_route53_zone.neilhosting_net
 }
 
 # assets.neilhosting.net is a CloudFront distribution that caches whatever neilhosting.net is
@@ -125,7 +125,7 @@ module "assets_neilhosting_net_cloudfront" {
   origin_domain_name = "www.neilhosting.net"
   origin_protocol_policy = "https-only"
   add_security_headers_arn = aws_lambda_function.addSecurityHeaders.qualified_arn
-  route53_zone_id = aws_route53_zone.neilhosting_net.zone_id
+  route53_zone = aws_route53_zone.neilhosting_net
 }
 
 # IAM policy so that Intercode can access the stuff it needs to access in AWS

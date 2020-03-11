@@ -1,7 +1,3 @@
-variable "domain_name" {
-  type = string
-}
-
 variable "redirect_destination" {
   type = string
 }
@@ -10,13 +6,25 @@ variable "add_security_headers_arn" {
   type = string
 }
 
-variable "route53_zone_id" {
+variable "validation_method" {
   type = string
+  default = "DNS"
+}
+
+variable "route53_zone" {
+  type = object({
+    zone_id = string
+    name = string
+  })
+}
+
+locals {
+  domain_name = trimsuffix(var.route53_zone.name, ".")
 }
 
 resource "aws_s3_bucket" "redirect_bucket" {
   acl    = "public-read"
-  bucket = var.domain_name
+  bucket = local.domain_name
 
   website {
     redirect_all_requests_to = var.redirect_destination
@@ -24,8 +32,8 @@ resource "aws_s3_bucket" "redirect_bucket" {
 }
 
 resource "aws_route53_record" "apex_alias" {
-  zone_id = var.route53_zone_id
-  name = var.domain_name
+  zone_id = var.route53_zone.zone_id
+  name = local.domain_name
   type = "A"
 
   alias {
@@ -38,11 +46,12 @@ resource "aws_route53_record" "apex_alias" {
 module "apex_redirect_cloudfront" {
   source = "../cloudfront_with_acm"
 
-  domain_name = var.domain_name
-  origin_id = "S3-${var.domain_name}"
+  domain_name = local.domain_name
+  origin_id = "S3-${local.domain_name}"
   origin_domain_name = aws_s3_bucket.redirect_bucket.website_endpoint
   add_security_headers_arn = var.add_security_headers_arn
-  route53_zone_id = var.route53_zone_id
+  route53_zone = var.route53_zone
+  validation_method = var.validation_method
 }
 
 output "cloudfront_distribution" {

@@ -114,3 +114,58 @@ resource "aws_iam_user_group_membership" "larp_library" {
 resource "aws_iam_access_key" "larp_library" {
   user = aws_iam_user.larp_library.name
 }
+
+resource "aws_route53_zone" "larplibrary_org" {
+  name = "larplibrary.org"
+}
+
+module "larp_library_apex_redirect" {
+  source = "./modules/cloudfront_apex_redirect"
+
+  route53_zone = aws_route53_zone.larplibrary_org
+  redirect_destination = "https://www.larplibrary.org"
+  add_security_headers_arn = aws_lambda_function.addSecurityHeaders.qualified_arn
+}
+
+resource "aws_route53_record" "larplibrary_org_mailgun_tracking" {
+  zone_id = aws_route53_zone.larplibrary_org.zone_id
+  name = "email.larplibrary.org"
+  type = "CNAME"
+  ttl = 300
+  records = ["mailgun.org."]
+}
+
+resource "aws_route53_record" "larplibrary_org_mailgun_dkim" {
+  zone_id = aws_route53_zone.larplibrary_org.zone_id
+  name = "k1._domainkey.larplibrary.org"
+  type = "TXT"
+  ttl = 300
+  records = ["k=rsa; p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDCeP+37KkcS1+URn+wS0QO31fQ+wcr14rDE2aw8aBhOCEattT3FKCeh60XJsD0flBV0GD/sJA9FM3Fz2Djk5+9kLd5/wQ4lPnO79Y8hRTq3M7nN/k31WNzMPrc75AcOkbIBk5CAuxeQMaPgNG0yTsms3ACRyzAEX0iHQpFyB3WBwIDAQAB"]
+}
+
+resource "aws_route53_record" "larplibrary_org_spf" {
+  zone_id = aws_route53_zone.larplibrary_org.zone_id
+  name = "larplibrary.org"
+  type = "TXT"
+  ttl = 300
+  records = ["v=spf1 include:mailgun.org include:amazonses.com ~all"]
+}
+
+resource "aws_route53_record" "larplibrary_org_www" {
+  zone_id = aws_route53_zone.larplibrary_org.zone_id
+  name = "www.larplibrary.org"
+  type = "CNAME"
+  ttl = 300
+  records = ["www.larplibrary.org.herokudns.com."]
+}
+
+resource "aws_route53_record" "larplibrary_org_mx" {
+  zone_id = aws_route53_zone.larplibrary_org.zone_id
+  name = "larplibrary.org"
+  type = "MX"
+  ttl = 300
+  records = [
+    "10 mxa.mailgun.org.",
+    "10 mxb.mailgun.org."
+  ]
+}
