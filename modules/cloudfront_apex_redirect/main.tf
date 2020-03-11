@@ -11,6 +11,11 @@ variable "validation_method" {
   default = "DNS"
 }
 
+variable "alternative_names" {
+  type = list(string)
+  default = []
+}
+
 variable "route53_zone" {
   type = object({
     zone_id = string
@@ -43,6 +48,15 @@ resource "aws_route53_record" "apex_alias" {
   }
 }
 
+resource "aws_route53_record" "alternative_name_cname" {
+  count = length(var.alternative_names)
+  zone_id = var.route53_zone.zone_id
+  name = var.alternative_names[count.index]
+  type = "CNAME"
+  ttl = 300
+  records = [var.route53_zone.name]
+}
+
 module "apex_redirect_cloudfront" {
   source = "../cloudfront_with_acm"
 
@@ -52,6 +66,7 @@ module "apex_redirect_cloudfront" {
   add_security_headers_arn = var.add_security_headers_arn
   route53_zone = var.route53_zone
   validation_method = var.validation_method
+  alternative_names = var.alternative_names
 }
 
 output "cloudfront_distribution" {
@@ -66,8 +81,8 @@ output "cert_validation" {
   value = module.apex_redirect_cloudfront.cert_validation
 }
 
-output "cert_validation_record" {
-  value = module.apex_redirect_cloudfront.cert_validation_record
+output "cert_validation_records" {
+  value = module.apex_redirect_cloudfront.cert_validation_records
 }
 
 output "redirect_bucket" {

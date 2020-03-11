@@ -6,12 +6,9 @@ resource "aws_ses_domain_dkim" "concentral_net" {
   domain = aws_ses_domain_identity.concentral_net.domain
 }
 
-resource "aws_ses_domain_identity" "convention_host" {
-  domain = "convention.host"
-}
-
-resource "aws_ses_domain_dkim" "convention_host" {
-  domain = aws_ses_domain_identity.convention_host.domain
+module "convention_host_ses_sending_domain" {
+  source = "./modules/ses_sending_domain"
+  route53_zone = aws_route53_zone.convention_host
 }
 
 resource "aws_ses_domain_identity" "festivalofthelarps_com" {

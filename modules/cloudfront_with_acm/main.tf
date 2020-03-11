@@ -105,16 +105,16 @@ resource "aws_acm_certificate_validation" "cert_validation" {
   count   = var.route53_zone != null ? 1 : 0
 
   certificate_arn         = aws_acm_certificate.cloudfront_cert.arn
-  validation_record_fqdns = [aws_route53_record.cert_validation_record[count.index].fqdn]
+  validation_record_fqdns = [for record in aws_route53_record.cert_validation_records : record.fqdn]
 }
 
-resource "aws_route53_record" "cert_validation_record" {
-  count   = var.route53_zone != null ? 1 : 0
+resource "aws_route53_record" "cert_validation_records" {
+  count   = var.route53_zone != null ? length(aws_acm_certificate.cloudfront_cert.domain_validation_options) : 0
 
-  name    = aws_acm_certificate.cloudfront_cert.domain_validation_options.0.resource_record_name
-  type    = aws_acm_certificate.cloudfront_cert.domain_validation_options.0.resource_record_type
+  name    = aws_acm_certificate.cloudfront_cert.domain_validation_options[count.index].resource_record_name
+  type    = aws_acm_certificate.cloudfront_cert.domain_validation_options[count.index].resource_record_type
   zone_id = var.route53_zone.zone_id
-  records = [aws_acm_certificate.cloudfront_cert.domain_validation_options.0.resource_record_value]
+  records = [aws_acm_certificate.cloudfront_cert.domain_validation_options[count.index].resource_record_value]
   ttl     = 300
 }
 
@@ -134,10 +134,6 @@ output "cert_validation" {
   )
 }
 
-output "cert_validation_record" {
-  value = (
-    length(aws_route53_record.cert_validation_record) > 0
-    ? aws_route53_record.cert_validation_record[0]
-    : null
-  )
+output "cert_validation_records" {
+  value = aws_route53_record.cert_validation_records
 }
