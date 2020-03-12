@@ -155,7 +155,8 @@ resource "aws_iam_group_policy" "intercode2_production" {
         "s3:RestoreObject"
       ],
       "Resource": [
-        "arn:aws:s3:::${aws_s3_bucket.intercode2_production.bucket}/*"
+        "${aws_s3_bucket.intercode2_production.arn}/*",
+        "${aws_s3_bucket.intercode_inbox.arn}/*"
       ]
     },
     {
@@ -210,12 +211,32 @@ resource "aws_iam_group_policy" "intercode2_production" {
     {
       "Sid": "SesAccess",
       "Effect":"Allow",
-      "Action":"ses:SendRawEmail",
+      "Action":[
+        "ses:SendRawEmail",
+        "ses:SendBounce"
+      ],
       "Resource":"*"
+    },
+    {
+      "Sid": "SnsAccess",
+      "Effect":"Allow",
+      "Action":[
+        "sns:ConfirmSubscription"
+      ],
+      "Resource": "${aws_sns_topic.intercode_inbox_deliveries.arn}"
+    },
+    {
+      "Sid": "KmsAccess",
+      "Effect": "Allow",
+      "Action": "kms:Decrypt",
+      "Resource": "arn:aws:kms:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:key/2570e363-9e0e-4a1a-b4de-41c2460786df"
     }
   ]
 }
   EOF
+
+  # TODO: I can't figure out a good way to avoid hardcoding the key ID in KmsAccess, maybe figure
+  # it out later
 }
 
 resource "aws_iam_user" "intercode2_production" {
