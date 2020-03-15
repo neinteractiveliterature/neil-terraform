@@ -12,8 +12,7 @@ resource "aws_route53_record" "neilhosting_net_mx" {
   type = "MX"
   ttl = 300
   records = [
-    "10 mxa.mailgun.org.",
-    "10 mxb.mailgun.org."
+    "10 inbound-smtp.us-east-1.amazonaws.com."
   ]
 }
 
