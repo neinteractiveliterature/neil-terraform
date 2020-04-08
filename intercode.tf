@@ -82,6 +82,16 @@ resource "aws_sqs_queue" "intercode_production_mailers" {
   )
 }
 
+resource "aws_sqs_queue" "intercode_production_ahoy" {
+  name = "intercode_production_ahoy"
+  redrive_policy                    = jsonencode(
+    {
+      deadLetterTargetArn = aws_sqs_queue.intercode_production_dead_letter.arn
+      maxReceiveCount     = 3
+    }
+  )
+}
+
 # uploads.neilhosting.net, aka intercode2_production, is the Cloudfront-served S3 bucket we use
 # for uploaded CMS content and product images
 resource "aws_s3_bucket" "intercode2_production" {
