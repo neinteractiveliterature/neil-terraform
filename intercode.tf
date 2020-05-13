@@ -37,12 +37,30 @@ resource "heroku_app" "intercode" {
   }
 }
 
+resource "aws_db_parameter_group" "production_pg12" {
+  name = "production-pg12"
+  description = "Production parameters (force SSL, tune max_connections)"
+  family = "postgres12"
+
+  parameter {
+    apply_method = "immediate"
+    name         = "rds.force_ssl"
+    value        = "1"
+  }
+  parameter {
+    apply_method = "pending-reboot"
+    name         = "max_connections"
+    value        = "100"
+  }
+}
+
 # The production Postgres database
 resource "aws_db_instance" "intercode_production" {
   instance_class = "db.t2.micro"
   engine         = "postgres"
-  engine_version = "10.9"
+  engine_version = "12.2"
   username       = "neiladmin"
+  parameter_group_name = "production-pg12"
   deletion_protection = true
   publicly_accessible = true
 
