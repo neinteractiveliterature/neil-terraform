@@ -1,3 +1,11 @@
+resource "aws_ses_domain_identity" "aegames_org" {
+  domain = "aegames.org"
+}
+
+resource "aws_ses_domain_dkim" "aegames_org" {
+  domain = aws_ses_domain_identity.aegames_org.domain
+}
+
 resource "aws_ses_domain_identity" "concentral_net" {
   domain = "concentral.net"
 }
