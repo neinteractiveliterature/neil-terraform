@@ -14,6 +14,14 @@ resource "aws_ses_domain_dkim" "concentral_net" {
   domain = aws_ses_domain_identity.concentral_net.domain
 }
 
+resource "aws_ses_domain_identity" "cyberol_org" {
+  domain = "cyberol.org"
+}
+
+resource "aws_ses_domain_dkim" "cyberol_org" {
+  domain = aws_ses_domain_identity.cyberol_org.domain
+}
+
 module "convention_host_ses_sending_domain" {
   source = "./modules/ses_sending_domain"
   route53_zone = aws_route53_zone.convention_host
