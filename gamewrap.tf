@@ -16,7 +16,7 @@ module "gamewrap_cloudfront" {
   domain_name = "gamewrap.interactiveliterature.org"
   origin_id = "S3-gamewrap.interactiveliterature.org"
   default_root_object = "index.html"
-  validation_method = "NONE"
+  validation_method = "EMAIL"
   origin_domain_name = aws_s3_bucket.gamewrap_interactiveliterature_org.website_endpoint
   add_security_headers_arn = aws_lambda_function.addSecurityHeaders.qualified_arn
 }

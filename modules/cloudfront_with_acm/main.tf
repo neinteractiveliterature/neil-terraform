@@ -45,6 +45,10 @@ resource "aws_acm_certificate" "cloudfront_cert" {
   domain_name = var.domain_name
   validation_method = var.validation_method
   subject_alternative_names = var.alternative_names
+
+  options {
+    certificate_transparency_logging_preference = "ENABLED"
+  }
 }
 
 resource "aws_cloudfront_distribution" "cloudfront_distribution" {

@@ -43,7 +43,7 @@ module "interconlarp_org_cloudfront" {
 
   domain_name = "interconlarp.org"
   alternative_names = ["www.interconlarp.org"]
-  validation_method = "NONE"
+  validation_method = "EMAIL"
   origin_id = "S3-interconlarp.org"
   origin_domain_name = aws_s3_bucket.interconlarp_org.website_endpoint
   add_security_headers_arn = aws_lambda_function.addSecurityHeaders.qualified_arn
