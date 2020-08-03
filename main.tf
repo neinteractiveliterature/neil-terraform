@@ -8,6 +8,20 @@ provider "heroku" {
   version = "~> 2.2"
 }
 
+variable "CONSTELLIX_API_KEY" {
+  type = string
+}
+
+variable "CONSTELLIX_SECRET_KEY" {
+  type = string
+}
+
+provider "constellix" {
+  version = "~> 0.1"
+  apikey    = var.CONSTELLIX_API_KEY
+  secretkey = var.CONSTELLIX_SECRET_KEY
+}
+
 terraform {
   backend "s3" {
     profile = "neil"
