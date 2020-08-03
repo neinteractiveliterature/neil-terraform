@@ -27,6 +27,14 @@ module "convention_host_ses_sending_domain" {
   route53_zone = aws_route53_zone.convention_host
 }
 
+resource "aws_ses_domain_identity" "extraconlarp_org" {
+  domain = "extraconlarp.org"
+}
+
+resource "aws_ses_domain_dkim" "extraconlarp_org" {
+  domain = aws_ses_domain_identity.extraconlarp_org.domain
+}
+
 resource "aws_ses_domain_identity" "festivalofthelarps_com" {
   domain = "festivalofthelarps.com"
 }

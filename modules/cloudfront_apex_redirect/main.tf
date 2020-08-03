@@ -21,10 +21,16 @@ variable "route53_zone" {
     zone_id = string
     name = string
   })
+  default = null
+}
+
+variable "non_route53_domain_name" {
+  type = string
+  default = null
 }
 
 locals {
-  domain_name = trimsuffix(var.route53_zone.name, ".")
+  domain_name = var.route53_zone != null ? trimsuffix(var.route53_zone.name, ".") : var.non_route53_domain_name
 }
 
 resource "aws_s3_bucket" "redirect_bucket" {
@@ -37,6 +43,8 @@ resource "aws_s3_bucket" "redirect_bucket" {
 }
 
 resource "aws_route53_record" "apex_alias" {
+  count   = var.route53_zone != null ? 1 : 0
+
   zone_id = var.route53_zone.zone_id
   name = local.domain_name
   type = "A"
@@ -49,7 +57,7 @@ resource "aws_route53_record" "apex_alias" {
 }
 
 resource "aws_route53_record" "alternative_name_cname" {
-  count = length(var.alternative_names)
+  count = var.route53_zone != null ? length(var.alternative_names) : 0
   zone_id = var.route53_zone.zone_id
   name = var.alternative_names[count.index]
   type = "CNAME"
