@@ -10,6 +10,7 @@ resource "heroku_app" "larp_library" {
   }
 
   config_vars = {
+    ASSETS_HOST = "assets.larplibrary.org"
     RACK_ENV = "production"
     RAILS_ENV = "production"
     RAILS_LOG_TO_STDOUT = "enabled"
@@ -167,6 +168,14 @@ resource "aws_route53_record" "larplibrary_org_mx" {
   records = [
     "10 inbound-smtp.us-east-1.amazonaws.com.",
   ]
+}
+
+resource "aws_route53_record" "assets_larplibrary_org" {
+  zone_id = aws_route53_zone.larplibrary_org.zone_id
+  name = "assets.larplibrary.org"
+  type = "CNAME"
+  ttl = 300
+  records = ["${module.assets_larplibrary_org_cloudfront.cloudfront_distribution.domain_name}."]
 }
 
 module "assets_larplibrary_org_cloudfront" {
