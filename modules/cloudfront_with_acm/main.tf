@@ -6,6 +6,11 @@ variable "domain_name" {
   type = string
 }
 
+variable "compress" {
+  type = bool
+  default = false
+}
+
 variable "alternative_names" {
   type = list(string)
   default = []
@@ -75,6 +80,7 @@ resource "aws_cloudfront_distribution" "cloudfront_distribution" {
     cached_methods         = ["GET", "HEAD"]
     target_origin_id       = var.origin_id
     viewer_protocol_policy = "redirect-to-https"
+    compress               = var.compress
 
     forwarded_values {
       headers = []
@@ -113,12 +119,18 @@ resource "aws_acm_certificate_validation" "cert_validation" {
 }
 
 resource "aws_route53_record" "cert_validation_records" {
-  count   = var.route53_zone != null ? length(aws_acm_certificate.cloudfront_cert.domain_validation_options) : 0
+  for_each = {
+    for dvo in (var.route53_zone != null ? aws_acm_certificate.cloudfront_cert.domain_validation_options: []) : dvo.domain_name => {
+      name   = dvo.resource_record_name
+      record = dvo.resource_record_value
+      type   = dvo.resource_record_type
+    }
+  }
 
-  name    = aws_acm_certificate.cloudfront_cert.domain_validation_options[count.index].resource_record_name
-  type    = aws_acm_certificate.cloudfront_cert.domain_validation_options[count.index].resource_record_type
+  name = each.value.name
+  records = [each.value.record]
+  type = each.value.type
   zone_id = var.route53_zone.zone_id
-  records = [aws_acm_certificate.cloudfront_cert.domain_validation_options[count.index].resource_record_value]
   ttl     = 300
 }
 

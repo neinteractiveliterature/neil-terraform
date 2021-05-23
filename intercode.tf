@@ -58,7 +58,7 @@ resource "aws_db_parameter_group" "production_pg12" {
 resource "aws_db_instance" "intercode_production" {
   instance_class = "db.t2.micro"
   engine         = "postgres"
-  engine_version = "12.2"
+  engine_version = "12.5"
   username       = "neiladmin"
   parameter_group_name = "production-pg12"
   deletion_protection = true
@@ -115,6 +115,14 @@ resource "aws_sqs_queue" "intercode_production_ahoy" {
 resource "aws_s3_bucket" "intercode2_production" {
   acl    = "private"
   bucket = "intercode2-production"
+
+  cors_rule {
+    allowed_headers = ["Authorization", "Content-Length"]
+    allowed_methods = ["GET"]
+    allowed_origins = ["*"]
+    expose_headers  = []
+    max_age_seconds = 3000
+  }
 }
 
 resource "aws_route53_record" "uploads_neilhosting_net" {
@@ -133,6 +141,7 @@ module "uploads_neilhosting_net_cloudfront" {
   origin_domain_name = aws_s3_bucket.intercode2_production.bucket_domain_name
   add_security_headers_arn = aws_lambda_function.addSecurityHeaders.qualified_arn
   route53_zone = aws_route53_zone.neilhosting_net
+  compress = true
 }
 
 # assets.neilhosting.net is a CloudFront distribution that caches whatever neilhosting.net is

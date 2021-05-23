@@ -62,7 +62,7 @@ resource "aws_route53_record" "alternative_name_cname" {
   name = var.alternative_names[count.index]
   type = "CNAME"
   ttl = 300
-  records = [var.route53_zone.name]
+  records = ["${var.route53_zone.name}."]
 }
 
 module "apex_redirect_cloudfront" {

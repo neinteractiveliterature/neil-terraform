@@ -2,7 +2,7 @@
 resource "heroku_app" "larp_library" {
   name = "larp-library"
   region = "us"
-  stack = "heroku-18"
+  stack = "heroku-20"
   acm = true
 
   organization {
@@ -167,4 +167,15 @@ resource "aws_route53_record" "larplibrary_org_mx" {
   records = [
     "10 inbound-smtp.us-east-1.amazonaws.com.",
   ]
+}
+
+module "assets_larplibrary_org_cloudfront" {
+  source = "./modules/cloudfront_with_acm"
+
+  domain_name = "assets.larplibrary.org"
+  origin_id = "larplibrary"
+  origin_domain_name = "www.larplibrary.org"
+  origin_protocol_policy = "https-only"
+  add_security_headers_arn = aws_lambda_function.addSecurityHeaders.qualified_arn
+  route53_zone = aws_route53_zone.larplibrary_org
 }
