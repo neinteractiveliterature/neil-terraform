@@ -76,20 +76,14 @@ resource "aws_cloudfront_distribution" "cloudfront_distribution" {
   default_root_object = var.default_root_object
 
   default_cache_behavior {
+    cache_policy_id = "658327ea-f89d-4fab-a63d-7e88639e58f6" # Managed-CachingOptimized
+    origin_request_policy_id = "59781a5b-3903-41f3-afcb-af62929ccde1" # Managed-CORS-CustomOrigin
+
     allowed_methods        = ["GET", "HEAD"]
     cached_methods         = ["GET", "HEAD"]
     target_origin_id       = var.origin_id
     viewer_protocol_policy = "redirect-to-https"
     compress               = var.compress
-
-    forwarded_values {
-      headers = []
-      query_string = false
-
-      cookies {
-        forward = "none"
-      }
-    }
 
     lambda_function_association {
       event_type = "origin-response"
