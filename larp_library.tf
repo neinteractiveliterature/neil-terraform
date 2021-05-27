@@ -187,4 +187,5 @@ module "assets_larplibrary_org_cloudfront" {
   origin_protocol_policy = "https-only"
   add_security_headers_arn = aws_lambda_function.addSecurityHeaders.qualified_arn
   route53_zone = aws_route53_zone.larplibrary_org
+  compress = true
 }
