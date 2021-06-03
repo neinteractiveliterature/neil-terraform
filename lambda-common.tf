@@ -26,7 +26,7 @@ resource "aws_lambda_function" "addSecurityHeaders" {
   function_name = "arn:aws:lambda:us-east-1:689053117832:function:addSecurityHeaders"
   handler       = "index.handler"
   role          = aws_iam_role.lambda_edge_role.arn
-  runtime       = "nodejs10.x"
+  runtime       = "nodejs14.x"
   timeout       = 1
 
   tags = {
