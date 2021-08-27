@@ -6,6 +6,7 @@ locals {
   convention_host_cnames = {
     "*" = "systematic-emu-ece4iltczqislup66je4ug96.herokudns.com."
     "_acme-challenge" = "_acme-challenge.neilhosting.net."
+    "_acme-challenge.cyberol" = "_acme-challenge.neilhosting.net."
     "_acme-challenge.demo" = "_acme-challenge.neilhosting.net."
     "_acme-challenge.foambrain" = "_acme-challenge.neilhosting.net."
     "_acme-challenge.gbls" = "_acme-challenge.neilhosting.net."
@@ -15,6 +16,7 @@ locals {
     "_acme-challenge.test" = "_acme-challenge.neilhosting.net."
     "*.demo" = "damp-mountain-qoz1fdoau4kwpcbz1frqh08i.herokudns.com."
     "email" = "mailgun.org."
+    "*.cyberol" = "cubic-lily-eb7w551cu1uo2hwr9rfmivpf.herokudns.com."
     "*.foambrain" = "behavioral-hamster-8bzeixz8bd3rt35shsc0p7we.herokudns.com."
     "furniture-test" = "guarded-pinchusion-vxtvyw1enyzcafs3uhvx7x1q.herokudns.com."
     "*.gbls" = "shaped-goldenrod-h9wpryfa8vwjom8lhe1h5ryx.herokudns.com."
@@ -23,8 +25,6 @@ locals {
     "*.slaw" = "dimensional-squash-gb4y74648bukgi7jpre5lsvt.herokudns.com."
     "*.test" = "reticulated-stegosaurus-p92f0odjhalcjpbddpg3fbuy.herokudns.com."
   }
-
-  convention_host_cname_keys = keys(local.convention_host_cnames)
 }
 
 module "convention_host_cloudfront" {
@@ -37,12 +37,13 @@ module "convention_host_cloudfront" {
 }
 
 resource "aws_route53_record" "convention_host_cname" {
-  count = length(local.convention_host_cname_keys)
+  for_each = local.convention_host_cnames
+
   zone_id = aws_route53_zone.convention_host.zone_id
-  name = "${local.convention_host_cname_keys[count.index]}.convention.host"
+  name = "${each.key}.convention.host"
   type = "CNAME"
   ttl = 300
-  records = [lookup(local.convention_host_cnames, local.convention_host_cname_keys[count.index], null)]
+  records = [each.value]
 }
 
 resource "aws_route53_record" "convention_host_mx" {
