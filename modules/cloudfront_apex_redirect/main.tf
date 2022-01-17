@@ -7,25 +7,25 @@ variable "add_security_headers_arn" {
 }
 
 variable "validation_method" {
-  type = string
+  type    = string
   default = "DNS"
 }
 
 variable "alternative_names" {
-  type = list(string)
+  type    = list(string)
   default = []
 }
 
 variable "route53_zone" {
   type = object({
     zone_id = string
-    name = string
+    name    = string
   })
   default = null
 }
 
 variable "non_route53_domain_name" {
-  type = string
+  type    = string
   default = null
 }
 
@@ -43,38 +43,39 @@ resource "aws_s3_bucket" "redirect_bucket" {
 }
 
 resource "aws_route53_record" "apex_alias" {
-  count   = var.route53_zone != null ? 1 : 0
+  count = var.route53_zone != null ? 1 : 0
 
   zone_id = var.route53_zone.zone_id
-  name = local.domain_name
-  type = "A"
+  name    = local.domain_name
+  type    = "A"
 
   alias {
-    name = module.apex_redirect_cloudfront.cloudfront_distribution.domain_name
-    zone_id = module.apex_redirect_cloudfront.cloudfront_distribution.hosted_zone_id
+    name                   = module.apex_redirect_cloudfront.cloudfront_distribution.domain_name
+    zone_id                = module.apex_redirect_cloudfront.cloudfront_distribution.hosted_zone_id
     evaluate_target_health = false
   }
 }
 
 resource "aws_route53_record" "alternative_name_cname" {
-  count = var.route53_zone != null ? length(var.alternative_names) : 0
+  count   = var.route53_zone != null ? length(var.alternative_names) : 0
   zone_id = var.route53_zone.zone_id
-  name = var.alternative_names[count.index]
-  type = "CNAME"
-  ttl = 300
+  name    = var.alternative_names[count.index]
+  type    = "CNAME"
+  ttl     = 300
   records = ["${var.route53_zone.name}."]
 }
 
 module "apex_redirect_cloudfront" {
   source = "../cloudfront_with_acm"
 
-  domain_name = local.domain_name
-  origin_id = "S3-${local.domain_name}"
-  origin_domain_name = aws_s3_bucket.redirect_bucket.website_endpoint
+  domain_name              = local.domain_name
+  origin_id                = "S3-${local.domain_name}"
+  origin_domain_name       = aws_s3_bucket.redirect_bucket.website_endpoint
   add_security_headers_arn = var.add_security_headers_arn
-  route53_zone = var.route53_zone
-  validation_method = var.validation_method
-  alternative_names = var.alternative_names
+  route53_zone             = var.route53_zone
+  validation_method        = var.validation_method
+  alternative_names        = var.alternative_names
+  compress                 = false
 }
 
 output "cloudfront_distribution" {

@@ -4,9 +4,9 @@ variable "intercode_production_db_password" {
 
 # The Heroku app itself
 resource "heroku_app" "intercode" {
-  name = "intercode"
+  name   = "intercode"
   region = "us"
-  stack = "container"
+  stack  = "container"
 
   organization {
     name = "neinteractiveliterature"
@@ -17,30 +17,29 @@ resource "heroku_app" "intercode" {
 
   config_vars = {
     INTERCODE_CERTS_NO_WILDCARD_DOMAINS = "5pi-con.natbudin.com"
-    INTERCODE_HOST = "neilhosting.net"
-    RACK_ENV = "production"
-    RAILS_ENV = "production"
-    RAILS_LOG_TO_STDOUT = "enabled"
-    RAILS_MAX_THREADS = "4"
-    RAILS_SERVE_STATIC_FILES = "enabled"
-    UPLOADS_HOST = "https://uploads.neilhosting.net"
-    WEB_CONCURRENCY = "1"
-    YARN_PRODUCTION = "true"
+    INTERCODE_HOST                      = "neilhosting.net"
+    RACK_ENV                            = "production"
+    RAILS_ENV                           = "production"
+    RAILS_LOG_TO_STDOUT                 = "enabled"
+    RAILS_MAX_THREADS                   = "3"
+    RAILS_SERVE_STATIC_FILES            = "enabled"
+    UPLOADS_HOST                        = "https://uploads.neilhosting.net"
+    WEB_CONCURRENCY                     = "1"
   }
 
   sensitive_config_vars = {
-    AWS_ACCESS_KEY_ID = aws_iam_access_key.intercode2_production.id
-    AWS_REGION = data.aws_region.current.name
+    AWS_ACCESS_KEY_ID     = aws_iam_access_key.intercode2_production.id
+    AWS_REGION            = data.aws_region.current.name
     AWS_SECRET_ACCESS_KEY = aws_iam_access_key.intercode2_production.secret
-    AWS_S3_BUCKET = aws_s3_bucket.intercode2_production.bucket
-    DATABASE_URL = "postgres://intercode_production:${var.intercode_production_db_password}@${aws_db_instance.intercode_production.endpoint}/intercode_production?sslrootcert=rds-combined-ca-bundle-2019.pem"
+    AWS_S3_BUCKET         = aws_s3_bucket.intercode2_production.bucket
+    DATABASE_URL          = "postgres://intercode_production:${var.intercode_production_db_password}@${aws_db_instance.intercode_production.endpoint}/intercode_production?sslrootcert=rds-combined-ca-bundle-2019.pem"
   }
 }
 
 resource "aws_db_parameter_group" "production_pg13" {
-  name = "production-pg13"
+  name        = "production-pg13"
   description = "Production parameters (force SSL, tune max_connections)"
-  family = "postgres13"
+  family      = "postgres13"
 
   parameter {
     apply_method = "immediate"
@@ -56,19 +55,19 @@ resource "aws_db_parameter_group" "production_pg13" {
 
 # The production Postgres database
 resource "aws_db_instance" "intercode_production" {
-  instance_class = "db.t3.micro"
-  engine         = "postgres"
-  engine_version = "13.3"
-  username       = "neiladmin"
+  instance_class       = "db.t3.micro"
+  engine               = "postgres"
+  engine_version       = "13.3"
+  username             = "neiladmin"
   parameter_group_name = "production-pg13"
-  deletion_protection = true
-  publicly_accessible = true
+  deletion_protection  = true
+  publicly_accessible  = true
 
-  monitoring_interval = 60
+  monitoring_interval          = 60
   performance_insights_enabled = true
 
   copy_tags_to_snapshot = true
-  skip_final_snapshot = true
+  skip_final_snapshot   = true
 
   tags = {
     "workload-type" = "other"
@@ -82,7 +81,7 @@ resource "aws_sqs_queue" "intercode_production_dead_letter" {
 
 resource "aws_sqs_queue" "intercode_production_default" {
   name = "intercode_production_default"
-  redrive_policy                    = jsonencode(
+  redrive_policy = jsonencode(
     {
       deadLetterTargetArn = aws_sqs_queue.intercode_production_dead_letter.arn
       maxReceiveCount     = 3
@@ -92,7 +91,7 @@ resource "aws_sqs_queue" "intercode_production_default" {
 
 resource "aws_sqs_queue" "intercode_production_mailers" {
   name = "intercode_production_mailers"
-  redrive_policy                    = jsonencode(
+  redrive_policy = jsonencode(
     {
       deadLetterTargetArn = aws_sqs_queue.intercode_production_dead_letter.arn
       maxReceiveCount     = 3
@@ -102,7 +101,7 @@ resource "aws_sqs_queue" "intercode_production_mailers" {
 
 resource "aws_sqs_queue" "intercode_production_ahoy" {
   name = "intercode_production_ahoy"
-  redrive_policy                    = jsonencode(
+  redrive_policy = jsonencode(
     {
       deadLetterTargetArn = aws_sqs_queue.intercode_production_dead_letter.arn
       maxReceiveCount     = 3
@@ -127,42 +126,42 @@ resource "aws_s3_bucket" "intercode2_production" {
 
 resource "aws_route53_record" "uploads_neilhosting_net" {
   zone_id = aws_route53_zone.neilhosting_net.zone_id
-  name = "uploads.neilhosting.net"
-  type = "CNAME"
-  ttl = 300
+  name    = "uploads.neilhosting.net"
+  type    = "CNAME"
+  ttl     = 300
   records = ["${module.uploads_neilhosting_net_cloudfront.cloudfront_distribution.domain_name}."]
 }
 
 module "uploads_neilhosting_net_cloudfront" {
   source = "./modules/cloudfront_with_acm"
 
-  domain_name = "uploads.neilhosting.net"
-  origin_id = "S3-intercode2-production"
-  origin_domain_name = aws_s3_bucket.intercode2_production.bucket_domain_name
+  domain_name              = "uploads.neilhosting.net"
+  origin_id                = "S3-intercode2-production"
+  origin_domain_name       = aws_s3_bucket.intercode2_production.bucket_domain_name
   add_security_headers_arn = aws_lambda_function.addSecurityHeaders.qualified_arn
-  route53_zone = aws_route53_zone.neilhosting_net
-  compress = true
+  route53_zone             = aws_route53_zone.neilhosting_net
+  compress                 = true
 }
 
 # assets.neilhosting.net is a CloudFront distribution that caches whatever neilhosting.net is
 # serving.  Intercode points asset URLs at that domain so that they can be served over CDN
 resource "aws_route53_record" "assets_neilhosting_net" {
   zone_id = aws_route53_zone.neilhosting_net.zone_id
-  name = "assets.neilhosting.net"
-  type = "CNAME"
-  ttl = 300
+  name    = "assets.neilhosting.net"
+  type    = "CNAME"
+  ttl     = 300
   records = ["${module.assets_neilhosting_net_cloudfront.cloudfront_distribution.domain_name}."]
 }
 
 module "assets_neilhosting_net_cloudfront" {
   source = "./modules/cloudfront_with_acm"
 
-  domain_name = "assets.neilhosting.net"
-  origin_id = "intercode"
-  origin_domain_name = "www.neilhosting.net"
-  origin_protocol_policy = "https-only"
+  domain_name              = "assets.neilhosting.net"
+  origin_id                = "intercode"
+  origin_domain_name       = "www.neilhosting.net"
+  origin_protocol_policy   = "https-only"
   add_security_headers_arn = aws_lambda_function.addSecurityHeaders.qualified_arn
-  route53_zone = aws_route53_zone.neilhosting_net
+  route53_zone             = aws_route53_zone.neilhosting_net
 }
 
 # IAM policy so that Intercode can access the stuff it needs to access in AWS
@@ -171,7 +170,7 @@ resource "aws_iam_group" "intercode2_production" {
 }
 
 resource "aws_iam_group_policy" "intercode2_production" {
-  name = "intercode2-production"
+  name  = "intercode2-production"
   group = aws_iam_group.intercode2_production.name
 
   policy = <<-EOF
@@ -281,7 +280,7 @@ resource "aws_iam_user" "intercode2_production" {
 }
 
 resource "aws_iam_user_group_membership" "intercode2_production" {
-  user = aws_iam_user.intercode2_production.name
+  user   = aws_iam_user.intercode2_production.name
   groups = [aws_iam_group.intercode2_production.name]
 }
 
