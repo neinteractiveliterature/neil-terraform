@@ -1,23 +1,30 @@
 terraform {
   required_providers {
     aws = {
-      source = "hashicorp/aws"
-      version = "~> 3.42"
+      source  = "hashicorp/aws"
+      version = "~> 3.72"
     }
     heroku = {
-      source = "heroku/heroku"
-      version = "~> 4.0"
+      source  = "heroku/heroku"
+      version = "~> 4.8.0"
+    }
+    rollbar = {
+      source  = "rollbar/rollbar"
+      version = "~> 1.4.0"
     }
   }
-  required_version = ">= 0.14"
+  required_version = ">= 1.1"
 }
 
 provider "aws" {
   profile = "neil"
-  region = "us-east-1"
+  region  = "us-east-1"
 }
 
 provider "heroku" {
+}
+
+provider "rollbar" {
 }
 
 # variable "CONSTELLIX_API_KEY" {
@@ -36,12 +43,12 @@ provider "heroku" {
 
 terraform {
   backend "s3" {
-    profile = "neil"
-    region = "us-east-1"
-    bucket = "neil-terraform-state"
-    key    = "terraform.tfstate"
-    encrypt = true
-    kms_key_id = "arn:aws:kms:us-east-1:689053117832:key/9c5f29f3-3d5d-4d9d-a16f-d081ecb3b152"
+    profile        = "neil"
+    region         = "us-east-1"
+    bucket         = "neil-terraform-state"
+    key            = "terraform.tfstate"
+    encrypt        = true
+    kms_key_id     = "arn:aws:kms:us-east-1:689053117832:key/9c5f29f3-3d5d-4d9d-a16f-d081ecb3b152"
     dynamodb_table = "terraform_state_locks"
   }
 }

@@ -23,6 +23,7 @@ resource "heroku_app" "intercode" {
     RAILS_LOG_TO_STDOUT                 = "enabled"
     RAILS_MAX_THREADS                   = "3"
     RAILS_SERVE_STATIC_FILES            = "enabled"
+    ROLLBAR_CLIENT_ACCESS_TOKEN         = rollbar_project_access_token.intercode_post_client_item.access_token
     UPLOADS_HOST                        = "https://uploads.neilhosting.net"
     WEB_CONCURRENCY                     = "1"
   }
@@ -33,7 +34,26 @@ resource "heroku_app" "intercode" {
     AWS_SECRET_ACCESS_KEY = aws_iam_access_key.intercode2_production.secret
     AWS_S3_BUCKET         = aws_s3_bucket.intercode2_production.bucket
     DATABASE_URL          = "postgres://intercode_production:${var.intercode_production_db_password}@${aws_db_instance.intercode_production.endpoint}/intercode_production?sslrootcert=rds-combined-ca-bundle-2019.pem"
+    ROLLBAR_ACCESS_TOKEN  = rollbar_project_access_token.intercode_post_server_item.access_token
   }
+}
+
+resource "rollbar_project" "intercode" {
+  name = "intercode"
+}
+
+resource "rollbar_project_access_token" "intercode_post_client_item" {
+  project_id = rollbar_project.intercode.id
+  name       = "post_client_item"
+  depends_on = [rollbar_project.intercode]
+  scopes     = ["post_client_item"]
+}
+
+resource "rollbar_project_access_token" "intercode_post_server_item" {
+  project_id = rollbar_project.intercode.id
+  name       = "post_server_item"
+  depends_on = [rollbar_project.intercode]
+  scopes     = ["post_server_item"]
 }
 
 resource "aws_db_parameter_group" "production_pg13" {
