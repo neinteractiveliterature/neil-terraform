@@ -156,8 +156,9 @@ module "uploads_neilhosting_net_cloudfront" {
   source = "./modules/cloudfront_with_acm"
 
   domain_name              = "uploads.neilhosting.net"
-  origin_id                = "S3-intercode2-production"
-  origin_domain_name       = aws_s3_bucket.intercode2_production.bucket_domain_name
+  origin_id                = "intercode"
+  origin_domain_name       = "www.neilhosting.net"
+  origin_protocol_policy   = "https-only"
   add_security_headers_arn = aws_lambda_function.addSecurityHeaders.qualified_arn
   route53_zone             = aws_route53_zone.neilhosting_net
   compress                 = true
