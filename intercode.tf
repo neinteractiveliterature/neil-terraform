@@ -193,6 +193,8 @@ resource "aws_cloudwatch_log_group" "intercode2_production" {
     Environment = "production"
     Application = "intercode"
   }
+
+  retention_in_days = 30
 }
 
 # IAM policy so that Intercode can access the stuff it needs to access in AWS
@@ -303,9 +305,11 @@ resource "aws_iam_group_policy" "intercode2_production" {
       "Effect": "Allow",
       "Action": [
         "logs:CreateLogStream",
+        "logs:DescribeLogStreams",
+        "logs:GetLogEvents",
         "logs:PutLogEvents"
       ],
-      "Resource": "${aws_cloudwatch_log_group.intercode2_production.arn}"
+      "Resource": "${aws_cloudwatch_log_group.intercode2_production.arn}:*"
     }
   ]
 }
