@@ -16,6 +16,7 @@ resource "heroku_app" "intercode" {
   acm = false
 
   config_vars = {
+    CLOUDWATCH_LOG_GROUP                = aws_cloudwatch_log_group.intercode2_production.arn
     INTERCODE_CERTS_NO_WILDCARD_DOMAINS = "5pi-con.natbudin.com"
     INTERCODE_HOST                      = "neilhosting.net"
     RACK_ENV                            = "production"
@@ -185,6 +186,15 @@ module "assets_neilhosting_net_cloudfront" {
   route53_zone             = aws_route53_zone.neilhosting_net
 }
 
+resource "aws_cloudwatch_log_group" "intercode2_production" {
+  name = "intercode2_production"
+
+  tags = {
+    Environment = "production"
+    Application = "intercode"
+  }
+}
+
 # IAM policy so that Intercode can access the stuff it needs to access in AWS
 resource "aws_iam_group" "intercode2_production" {
   name = "intercode2-production"
@@ -287,6 +297,15 @@ resource "aws_iam_group_policy" "intercode2_production" {
       "Effect": "Allow",
       "Action": "kms:Decrypt",
       "Resource": "arn:aws:kms:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:key/2570e363-9e0e-4a1a-b4de-41c2460786df"
+    },
+    {
+      "Sid": "CloudwatchLogsAccess",
+      "Effect": "Allow",
+      "Action": [
+        "logs:CreateLogStream",
+        "logs:PutLogEvents"
+      ],
+      "Resource": "${aws_cloudwatch_log_group.intercode2_production.arn}"
     }
   ]
 }

@@ -3,6 +3,9 @@
 # Do not check secrets into git
 /secrets.auto.tfvars
 
+# Do not store the generated plan
+/tfplan
+
 # Local .terraform directories
 **/.terraform/*
 
