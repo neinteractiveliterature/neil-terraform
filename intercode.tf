@@ -16,7 +16,7 @@ resource "heroku_app" "intercode" {
   acm = false
 
   config_vars = {
-    CLOUDWATCH_LOG_GROUP                = aws_cloudwatch_log_group.intercode2_production.arn
+    CLOUDWATCH_LOG_GROUP                = aws_cloudwatch_log_group.intercode2_production.name
     INTERCODE_CERTS_NO_WILDCARD_DOMAINS = "5pi-con.natbudin.com"
     INTERCODE_HOST                      = "neilhosting.net"
     RACK_ENV                            = "production"
