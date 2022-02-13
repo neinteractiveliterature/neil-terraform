@@ -137,10 +137,15 @@ resource "aws_s3_bucket" "intercode2_production" {
   bucket = "intercode2-production"
 
   cors_rule {
-    allowed_headers = ["Authorization", "Content-Length"]
-    allowed_methods = ["GET"]
+    allowed_headers = ["*"]
+    allowed_methods = ["GET", "PUT"]
     allowed_origins = ["*"]
-    expose_headers  = []
+    expose_headers  = [
+      "Origin",
+      "Content-Type",
+      "Content-MD5",
+      "Content-Disposition"
+    ]
     max_age_seconds = 3000
   }
 }
