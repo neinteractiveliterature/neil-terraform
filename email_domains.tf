@@ -43,6 +43,14 @@ resource "aws_ses_domain_dkim" "festivalofthelarps_com" {
   domain = aws_ses_domain_identity.festivalofthelarps_com.domain
 }
 
+resource "aws_ses_domain_identity" "greaterbostonlarpsociety_org" {
+  domain = "greaterbostonlarpsociety.org"
+}
+
+resource "aws_ses_domain_dkim" "greaterbostonlarpsociety_org" {
+  domain = aws_ses_domain_identity.greaterbostonlarpsociety_org.domain
+}
+
 resource "aws_ses_domain_identity" "interactiveliterature_org" {
   domain = "interactiveliterature.org"
 }

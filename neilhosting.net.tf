@@ -49,6 +49,14 @@ resource "aws_route53_record" "neilhosting_net_intercode" {
   records = ["peaceful-tortoise-a9lwi8zf1skj973tyemrono5.herokudns.com."]
 }
 
+resource "aws_route53_record" "neilhosting_net_gbls" {
+  zone_id = aws_route53_zone.neilhosting_net.zone_id
+  name    = "gbls.neilhosting.net"
+  type    = "CNAME"
+  ttl     = 300
+  records = ["globular-peach-7du7l3c18utuz0kzznip4k0g.herokudns.com."]
+}
+
 module "neilhosting_net_cloudfront" {
   source = "./modules/cloudfront_apex_redirect"
 
