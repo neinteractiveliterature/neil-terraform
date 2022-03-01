@@ -17,7 +17,7 @@ resource "heroku_app" "intercode" {
 
   config_vars = {
     CLOUDWATCH_LOG_GROUP                = aws_cloudwatch_log_group.intercode2_production.name
-    INTERCODE_CERTS_NO_WILDCARD_DOMAINS = "5pi-con.natbudin.com"
+    INTERCODE_CERTS_NO_WILDCARD_DOMAINS = "5pi-con.natbudin.com signups.greaterbostonlarpsociety.org"
     INTERCODE_HOST                      = "neilhosting.net"
     RACK_ENV                            = "production"
     RAILS_ENV                           = "production"
@@ -140,7 +140,7 @@ resource "aws_s3_bucket" "intercode2_production" {
     allowed_headers = ["*"]
     allowed_methods = ["GET", "PUT"]
     allowed_origins = ["*"]
-    expose_headers  = [
+    expose_headers = [
       "Origin",
       "Content-Type",
       "Content-MD5",

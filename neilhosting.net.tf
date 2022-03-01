@@ -1,5 +1,9 @@
 locals {
   intercode_subdomains = ["www.neilhosting.net", "template.neilhosting.net"]
+  hosted_org_subdomains = {
+    "becon" = "horizontal-dove-25tume72wmmlntnd2fo5ezw3.herokudns.com.",
+    "gbls"  = "globular-peach-7du7l3c18utuz0kzznip4k0g.herokudns.com."
+  }
 }
 
 resource "aws_route53_zone" "neilhosting_net" {
@@ -49,12 +53,13 @@ resource "aws_route53_record" "neilhosting_net_intercode" {
   records = ["peaceful-tortoise-a9lwi8zf1skj973tyemrono5.herokudns.com."]
 }
 
-resource "aws_route53_record" "neilhosting_net_gbls" {
-  zone_id = aws_route53_zone.neilhosting_net.zone_id
-  name    = "gbls.neilhosting.net"
-  type    = "CNAME"
-  ttl     = 300
-  records = ["globular-peach-7du7l3c18utuz0kzznip4k0g.herokudns.com."]
+resource "aws_route53_record" "neilhosting_net_hosted_orgs" {
+  for_each = local.hosted_org_subdomains
+  zone_id  = aws_route53_zone.neilhosting_net.zone_id
+  name     = "${each.key}.hosted.neilhosting.net"
+  type     = "CNAME"
+  ttl      = 300
+  records  = [each.value]
 }
 
 module "neilhosting_net_cloudfront" {
