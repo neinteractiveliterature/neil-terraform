@@ -189,6 +189,7 @@ module "assets_neilhosting_net_cloudfront" {
   origin_protocol_policy   = "https-only"
   add_security_headers_arn = aws_lambda_function.addSecurityHeaders.qualified_arn
   route53_zone             = aws_route53_zone.neilhosting_net
+  compress                 = true
 }
 
 resource "aws_cloudwatch_log_group" "intercode2_production" {
