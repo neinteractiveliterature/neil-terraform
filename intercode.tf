@@ -316,6 +316,30 @@ resource "aws_iam_group_policy" "intercode2_production" {
         "logs:PutLogEvents"
       ],
       "Resource": "${aws_cloudwatch_log_group.intercode2_production.arn}:*"
+    },
+    {
+      "Sid": "CloudwatchSchedulerProvisioning",
+      "Effect": "Allow",
+      "Action": [
+        "sqs:CreateQueue",
+        "sqs:GetQueueAttributes",
+        "sqs:SetQueueAttributes"
+      ],
+      "Resource": [
+        "arn:aws:sqs:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:intercode_production_cloudwatch_scheduler",
+        "arn:aws:sqs:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:intercode_production_cloudwatch_scheduler-failures"
+      ]
+    },
+    {
+      "Sid": "CloudwatchSchedulerAccess",
+      "Effect": "Allow",
+      "Action": [
+        "events:PutRule",
+        "events:PutTargets"
+      ],
+      "Resource": [
+        "*"
+      ]
     }
   ]
 }
