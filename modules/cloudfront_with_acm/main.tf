@@ -20,17 +20,17 @@ variable "domain_name" {
 }
 
 variable "compress" {
-  type = bool
+  type    = bool
   default = false
 }
 
 variable "alternative_names" {
-  type = list(string)
+  type    = list(string)
   default = []
 }
 
 variable "validation_method" {
-  type = string
+  type    = string
   default = "DNS"
 }
 
@@ -39,12 +39,12 @@ variable "origin_domain_name" {
 }
 
 variable "origin_protocol_policy" {
-  type = string
+  type    = string
   default = "http-only"
 }
 
 variable "default_root_object" {
-  type = string
+  type    = string
   default = null
 }
 
@@ -67,8 +67,8 @@ variable "cloudflare_zone" {
 }
 
 resource "aws_acm_certificate" "cloudfront_cert" {
-  domain_name = var.domain_name
-  validation_method = var.validation_method
+  domain_name               = var.domain_name
+  validation_method         = var.validation_method
   subject_alternative_names = var.alternative_names
 
   options {
@@ -84,19 +84,19 @@ resource "aws_cloudfront_distribution" "cloudfront_distribution" {
     origin_id   = var.origin_id
 
     custom_origin_config {
-      http_port = 80
-      https_port = 443
+      http_port              = 80
+      https_port             = 443
       origin_protocol_policy = var.origin_protocol_policy
-      origin_ssl_protocols = ["TLSv1", "TLSv1.1", "TLSv1.2"]
+      origin_ssl_protocols   = ["TLSv1", "TLSv1.1", "TLSv1.2"]
     }
   }
 
-  aliases = concat([var.domain_name], var.alternative_names)
-  is_ipv6_enabled = true
+  aliases             = concat([var.domain_name], var.alternative_names)
+  is_ipv6_enabled     = true
   default_root_object = var.default_root_object
 
   default_cache_behavior {
-    cache_policy_id = "658327ea-f89d-4fab-a63d-7e88639e58f6" # Managed-CachingOptimized
+    cache_policy_id          = "658327ea-f89d-4fab-a63d-7e88639e58f6" # Managed-CachingOptimized
     origin_request_policy_id = "59781a5b-3903-41f3-afcb-af62929ccde1" # Managed-CORS-CustomOrigin
 
     allowed_methods        = ["GET", "HEAD"]
@@ -106,9 +106,9 @@ resource "aws_cloudfront_distribution" "cloudfront_distribution" {
     compress               = var.compress
 
     lambda_function_association {
-      event_type = "origin-response"
+      event_type   = "origin-response"
       include_body = false
-      lambda_arn = var.add_security_headers_arn
+      lambda_arn   = var.add_security_headers_arn
     }
   }
 
@@ -119,14 +119,14 @@ resource "aws_cloudfront_distribution" "cloudfront_distribution" {
   }
 
   viewer_certificate {
-    acm_certificate_arn = aws_acm_certificate.cloudfront_cert.arn
+    acm_certificate_arn      = aws_acm_certificate.cloudfront_cert.arn
     minimum_protocol_version = "TLSv1.1_2016"
-    ssl_support_method = "sni-only"
+    ssl_support_method       = "sni-only"
   }
 }
 
 resource "aws_acm_certificate_validation" "cert_validation" {
-  count   = var.route53_zone != null ? 1 : 0
+  count = var.route53_zone != null ? 1 : 0
 
   certificate_arn         = aws_acm_certificate.cloudfront_cert.arn
   validation_record_fqdns = [for record in aws_route53_record.cert_validation_records : record.fqdn]
@@ -134,32 +134,32 @@ resource "aws_acm_certificate_validation" "cert_validation" {
 
 resource "aws_route53_record" "cert_validation_records" {
   for_each = {
-    for dvo in (var.route53_zone != null ? aws_acm_certificate.cloudfront_cert.domain_validation_options: []) : dvo.domain_name => {
+    for dvo in(var.route53_zone != null ? aws_acm_certificate.cloudfront_cert.domain_validation_options : []) : dvo.domain_name => {
       name   = dvo.resource_record_name
       record = dvo.resource_record_value
       type   = dvo.resource_record_type
     }
   }
 
-  name = each.value.name
+  name    = each.value.name
   records = [each.value.record]
-  type = each.value.type
+  type    = each.value.type
   zone_id = var.route53_zone.zone_id
   ttl     = 300
 }
 
 resource "cloudflare_record" "cert_validation_records" {
   for_each = {
-    for dvo in (var.cloudflare_zone != null ? aws_acm_certificate.cloudfront_cert.domain_validation_options: []) : dvo.domain_name => {
+    for dvo in(var.cloudflare_zone != null ? aws_acm_certificate.cloudfront_cert.domain_validation_options : []) : dvo.domain_name => {
       name   = dvo.resource_record_name
       record = dvo.resource_record_value
       type   = dvo.resource_record_type
     }
   }
 
-  name = each.value.name
-  value = each.value.record
-  type = each.value.type
+  name    = each.value.name
+  value   = trimsuffix(each.value.record, ".")
+  type    = each.value.type
   zone_id = var.cloudflare_zone.zone_id
   proxied = false
 }
