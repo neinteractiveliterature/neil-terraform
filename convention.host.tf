@@ -4,53 +4,61 @@ resource "aws_route53_zone" "convention_host" {
 
 locals {
   convention_host_cnames = {
-    "*" = "systematic-emu-ece4iltczqislup66je4ug96.herokudns.com."
-    "_acme-challenge" = "_acme-challenge.neilhosting.net."
-    "_acme-challenge.cyberol" = "_acme-challenge.neilhosting.net."
-    "_acme-challenge.demo" = "_acme-challenge.neilhosting.net."
-    "_acme-challenge.foambrain" = "_acme-challenge.neilhosting.net."
-    "_acme-challenge.gbls" = "_acme-challenge.neilhosting.net."
-    "_acme-challenge.genericon" = "_acme-challenge.neilhosting.net."
-    "_acme-challenge.larpi" = "_acme-challenge.neilhosting.net."
-    "_acme-challenge.slaw" = "_acme-challenge.neilhosting.net."
-    "_acme-challenge.test" = "_acme-challenge.neilhosting.net."
-    "*.demo" = "damp-mountain-qoz1fdoau4kwpcbz1frqh08i.herokudns.com."
-    "email" = "mailgun.org."
-    "*.cyberol" = "cubic-lily-eb7w551cu1uo2hwr9rfmivpf.herokudns.com."
-    "*.foambrain" = "behavioral-hamster-8bzeixz8bd3rt35shsc0p7we.herokudns.com."
-    "furniture-test" = "guarded-pinchusion-vxtvyw1enyzcafs3uhvx7x1q.herokudns.com."
-    "*.gbls" = "shaped-goldenrod-h9wpryfa8vwjom8lhe1h5ryx.herokudns.com."
-    "*.genericon" = "secret-stream-k361oq58pogv6y5zl9113n03.herokudns.com."
-    "*.larpi" = "mathematical-lobster-h6pd2t3hxr0hw561vdpwofz8.herokudns.com."
-    "*.slaw" = "dimensional-squash-gb4y74648bukgi7jpre5lsvt.herokudns.com."
-    "*.test" = "reticulated-stegosaurus-p92f0odjhalcjpbddpg3fbuy.herokudns.com."
+    "*"                             = "neilhosting.onrender.com."
+    "_acme-challenge"               = "neilhosting.verify.renderdns.com."
+    "_acme-challenge.cyberol"       = "neilhosting.verify.renderdns.com."
+    "_acme-challenge.demo"          = "neilhosting.verify.renderdns.com."
+    "_acme-challenge.foambrain"     = "neilhosting.verify.renderdns.com."
+    "_acme-challenge.gbls"          = "_acme-challenge.neilhosting.net."
+    "_acme-challenge.genericon"     = "neilhosting.verify.renderdns.com."
+    "_acme-challenge.larpi"         = "neilhosting.verify.renderdns.com."
+    "_acme-challenge.slaw"          = "neilhosting.verify.renderdns.com."
+    "_acme-challenge.test"          = "neilhosting.verify.renderdns.com."
+    "_cf-custom-hostname"           = "neilhosting.hostname.renderdns.com."
+    "_cf-custom-hostname.cyberol"   = "neilhosting.hostname.renderdns.com."
+    "_cf-custom-hostname.demo"      = "neilhosting.hostname.renderdns.com."
+    "_cf-custom-hostname.foambrain" = "neilhosting.hostname.renderdns.com."
+    "_cf-custom-hostname.genericon" = "neilhosting.hostname.renderdns.com."
+    "_cf-custom-hostname.larpi"     = "neilhosting.hostname.renderdns.com."
+    "_cf-custom-hostname.slaw"      = "neilhosting.hostname.renderdns.com."
+    "_cf-custom-hostname.test"      = "neilhosting.hostname.renderdns.com."
+    "*.demo"                        = "neilhosting.onrender.com."
+    "email"                         = "mailgun.org."
+    "*.cyberol"                     = "neilhosting.onrender.com."
+    "*.foambrain"                   = "neilhosting.onrender.com."
+    "furniture-test"                = "guarded-pinchusion-vxtvyw1enyzcafs3uhvx7x1q.herokudns.com."
+    "*.gbls"                        = "shaped-goldenrod-h9wpryfa8vwjom8lhe1h5ryx.herokudns.com."
+    "*.genericon"                   = "neilhosting.onrender.com."
+    "*.larpi"                       = "neilhosting.onrender.com."
+    "*.slaw"                        = "neilhosting.onrender.com."
+    "*.test"                        = "neilhosting.onrender.com."
   }
 }
 
 module "convention_host_cloudfront" {
   source = "./modules/cloudfront_apex_redirect"
 
-  route53_zone = aws_route53_zone.convention_host
-  redirect_destination = "https://www.neilhosting.net"
+  route53_zone             = aws_route53_zone.convention_host
+  redirect_destination     = "https://www.neilhosting.net"
   add_security_headers_arn = aws_lambda_function.addSecurityHeaders.qualified_arn
-  alternative_names = ["www.convention.host"]
+  alternative_names        = ["www.convention.host"]
 }
 
 resource "aws_route53_record" "convention_host_cname" {
   for_each = local.convention_host_cnames
 
   zone_id = aws_route53_zone.convention_host.zone_id
-  name = "${each.key}.convention.host"
-  type = "CNAME"
-  ttl = 300
+  name    = "${each.key}.convention.host"
+  type    = "CNAME"
+  ttl     = 300
   records = [each.value]
 }
 
 resource "aws_route53_record" "convention_host_mx" {
   zone_id = aws_route53_zone.convention_host.zone_id
-  name = "convention.host"
-  type = "MX"
-  ttl = 300
+  name    = "convention.host"
+  type    = "MX"
+  ttl     = 300
   records = [
     "10 inbound-smtp.us-east-1.amazonaws.com."
   ]
@@ -58,16 +66,16 @@ resource "aws_route53_record" "convention_host_mx" {
 
 resource "aws_route53_record" "convention_host_mailgun_dkim" {
   zone_id = aws_route53_zone.convention_host.zone_id
-  name = "smtp._domainkey.convention.host"
-  type = "TXT"
-  ttl = 300
+  name    = "smtp._domainkey.convention.host"
+  type    = "TXT"
+  ttl     = 300
   records = ["k=rsa; p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDEj5lFIYoEjeIvTrIZ+VJ2YVLPSej+1Cr4HHBaWqmRLw0U9lasioYkognN7LmRn2/fyuTCBeu+YCO2/s2qcHRgnzIMgIiCNVoEX+PSidgaLEh7u/gbL1AID57QG7q9Wndcd7LOV7eYkxk3XBKiTiRx7/Edr5BSbJEQFZ3h7430WQIDAQAB"]
 }
 
 resource "aws_route53_record" "convention_host_spf" {
   zone_id = aws_route53_zone.convention_host.zone_id
-  name = "convention.host"
-  type = "TXT"
-  ttl = 300
+  name    = "convention.host"
+  type    = "TXT"
+  ttl     = 300
   records = ["v=spf1 include:mailgun.org include:amazonses.com ~all"]
 }

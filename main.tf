@@ -4,6 +4,10 @@ terraform {
       source  = "hashicorp/aws"
       version = "~> 3.72"
     }
+    cloudflare = {
+      source  = "cloudflare/cloudflare"
+      version = "~> 3.0"
+    }
     heroku = {
       source  = "heroku/heroku"
       version = "~> 4.8.0"
@@ -25,6 +29,19 @@ provider "heroku" {
 }
 
 provider "rollbar" {
+}
+
+variable "cloudflare_email" {
+  type = string
+}
+
+variable "cloudflare_api_key" {
+  type = string
+}
+
+provider "cloudflare" {
+  email   = var.cloudflare_email
+  api_key = var.cloudflare_api_key
 }
 
 # variable "CONSTELLIX_API_KEY" {

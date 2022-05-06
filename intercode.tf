@@ -78,7 +78,7 @@ resource "aws_db_parameter_group" "production_pg13" {
 resource "aws_db_instance" "intercode_production" {
   instance_class       = "db.t3.micro"
   engine               = "postgres"
-  engine_version       = "13.3"
+  engine_version       = "13.4"
   username             = "neiladmin"
   parameter_group_name = "production-pg13"
   deletion_protection  = true

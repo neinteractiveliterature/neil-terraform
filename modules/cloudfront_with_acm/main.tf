@@ -1,3 +1,16 @@
+terraform {
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 3.72"
+    }
+    cloudflare = {
+      source  = "cloudflare/cloudflare"
+      version = "~> 3.0"
+    }
+  }
+}
+
 variable "origin_id" {
   type = string
 }
@@ -40,6 +53,13 @@ variable "add_security_headers_arn" {
 }
 
 variable "route53_zone" {
+  type = object({
+    zone_id = string
+  })
+  default = null
+}
+
+variable "cloudflare_zone" {
   type = object({
     zone_id = string
   })
@@ -128,6 +148,22 @@ resource "aws_route53_record" "cert_validation_records" {
   ttl     = 300
 }
 
+resource "cloudflare_record" "cert_validation_records" {
+  for_each = {
+    for dvo in (var.cloudflare_zone != null ? aws_acm_certificate.cloudfront_cert.domain_validation_options: []) : dvo.domain_name => {
+      name   = dvo.resource_record_name
+      record = dvo.resource_record_value
+      type   = dvo.resource_record_type
+    }
+  }
+
+  name = each.value.name
+  value = each.value.record
+  type = each.value.type
+  zone_id = var.cloudflare_zone.zone_id
+  proxied = false
+}
+
 output "cloudfront_distribution" {
   value = aws_cloudfront_distribution.cloudfront_distribution
 }
@@ -146,4 +182,8 @@ output "cert_validation" {
 
 output "cert_validation_records" {
   value = aws_route53_record.cert_validation_records
+}
+
+output "cloudflare_validation_records" {
+  value = cloudflare_record.cert_validation_records
 }
