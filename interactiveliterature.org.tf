@@ -191,7 +191,14 @@ resource "cloudflare_record" "interactiveliterature_org_acme_challenge_cname" {
   zone_id = cloudflare_zone.interactiveliterature_org.id
   name    = "_acme-challenge"
   type    = "CNAME"
-  value   = "_acme-challenge.neilhosting.net"
+  value   = "neilhosting.verify.renderdns.com"
+}
+
+resource "cloudflare_record" "interactiveliterature_org_cf_custom_hostname_cname" {
+  zone_id = cloudflare_zone.interactiveliterature_org.id
+  name    = "_cf-custom-hostname"
+  type    = "CNAME"
+  value   = "neilhosting.hostname.renderdns.com"
 }
 
 resource "cloudflare_record" "interactiveliterature_org_convention_subdomain_cname" {
@@ -200,7 +207,7 @@ resource "cloudflare_record" "interactiveliterature_org_convention_subdomain_cna
   zone_id = cloudflare_zone.interactiveliterature_org.id
   name    = each.value
   type    = "CNAME"
-  value   = "darwinian-shore-tp7n3b4445fh1h8q5xl0sb34.herokudns.com"
+  value   = "neilhosting.onrender.com"
   proxied = true
 }
 
@@ -266,4 +273,11 @@ resource "cloudflare_record" "interactiveliterature_org_litform_cname" {
   name    = "litform"
   type    = "CNAME"
   value   = "neinteractiveliterature.github.io"
+}
+
+resource "cloudflare_record" "interactiveliterature_org_wildcard_cname" {
+  zone_id = cloudflare_zone.interactiveliterature_org.id
+  name    = "*"
+  type    = "CNAME"
+  value   = "neilhosting.onrender.com"
 }
