@@ -1,5 +1,5 @@
 locals {
-  convention_subdomains = toset([
+  extraconlarp_org_intercode_subdomains = toset([
     "2021"
   ])
 }
@@ -50,16 +50,17 @@ resource "cloudflare_record" "extraconlarp_org_cf_custom_hostname_cname" {
 }
 
 resource "cloudflare_record" "extraconlarp_org_convention_subdomain_cname" {
-  for_each = local.convention_subdomains
+  for_each = local.extraconlarp_org_intercode_subdomains
 
   zone_id = cloudflare_zone.extraconlarp_org.id
   name    = each.value
   type    = "CNAME"
   value   = "neilhosting.onrender.com"
+  proxied = true
 }
 
 resource "cloudflare_record" "extraconlarp_org_convention_subdomain_mx" {
-  for_each = local.convention_subdomains
+  for_each = local.extraconlarp_org_intercode_subdomains
 
   zone_id  = cloudflare_zone.extraconlarp_org.id
   name     = each.value
@@ -69,7 +70,7 @@ resource "cloudflare_record" "extraconlarp_org_convention_subdomain_mx" {
 }
 
 resource "cloudflare_record" "extraconlarp_org_convention_subdomain_events_mx" {
-  for_each = local.convention_subdomains
+  for_each = local.extraconlarp_org_intercode_subdomains
 
   zone_id  = cloudflare_zone.extraconlarp_org.id
   name     = "events.${each.value}"

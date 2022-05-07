@@ -209,3 +209,10 @@ module "assets_larplibrary_org_cloudfront" {
   route53_zone             = aws_route53_zone.larplibrary_org
   compress                 = true
 }
+
+resource "cloudflare_record" "interactiveliterature_org_library_cname" {
+  zone_id  = cloudflare_zone.interactiveliterature_org.id
+  name     = "library"
+  type     = "CNAME"
+  value    = "library.interactiveliterature.org.herokudns.com"
+}
