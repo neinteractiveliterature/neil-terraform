@@ -28,13 +28,6 @@ resource "cloudflare_record" "extraconlarp_org_mx" {
   priority = 10
 }
 
-resource "cloudflare_record" "extraconlarp_org_wildcard_cname" {
-  zone_id = cloudflare_zone.extraconlarp_org.id
-  name    = "*"
-  type    = "CNAME"
-  value   = "neilhosting.onrender.com"
-}
-
 resource "cloudflare_record" "extraconlarp_org_acme_challenge_cname" {
   zone_id = cloudflare_zone.extraconlarp_org.id
   name    = "_acme-challenge"
@@ -100,4 +93,11 @@ resource "cloudflare_record" "extraconlarp_org_google_site_verification_record" 
   name    = "extraconlarp.org"
   type    = "TXT"
   value   = "google-site-verification=FD3Na7QpetcgjXgnJAQUBTwqmyi9oh8LsZ34ODrLuUM"
+}
+
+resource "cloudflare_record" "extraconlarp_org_wildcard_cname" {
+  zone_id = cloudflare_zone.extraconlarp_org.id
+  name    = "*"
+  type    = "CNAME"
+  value   = "neilhosting.onrender.com"
 }

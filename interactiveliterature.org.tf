@@ -194,7 +194,6 @@ resource "cloudflare_record" "interactiveliterature_org_acme_challenge_cname" {
   value   = "_acme-challenge.neilhosting.net"
 }
 
-
 resource "cloudflare_record" "interactiveliterature_org_convention_subdomain_cname" {
   for_each = local.interactiveliterature_org_intercode_subdomains
 
@@ -225,13 +224,6 @@ resource "cloudflare_record" "interactiveliterature_org_convention_subdomain_eve
   priority = 10
 }
 
-resource "cloudflare_record" "interactiveliterature_org_intercode_cname" {
-  zone_id = cloudflare_zone.interactiveliterature_org.id
-  name    = "intercode"
-  type    = "CNAME"
-  value   = "neinteractiveliterature.github.io"
-}
-
 resource "cloudflare_record" "interactiveliterature_org_amazonses_dkim_record" {
   count = 3
 
@@ -239,13 +231,6 @@ resource "cloudflare_record" "interactiveliterature_org_amazonses_dkim_record" {
   name    = "${element(aws_ses_domain_dkim.interactiveliterature_org.dkim_tokens, count.index)}._domainkey"
   type    = "CNAME"
   value   = "${element(aws_ses_domain_dkim.interactiveliterature_org.dkim_tokens, count.index)}.dkim.amazonses.com"
-}
-
-resource "cloudflare_record" "interactiveliterature_org_litform_cname" {
-  zone_id = cloudflare_zone.interactiveliterature_org.id
-  name    = "litform"
-  type    = "CNAME"
-  value   = "neinteractiveliterature.github.io"
 }
 
 resource "cloudflare_record" "interactiveliterature_org_www_cname" {
@@ -267,4 +252,18 @@ resource "cloudflare_record" "interactiveliterature_org_google_site_verification
   name    = "interactiveliterature.org"
   type    = "TXT"
   value   = "google-site-verification=iP41tocP1AHGrYev0oaDM8YcwTtCEBYPA9dJddZZ6Yc"
+}
+
+resource "cloudflare_record" "interactiveliterature_org_intercode_cname" {
+  zone_id = cloudflare_zone.interactiveliterature_org.id
+  name    = "intercode"
+  type    = "CNAME"
+  value   = "neinteractiveliterature.github.io"
+}
+
+resource "cloudflare_record" "interactiveliterature_org_litform_cname" {
+  zone_id = cloudflare_zone.interactiveliterature_org.id
+  name    = "litform"
+  type    = "CNAME"
+  value   = "neinteractiveliterature.github.io"
 }
