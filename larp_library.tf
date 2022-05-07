@@ -148,28 +148,12 @@ module "larp_library_apex_redirect" {
   add_security_headers_arn = aws_lambda_function.addSecurityHeaders.qualified_arn
 }
 
-resource "aws_route53_record" "larplibrary_org_mailgun_tracking" {
-  zone_id = aws_route53_zone.larplibrary_org.zone_id
-  name    = "email.larplibrary.org"
-  type    = "CNAME"
-  ttl     = 300
-  records = ["mailgun.org."]
-}
-
-resource "aws_route53_record" "larplibrary_org_mailgun_dkim" {
-  zone_id = aws_route53_zone.larplibrary_org.zone_id
-  name    = "k1._domainkey.larplibrary.org"
-  type    = "TXT"
-  ttl     = 300
-  records = ["k=rsa; p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDCeP+37KkcS1+URn+wS0QO31fQ+wcr14rDE2aw8aBhOCEattT3FKCeh60XJsD0flBV0GD/sJA9FM3Fz2Djk5+9kLd5/wQ4lPnO79Y8hRTq3M7nN/k31WNzMPrc75AcOkbIBk5CAuxeQMaPgNG0yTsms3ACRyzAEX0iHQpFyB3WBwIDAQAB"]
-}
-
 resource "aws_route53_record" "larplibrary_org_spf" {
   zone_id = aws_route53_zone.larplibrary_org.zone_id
   name    = "larplibrary.org"
   type    = "TXT"
   ttl     = 300
-  records = ["v=spf1 include:mailgun.org include:amazonses.com ~all"]
+  records = ["v=spf1 include:amazonses.com ~all"]
 }
 
 resource "aws_route53_record" "larplibrary_org_www" {
@@ -211,8 +195,8 @@ module "assets_larplibrary_org_cloudfront" {
 }
 
 resource "cloudflare_record" "interactiveliterature_org_library_cname" {
-  zone_id  = cloudflare_zone.interactiveliterature_org.id
-  name     = "library"
-  type     = "CNAME"
-  value    = "library.interactiveliterature.org.herokudns.com"
+  zone_id = cloudflare_zone.interactiveliterature_org.id
+  name    = "library"
+  type    = "CNAME"
+  value   = "library.interactiveliterature.org.herokudns.com"
 }

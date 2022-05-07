@@ -24,7 +24,6 @@ locals {
     "_cf-custom-hostname.slaw"      = "neilhosting.hostname.renderdns.com."
     "_cf-custom-hostname.test"      = "neilhosting.hostname.renderdns.com."
     "*.demo"                        = "neilhosting.onrender.com."
-    "email"                         = "mailgun.org."
     "*.cyberol"                     = "neilhosting.onrender.com."
     "*.foambrain"                   = "neilhosting.onrender.com."
     "furniture-test"                = "guarded-pinchusion-vxtvyw1enyzcafs3uhvx7x1q.herokudns.com."
@@ -65,18 +64,10 @@ resource "aws_route53_record" "convention_host_mx" {
   ]
 }
 
-resource "aws_route53_record" "convention_host_mailgun_dkim" {
-  zone_id = aws_route53_zone.convention_host.zone_id
-  name    = "smtp._domainkey.convention.host"
-  type    = "TXT"
-  ttl     = 300
-  records = ["k=rsa; p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDEj5lFIYoEjeIvTrIZ+VJ2YVLPSej+1Cr4HHBaWqmRLw0U9lasioYkognN7LmRn2/fyuTCBeu+YCO2/s2qcHRgnzIMgIiCNVoEX+PSidgaLEh7u/gbL1AID57QG7q9Wndcd7LOV7eYkxk3XBKiTiRx7/Edr5BSbJEQFZ3h7430WQIDAQAB"]
-}
-
 resource "aws_route53_record" "convention_host_spf" {
   zone_id = aws_route53_zone.convention_host.zone_id
   name    = "convention.host"
   type    = "TXT"
   ttl     = 300
-  records = ["v=spf1 include:mailgun.org include:amazonses.com ~all"]
+  records = ["v=spf1 include:amazonses.com ~all"]
 }
