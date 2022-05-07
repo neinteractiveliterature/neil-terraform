@@ -10,6 +10,14 @@ resource "aws_route53_zone" "neilhosting_net" {
   name = "neilhosting.net"
 }
 
+resource "aws_route53_record" "neilhosting_net_a" {
+  zone_id = aws_route53_zone.neilhosting_net.zone_id
+  name    = "neilhosting.net"
+  type    = "A"
+  ttl     = 300
+  records = ["216.24.57.1"]
+}
+
 resource "aws_route53_record" "neilhosting_net_mx" {
   zone_id = aws_route53_zone.neilhosting_net.zone_id
   name    = "neilhosting.net"
@@ -50,7 +58,7 @@ resource "aws_route53_record" "neilhosting_net_intercode" {
   name    = local.intercode_subdomains[count.index]
   type    = "CNAME"
   ttl     = 300
-  records = ["peaceful-tortoise-a9lwi8zf1skj973tyemrono5.herokudns.com."]
+  records = ["neilhosting.onrender.com."]
 }
 
 resource "aws_route53_record" "neilhosting_net_hosted_orgs" {
@@ -60,12 +68,4 @@ resource "aws_route53_record" "neilhosting_net_hosted_orgs" {
   type     = "CNAME"
   ttl      = 300
   records  = [each.value]
-}
-
-module "neilhosting_net_cloudfront" {
-  source = "./modules/cloudfront_apex_redirect"
-
-  route53_zone             = aws_route53_zone.neilhosting_net
-  redirect_destination     = "https://www.neilhosting.net"
-  add_security_headers_arn = aws_lambda_function.addSecurityHeaders.qualified_arn
 }
