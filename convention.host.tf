@@ -81,7 +81,7 @@ resource "aws_route53_record" "convention_host_spf" {
 #
 # https://github.com/cloudflare/terraform-provider-cloudflare/issues/1342
 resource "cloudflare_record" "convention_host_apex_redirect" {
-  zone_id = cloudflare_zone.interactiveliterature_org.id
+  zone_id = cloudflare_zone.convention_host.id
   name    = "convention.host"
   type    = "A"
   value   = "192.0.2.1"
