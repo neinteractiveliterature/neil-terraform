@@ -1,8 +1,8 @@
 locals {
   intercode_subdomains = ["www.neilhosting.net", "template.neilhosting.net"]
   hosted_org_subdomains = {
-    "becon" = "horizontal-dove-25tume72wmmlntnd2fo5ezw3.herokudns.com.",
-    "gbls"  = "globular-peach-7du7l3c18utuz0kzznip4k0g.herokudns.com."
+    "becon" = "neilhosting.onrender.com.",
+    "gbls"  = "neilhosting.onrender.com."
   }
 }
 

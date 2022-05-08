@@ -111,7 +111,14 @@ resource "cloudflare_record" "interconlarp_org_acme_challenge_cname" {
   zone_id = cloudflare_zone.interconlarp_org.id
   name    = "_acme-challenge"
   type    = "CNAME"
-  value   = "_acme-challenge.neilhosting.net"
+  value   = "neilhosting.verify.renderdns.com"
+}
+
+resource "cloudflare_record" "interconlarp_org_cf_custom_hostname_cname" {
+  zone_id = cloudflare_zone.interconlarp_org.id
+  name    = "_cf-custom-hostname"
+  type    = "CNAME"
+  value   = "neilhosting.hostname.renderdns.com"
 }
 
 resource "cloudflare_record" "interconlarp_org_convention_subdomain_cname" {
@@ -120,7 +127,7 @@ resource "cloudflare_record" "interconlarp_org_convention_subdomain_cname" {
   zone_id = cloudflare_zone.interconlarp_org.id
   name    = each.value
   type    = "CNAME"
-  value   = "blooming-turnip-zneklesemhujyp4e31h2rrys.herokudns.com"
+  value   = "neilhosting.onrender.com"
   proxied = true
 }
 
@@ -178,7 +185,7 @@ resource "cloudflare_record" "interconlarp_org_wildcard_cname" {
   zone_id = cloudflare_zone.interconlarp_org.id
   name    = "*"
   type    = "CNAME"
-  value   = "blooming-turnip-zneklesemhujyp4e31h2rrys.herokudns.com"
+  value   = "neilhosting.onrender.com"
 }
 
 resource "cloudflare_record" "interconlarp_org_furniture_cname" {
