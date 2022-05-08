@@ -23,16 +23,14 @@ resource "aws_ses_domain_dkim" "cyberol_org" {
 }
 
 module "convention_host_ses_sending_domain" {
-  source = "./modules/ses_sending_domain"
-  route53_zone = aws_route53_zone.convention_host
+  source          = "./modules/ses_sending_domain"
+  route53_zone    = aws_route53_zone.convention_host
+  cloudflare_zone = cloudflare_zone.convention_host
 }
 
-resource "aws_ses_domain_identity" "extraconlarp_org" {
-  domain = "extraconlarp.org"
-}
-
-resource "aws_ses_domain_dkim" "extraconlarp_org" {
-  domain = aws_ses_domain_identity.extraconlarp_org.domain
+module "extraconlarp_org_ses_sending_domain" {
+  source          = "./modules/ses_sending_domain"
+  cloudflare_zone = cloudflare_zone.extraconlarp_org
 }
 
 resource "aws_ses_domain_identity" "festivalofthelarps_com" {
@@ -51,12 +49,9 @@ resource "aws_ses_domain_dkim" "greaterbostonlarpsociety_org" {
   domain = aws_ses_domain_identity.greaterbostonlarpsociety_org.domain
 }
 
-resource "aws_ses_domain_identity" "interactiveliterature_org" {
-  domain = "interactiveliterature.org"
-}
-
-resource "aws_ses_domain_dkim" "interactiveliterature_org" {
-  domain = aws_ses_domain_identity.interactiveliterature_org.domain
+module "interactiveliterature_org_ses_sending_domain" {
+  source          = "./modules/ses_sending_domain"
+  cloudflare_zone = cloudflare_zone.interactiveliterature_org
 }
 
 resource "aws_ses_domain_identity" "interconlarp_org" {
@@ -68,7 +63,7 @@ resource "aws_ses_domain_dkim" "interconlarp_org" {
 }
 
 module "larplibrary_org_ses_sending_domain" {
-  source = "./modules/ses_sending_domain"
+  source       = "./modules/ses_sending_domain"
   route53_zone = aws_route53_zone.larplibrary_org
 }
 
@@ -81,6 +76,7 @@ resource "aws_ses_domain_dkim" "natbudin_com" {
 }
 
 module "neilhosting_net_ses_sending_domain" {
-  source = "./modules/ses_sending_domain"
-  route53_zone = aws_route53_zone.neilhosting_net
+  source          = "./modules/ses_sending_domain"
+  route53_zone    = aws_route53_zone.neilhosting_net
+  cloudflare_zone = cloudflare_zone.neilhosting_net
 }

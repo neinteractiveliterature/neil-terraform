@@ -13,9 +13,7 @@ resource "aws_s3_bucket" "gamewrap_interactiveliterature_org" {
 module "gamewrap_cloudfront" {
   source = "./modules/cloudfront_with_acm"
 
-  cloudflare_zone = {
-    zone_id = cloudflare_zone.interactiveliterature_org.id
-  }
+  cloudflare_zone = cloudflare_zone.interactiveliterature_org
 
   # TODO: remove this once we're actually using CloudFlare DNS for this domain
   validation_method = "EMAIL"

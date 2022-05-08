@@ -150,10 +150,8 @@ resource "aws_iam_group_policy" "interactiveliterature_org_cloudfront" {
 module "interactiveliterature_org_cloudfront" {
   source = "./modules/cloudfront_with_acm"
 
-  domain_name = "interactiveliterature.org"
-  cloudflare_zone = {
-    zone_id : cloudflare_zone.interactiveliterature_org.id
-  }
+  domain_name              = "interactiveliterature.org"
+  cloudflare_zone          = cloudflare_zone.interactiveliterature_org
   alternative_names        = ["www.interactiveliterature.org"]
   origin_id                = "S3-Website-www.interactiveliterature.org.s3-website-us-east-1.amazonaws.com"
   origin_domain_name       = aws_s3_bucket.www_interactiveliterature_org.website_endpoint
@@ -229,15 +227,6 @@ resource "cloudflare_record" "interactiveliterature_org_convention_subdomain_eve
   type     = "MX"
   value    = "inbound-smtp.us-east-1.amazonaws.com"
   priority = 10
-}
-
-resource "cloudflare_record" "interactiveliterature_org_amazonses_dkim_record" {
-  count = 3
-
-  zone_id = cloudflare_zone.interactiveliterature_org.id
-  name    = "${element(aws_ses_domain_dkim.interactiveliterature_org.dkim_tokens, count.index)}._domainkey"
-  type    = "CNAME"
-  value   = "${element(aws_ses_domain_dkim.interactiveliterature_org.dkim_tokens, count.index)}.dkim.amazonses.com"
 }
 
 resource "cloudflare_record" "interactiveliterature_org_www_cname" {

@@ -2,6 +2,10 @@ resource "aws_route53_zone" "convention_host" {
   name = "convention.host"
 }
 
+resource "cloudflare_zone" "convention_host" {
+  zone = "convention.host"
+}
+
 locals {
   convention_host_cnames = {
     "*"                             = "neilhosting.onrender.com."
@@ -70,4 +74,40 @@ resource "aws_route53_record" "convention_host_spf" {
   type    = "TXT"
   ttl     = 300
   records = ["v=spf1 include:amazonses.com ~all"]
+}
+
+# For now, the CloudFlare terraform provider doesn't suport bulk redirects.  This has to be managed via
+# the web UI at the moment.  This will hopefully change soon.
+#
+# https://github.com/cloudflare/terraform-provider-cloudflare/issues/1342
+resource "cloudflare_record" "convention_host_apex_redirect" {
+  zone_id = cloudflare_zone.interactiveliterature_org.id
+  name    = "convention.host"
+  type    = "A"
+  value   = "192.0.2.1"
+  proxied = true
+}
+
+resource "cloudflare_record" "convention_host_cname" {
+  for_each = local.convention_host_cnames
+
+  zone_id = cloudflare_zone.convention_host.id
+  name    = "${each.key}.convention.host"
+  type    = "CNAME"
+  value   = trimsuffix(each.value, ".")
+}
+
+resource "cloudflare_record" "convention_host_mx" {
+  zone_id  = cloudflare_zone.convention_host.id
+  name     = "convention.host"
+  type     = "MX"
+  value    = "inbound-smtp.us-east-1.amazonaws.com"
+  priority = 10
+}
+
+resource "cloudflare_record" "convention_host_spf" {
+  zone_id = cloudflare_zone.convention_host.id
+  name    = "convention.host"
+  type    = "TXT"
+  value   = "v=spf1 include:amazonses.com ~all"
 }

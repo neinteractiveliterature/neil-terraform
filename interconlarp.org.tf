@@ -68,9 +68,7 @@ module "interconlarp_org_cloudfront" {
 
   domain_name       = "interconlarp.org"
   alternative_names = ["www.interconlarp.org"]
-  cloudflare_zone = {
-    zone_id : cloudflare_zone.interconlarp_org.id
-  }
+  cloudflare_zone = cloudflare_zone.interconlarp_org
   # TODO disable this once we're on CloudFlare DNS
   validation_method        = "EMAIL"
   origin_id                = "S3-interconlarp.org"

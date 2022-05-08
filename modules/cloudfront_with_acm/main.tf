@@ -61,7 +61,7 @@ variable "route53_zone" {
 
 variable "cloudflare_zone" {
   type = object({
-    zone_id = string
+    id = string
   })
   default = null
 }
@@ -160,7 +160,7 @@ resource "cloudflare_record" "cert_validation_records" {
   name    = each.value.name
   value   = trimsuffix(each.value.record, ".")
   type    = each.value.type
-  zone_id = var.cloudflare_zone.zone_id
+  zone_id = var.cloudflare_zone.id
   proxied = false
 }
 

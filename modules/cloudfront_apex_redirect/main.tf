@@ -39,8 +39,8 @@ variable "route53_zone" {
 
 variable "cloudflare_zone" {
   type = object({
-    zone_id = string
-    name    = string
+    id = string
+    zone    = string
   })
   default = null
 }
@@ -55,7 +55,7 @@ locals {
     var.route53_zone != null ?
     trimsuffix(var.route53_zone.name, ".") :
     (var.cloudflare_zone != null ?
-      var.cloudflare_zone.name :
+      var.cloudflare_zone.zone :
       var.non_route53_domain_name
     )
   )
@@ -87,7 +87,7 @@ resource "aws_route53_record" "apex_alias" {
 resource "cloudflare_record" "apex_alias" {
   count = var.cloudflare_zone != null ? 1 : 0
 
-  zone_id = var.cloudflare_zone.zone_id
+  zone_id = var.cloudflare_zone.id
   name    = local.domain_name
   type    = "CNAME"
   proxied = false
@@ -105,10 +105,10 @@ resource "aws_route53_record" "alternative_name_cname" {
 
 resource "cloudflare_record" "alternative_name_cname" {
   count   = var.cloudflare_zone != null ? length(var.alternative_names) : 0
-  zone_id = var.cloudflare_zone.zone_id
+  zone_id = var.cloudflare_zone.id
   name    = var.alternative_names[count.index]
   type    = "CNAME"
-  value   = var.cloudflare_zone.name
+  value   = var.cloudflare_zone.zone
 }
 
 module "apex_redirect_cloudfront" {

@@ -11,10 +11,7 @@ resource "cloudflare_zone" "extraconlarp_org" {
 module "extraconlarp_org_cloudfront" {
   source = "./modules/cloudfront_apex_redirect"
 
-  cloudflare_zone = {
-    zone_id : cloudflare_zone.extraconlarp_org.id,
-    name : "extraconlarp.org"
-  }
+  cloudflare_zone          = cloudflare_zone.extraconlarp_org
   redirect_destination     = "https://2021.extraconlarp.org"
   add_security_headers_arn = aws_lambda_function.addSecurityHeaders.qualified_arn
   alternative_names        = ["www.extraconlarp.org"]
@@ -70,15 +67,6 @@ resource "cloudflare_record" "extraconlarp_org_convention_subdomain_events_mx" {
   type     = "MX"
   value    = "inbound-smtp.us-east-1.amazonaws.com"
   priority = 10
-}
-
-resource "cloudflare_record" "extraconlarp_org_amazonses_dkim_record" {
-  count = 3
-
-  zone_id = cloudflare_zone.extraconlarp_org.id
-  name    = "${element(aws_ses_domain_dkim.extraconlarp_org.dkim_tokens, count.index)}._domainkey"
-  type    = "CNAME"
-  value   = "${element(aws_ses_domain_dkim.extraconlarp_org.dkim_tokens, count.index)}.dkim.amazonses.com"
 }
 
 resource "cloudflare_record" "extraconlarp_org_spf_record" {

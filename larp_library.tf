@@ -140,12 +140,28 @@ resource "aws_route53_zone" "larplibrary_org" {
   name = "larplibrary.org"
 }
 
+resource "cloudflare_zone" "larplibrary_org" {
+  zone = "larplibrary.org"
+}
+
 module "larp_library_apex_redirect" {
   source = "./modules/cloudfront_apex_redirect"
 
   route53_zone             = aws_route53_zone.larplibrary_org
   redirect_destination     = "https://www.larplibrary.org"
   add_security_headers_arn = aws_lambda_function.addSecurityHeaders.qualified_arn
+}
+
+# For now, the CloudFlare terraform provider doesn't suport bulk redirects.  This has to be managed via
+# the web UI at the moment.  This will hopefully change soon.
+#
+# https://github.com/cloudflare/terraform-provider-cloudflare/issues/1342
+resource "cloudflare_record" "larplibrary_org_apex_redirect" {
+  zone_id = cloudflare_zone.larplibrary_org.id
+  name    = "larplibrary.org"
+  type    = "A"
+  value   = "192.0.2.1"
+  proxied = true
 }
 
 resource "aws_route53_record" "larplibrary_org_spf" {
@@ -182,6 +198,36 @@ resource "aws_route53_record" "assets_larplibrary_org" {
   records = ["${module.assets_larplibrary_org_cloudfront.cloudfront_distribution.domain_name}."]
 }
 
+resource "cloudflare_record" "larplibrary_org_spf" {
+  zone_id = cloudflare_zone.larplibrary_org.id
+  name    = "larplibrary.org"
+  type    = "TXT"
+  value   = "v=spf1 include:amazonses.com ~all"
+}
+
+resource "cloudflare_record" "larplibrary_org_www" {
+  zone_id = cloudflare_zone.larplibrary_org.id
+  name    = "www.larplibrary.org"
+  type    = "CNAME"
+  value   = "www.larplibrary.org.herokudns.com"
+}
+
+resource "cloudflare_record" "larplibrary_org_mx" {
+  zone_id  = cloudflare_zone.larplibrary_org.id
+  name     = "larplibrary.org"
+  type     = "MX"
+  value    = "inbound-smtp.us-east-1.amazonaws.com"
+  priority = 10
+}
+
+resource "cloudflare_record" "assets_larplibrary_org" {
+  zone_id = cloudflare_zone.larplibrary_org.id
+  name    = "assets.larplibrary.org"
+  type    = "CNAME"
+  value   = module.assets_larplibrary_org_cloudfront.cloudfront_distribution.domain_name
+}
+
+
 module "assets_larplibrary_org_cloudfront" {
   source = "./modules/cloudfront_with_acm"
 
@@ -191,7 +237,8 @@ module "assets_larplibrary_org_cloudfront" {
   origin_protocol_policy   = "https-only"
   add_security_headers_arn = aws_lambda_function.addSecurityHeaders.qualified_arn
   route53_zone             = aws_route53_zone.larplibrary_org
-  compress                 = true
+  cloudflare_zone = cloudflare_zone.larplibrary_org
+  compress = true
 }
 
 resource "cloudflare_record" "interactiveliterature_org_library_cname" {
