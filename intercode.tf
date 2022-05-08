@@ -158,6 +158,13 @@ resource "aws_route53_record" "uploads_neilhosting_net" {
   records = ["${module.uploads_neilhosting_net_cloudfront.cloudfront_distribution.domain_name}."]
 }
 
+resource "cloudflare_record" "uploads_neilhosting_net" {
+  zone_id = cloudflare_zone.neilhosting_net.id
+  name    = "uploads.neilhosting.net"
+  type    = "CNAME"
+  value   = module.uploads_neilhosting_net_cloudfront.cloudfront_distribution.domain_name
+}
+
 module "uploads_neilhosting_net_cloudfront" {
   source = "./modules/cloudfront_with_acm"
 
@@ -167,6 +174,7 @@ module "uploads_neilhosting_net_cloudfront" {
   origin_protocol_policy   = "https-only"
   add_security_headers_arn = aws_lambda_function.addSecurityHeaders.qualified_arn
   route53_zone             = aws_route53_zone.neilhosting_net
+  cloudflare_zone          = cloudflare_zone.neilhosting_net
   compress                 = true
 }
 
@@ -180,6 +188,15 @@ resource "aws_route53_record" "assets_neilhosting_net" {
   records = ["${module.assets_neilhosting_net_cloudfront.cloudfront_distribution.domain_name}."]
 }
 
+# assets.neilhosting.net is a CloudFront distribution that caches whatever neilhosting.net is
+# serving.  Intercode points asset URLs at that domain so that they can be served over CDN
+resource "cloudflare_record" "assets_neilhosting_net" {
+  zone_id = cloudflare_zone.neilhosting_net.id
+  name    = "assets.neilhosting.net"
+  type    = "CNAME"
+  value   = module.assets_neilhosting_net_cloudfront.cloudfront_distribution.domain_name
+}
+
 module "assets_neilhosting_net_cloudfront" {
   source = "./modules/cloudfront_with_acm"
 
@@ -189,6 +206,7 @@ module "assets_neilhosting_net_cloudfront" {
   origin_protocol_policy   = "https-only"
   add_security_headers_arn = aws_lambda_function.addSecurityHeaders.qualified_arn
   route53_zone             = aws_route53_zone.neilhosting_net
+  cloudflare_zone          = cloudflare_zone.neilhosting_net
   compress                 = true
 }
 
@@ -262,26 +280,6 @@ resource "aws_iam_group_policy" "intercode2_production" {
         "sqs:ListQueues"
       ],
       "Resource": "arn:aws:sqs:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:intercode_production_*"
-    },
-    {
-      "Sid": "AcmeShListAccess",
-      "Effect": "Allow",
-      "Action": [
-        "route53:ListHostedZones",
-        "route53:ListHostedZonesByName",
-        "route53:GetHostedZoneCount"
-      ],
-      "Resource": "*"
-    },
-    {
-      "Sid": "AcmeShDomainAccess",
-      "Effect": "Allow",
-      "Action": [
-        "route53:GetHostedZone",
-        "route53:ChangeResourceRecordSets",
-        "route53:ListResourceRecordSets"
-      ],
-      "Resource": "arn:aws:route53:::hostedzone/${aws_route53_zone.neilhosting_net.zone_id}"
     },
     {
       "Sid": "SesAccess",
