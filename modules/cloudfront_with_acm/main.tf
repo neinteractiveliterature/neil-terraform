@@ -52,18 +52,16 @@ variable "add_security_headers_arn" {
   type = string
 }
 
-variable "route53_zone" {
-  type = object({
-    zone_id = string
-  })
-  default = null
-}
-
 variable "cloudflare_zone" {
   type = object({
     id = string
   })
   default = null
+}
+
+resource "aws_acm_certificate_validation" "cert_validation" {
+  certificate_arn         = aws_acm_certificate.cloudfront_cert.arn
+  validation_record_fqdns = [for record in cloudflare_record.cert_validation_records : record.hostname]
 }
 
 resource "aws_acm_certificate" "cloudfront_cert" {
@@ -125,29 +123,6 @@ resource "aws_cloudfront_distribution" "cloudfront_distribution" {
   }
 }
 
-resource "aws_acm_certificate_validation" "cert_validation" {
-  count = var.route53_zone != null ? 1 : 0
-
-  certificate_arn         = aws_acm_certificate.cloudfront_cert.arn
-  validation_record_fqdns = [for record in aws_route53_record.cert_validation_records : record.fqdn]
-}
-
-resource "aws_route53_record" "cert_validation_records" {
-  for_each = {
-    for dvo in(var.route53_zone != null ? aws_acm_certificate.cloudfront_cert.domain_validation_options : []) : dvo.domain_name => {
-      name   = dvo.resource_record_name
-      record = dvo.resource_record_value
-      type   = dvo.resource_record_type
-    }
-  }
-
-  name    = each.value.name
-  records = [each.value.record]
-  type    = each.value.type
-  zone_id = var.route53_zone.zone_id
-  ttl     = 300
-}
-
 resource "cloudflare_record" "cert_validation_records" {
   for_each = {
     for dvo in(var.cloudflare_zone != null ? aws_acm_certificate.cloudfront_cert.domain_validation_options : []) : dvo.domain_name => {
@@ -173,17 +148,9 @@ output "acm_certificate" {
 }
 
 output "cert_validation" {
-  value = (
-    length(aws_acm_certificate_validation.cert_validation) > 0
-    ? aws_acm_certificate_validation.cert_validation[0]
-    : null
-  )
+  value = aws_acm_certificate_validation.cert_validation
 }
 
 output "cert_validation_records" {
-  value = aws_route53_record.cert_validation_records
-}
-
-output "cloudflare_validation_records" {
   value = cloudflare_record.cert_validation_records
 }

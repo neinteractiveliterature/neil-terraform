@@ -29,35 +29,24 @@ variable "alternative_names" {
   default = []
 }
 
-variable "route53_zone" {
-  type = object({
-    zone_id = string
-    name    = string
-  })
-  default = null
-}
-
 variable "cloudflare_zone" {
   type = object({
-    id = string
-    zone    = string
+    id   = string
+    zone = string
   })
   default = null
 }
 
-variable "non_route53_domain_name" {
+variable "non_cloudflare_domain_name" {
   type    = string
   default = null
 }
 
 locals {
   domain_name = (
-    var.route53_zone != null ?
-    trimsuffix(var.route53_zone.name, ".") :
-    (var.cloudflare_zone != null ?
-      var.cloudflare_zone.zone :
-      var.non_route53_domain_name
-    )
+    var.cloudflare_zone != null ?
+    var.cloudflare_zone.zone :
+    var.non_cloudflare_domain_name
   )
 }
 
@@ -70,20 +59,6 @@ resource "aws_s3_bucket" "redirect_bucket" {
   }
 }
 
-resource "aws_route53_record" "apex_alias" {
-  count = var.route53_zone != null ? 1 : 0
-
-  zone_id = var.route53_zone.zone_id
-  name    = local.domain_name
-  type    = "A"
-
-  alias {
-    name                   = module.apex_redirect_cloudfront.cloudfront_distribution.domain_name
-    zone_id                = module.apex_redirect_cloudfront.cloudfront_distribution.hosted_zone_id
-    evaluate_target_health = false
-  }
-}
-
 resource "cloudflare_record" "apex_alias" {
   count = var.cloudflare_zone != null ? 1 : 0
 
@@ -92,15 +67,6 @@ resource "cloudflare_record" "apex_alias" {
   type    = "CNAME"
   proxied = false
   value   = module.apex_redirect_cloudfront.cloudfront_distribution.domain_name
-}
-
-resource "aws_route53_record" "alternative_name_cname" {
-  count   = var.route53_zone != null ? length(var.alternative_names) : 0
-  zone_id = var.route53_zone.zone_id
-  name    = var.alternative_names[count.index]
-  type    = "CNAME"
-  ttl     = 300
-  records = ["${var.route53_zone.name}."]
 }
 
 resource "cloudflare_record" "alternative_name_cname" {
@@ -118,7 +84,6 @@ module "apex_redirect_cloudfront" {
   origin_id                = "S3-${local.domain_name}"
   origin_domain_name       = aws_s3_bucket.redirect_bucket.website_endpoint
   add_security_headers_arn = var.add_security_headers_arn
-  route53_zone             = var.route53_zone
   cloudflare_zone          = var.cloudflare_zone
   validation_method        = var.validation_method
   alternative_names        = var.alternative_names
@@ -146,9 +111,5 @@ output "redirect_bucket" {
 }
 
 output "apex_alias_record" {
-  value = aws_route53_record.apex_alias
-}
-
-output "cloudflare_apex_alias_record" {
   value = cloudflare_record.apex_alias
 }

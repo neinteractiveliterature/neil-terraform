@@ -1,7 +1,3 @@
-resource "aws_route53_zone" "convention_host" {
-  name = "convention.host"
-}
-
 resource "cloudflare_zone" "convention_host" {
   zone = "convention.host"
 }
@@ -37,43 +33,6 @@ locals {
     "*.slaw"                        = "neilhosting.onrender.com."
     "*.test"                        = "neilhosting.onrender.com."
   }
-}
-
-module "convention_host_cloudfront" {
-  source = "./modules/cloudfront_apex_redirect"
-
-  route53_zone             = aws_route53_zone.convention_host
-  redirect_destination     = "https://www.neilhosting.net"
-  add_security_headers_arn = aws_lambda_function.addSecurityHeaders.qualified_arn
-  alternative_names        = ["www.convention.host"]
-}
-
-resource "aws_route53_record" "convention_host_cname" {
-  for_each = local.convention_host_cnames
-
-  zone_id = aws_route53_zone.convention_host.zone_id
-  name    = "${each.key}.convention.host"
-  type    = "CNAME"
-  ttl     = 300
-  records = [each.value]
-}
-
-resource "aws_route53_record" "convention_host_mx" {
-  zone_id = aws_route53_zone.convention_host.zone_id
-  name    = "convention.host"
-  type    = "MX"
-  ttl     = 300
-  records = [
-    "10 inbound-smtp.us-east-1.amazonaws.com."
-  ]
-}
-
-resource "aws_route53_record" "convention_host_spf" {
-  zone_id = aws_route53_zone.convention_host.zone_id
-  name    = "convention.host"
-  type    = "TXT"
-  ttl     = 300
-  records = ["v=spf1 include:amazonses.com ~all"]
 }
 
 # For now, the CloudFlare terraform provider doesn't suport bulk redirects.  This has to be managed via

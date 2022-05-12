@@ -150,14 +150,6 @@ resource "aws_s3_bucket" "intercode2_production" {
   }
 }
 
-resource "aws_route53_record" "uploads_neilhosting_net" {
-  zone_id = aws_route53_zone.neilhosting_net.zone_id
-  name    = "uploads.neilhosting.net"
-  type    = "CNAME"
-  ttl     = 300
-  records = ["${module.uploads_neilhosting_net_cloudfront.cloudfront_distribution.domain_name}."]
-}
-
 resource "cloudflare_record" "uploads_neilhosting_net" {
   zone_id = cloudflare_zone.neilhosting_net.id
   name    = "uploads.neilhosting.net"
@@ -173,19 +165,8 @@ module "uploads_neilhosting_net_cloudfront" {
   origin_domain_name       = "www.neilhosting.net"
   origin_protocol_policy   = "https-only"
   add_security_headers_arn = aws_lambda_function.addSecurityHeaders.qualified_arn
-  route53_zone             = aws_route53_zone.neilhosting_net
   cloudflare_zone          = cloudflare_zone.neilhosting_net
   compress                 = true
-}
-
-# assets.neilhosting.net is a CloudFront distribution that caches whatever neilhosting.net is
-# serving.  Intercode points asset URLs at that domain so that they can be served over CDN
-resource "aws_route53_record" "assets_neilhosting_net" {
-  zone_id = aws_route53_zone.neilhosting_net.zone_id
-  name    = "assets.neilhosting.net"
-  type    = "CNAME"
-  ttl     = 300
-  records = ["${module.assets_neilhosting_net_cloudfront.cloudfront_distribution.domain_name}."]
 }
 
 # assets.neilhosting.net is a CloudFront distribution that caches whatever neilhosting.net is
@@ -205,7 +186,6 @@ module "assets_neilhosting_net_cloudfront" {
   origin_domain_name       = "www.neilhosting.net"
   origin_protocol_policy   = "https-only"
   add_security_headers_arn = aws_lambda_function.addSecurityHeaders.qualified_arn
-  route53_zone             = aws_route53_zone.neilhosting_net
   cloudflare_zone          = cloudflare_zone.neilhosting_net
   compress                 = true
 }

@@ -24,7 +24,6 @@ resource "aws_ses_domain_dkim" "cyberol_org" {
 
 module "convention_host_ses_sending_domain" {
   source          = "./modules/ses_sending_domain"
-  route53_zone    = aws_route53_zone.convention_host
   cloudflare_zone = cloudflare_zone.convention_host
 }
 
@@ -63,8 +62,8 @@ resource "aws_ses_domain_dkim" "interconlarp_org" {
 }
 
 module "larplibrary_org_ses_sending_domain" {
-  source       = "./modules/ses_sending_domain"
-  route53_zone = aws_route53_zone.larplibrary_org
+  source          = "./modules/ses_sending_domain"
+  cloudflare_zone = cloudflare_zone.larplibrary_org
 }
 
 resource "aws_ses_domain_identity" "natbudin_com" {
@@ -77,6 +76,5 @@ resource "aws_ses_domain_dkim" "natbudin_com" {
 
 module "neilhosting_net_ses_sending_domain" {
   source          = "./modules/ses_sending_domain"
-  route53_zone    = aws_route53_zone.neilhosting_net
   cloudflare_zone = cloudflare_zone.neilhosting_net
 }

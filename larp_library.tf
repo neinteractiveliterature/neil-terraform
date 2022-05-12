@@ -136,20 +136,8 @@ resource "aws_iam_access_key" "larp_library" {
   user = aws_iam_user.larp_library.name
 }
 
-resource "aws_route53_zone" "larplibrary_org" {
-  name = "larplibrary.org"
-}
-
 resource "cloudflare_zone" "larplibrary_org" {
   zone = "larplibrary.org"
-}
-
-module "larp_library_apex_redirect" {
-  source = "./modules/cloudfront_apex_redirect"
-
-  route53_zone             = aws_route53_zone.larplibrary_org
-  redirect_destination     = "https://www.larplibrary.org"
-  add_security_headers_arn = aws_lambda_function.addSecurityHeaders.qualified_arn
 }
 
 # For now, the CloudFlare terraform provider doesn't suport bulk redirects.  This has to be managed via
@@ -162,40 +150,6 @@ resource "cloudflare_record" "larplibrary_org_apex_redirect" {
   type    = "A"
   value   = "192.0.2.1"
   proxied = true
-}
-
-resource "aws_route53_record" "larplibrary_org_spf" {
-  zone_id = aws_route53_zone.larplibrary_org.zone_id
-  name    = "larplibrary.org"
-  type    = "TXT"
-  ttl     = 300
-  records = ["v=spf1 include:amazonses.com ~all"]
-}
-
-resource "aws_route53_record" "larplibrary_org_www" {
-  zone_id = aws_route53_zone.larplibrary_org.zone_id
-  name    = "www.larplibrary.org"
-  type    = "CNAME"
-  ttl     = 300
-  records = ["www.larplibrary.org.herokudns.com."]
-}
-
-resource "aws_route53_record" "larplibrary_org_mx" {
-  zone_id = aws_route53_zone.larplibrary_org.zone_id
-  name    = "larplibrary.org"
-  type    = "MX"
-  ttl     = 300
-  records = [
-    "10 inbound-smtp.us-east-1.amazonaws.com.",
-  ]
-}
-
-resource "aws_route53_record" "assets_larplibrary_org" {
-  zone_id = aws_route53_zone.larplibrary_org.zone_id
-  name    = "assets.larplibrary.org"
-  type    = "CNAME"
-  ttl     = 300
-  records = ["${module.assets_larplibrary_org_cloudfront.cloudfront_distribution.domain_name}."]
 }
 
 resource "cloudflare_record" "larplibrary_org_spf" {
@@ -236,7 +190,6 @@ module "assets_larplibrary_org_cloudfront" {
   origin_domain_name       = "www.larplibrary.org"
   origin_protocol_policy   = "https-only"
   add_security_headers_arn = aws_lambda_function.addSecurityHeaders.qualified_arn
-  route53_zone             = aws_route53_zone.larplibrary_org
   cloudflare_zone = cloudflare_zone.larplibrary_org
   compress = true
 }
