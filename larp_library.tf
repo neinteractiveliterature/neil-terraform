@@ -1,32 +1,32 @@
 # The Heroku app itself
-resource "heroku_app" "larp_library" {
-  name   = "larp-library"
-  region = "us"
-  stack  = "heroku-20"
-  acm    = true
+# resource "heroku_app" "larp_library" {
+#   name   = "larp-library"
+#   region = "us"
+#   stack  = "heroku-20"
+#   acm    = true
 
-  organization {
-    name = "neinteractiveliterature"
-  }
+#   organization {
+#     name = "neinteractiveliterature"
+#   }
 
-  config_vars = {
-    ASSETS_HOST                 = "assets.larplibrary.org"
-    RACK_ENV                    = "production"
-    RAILS_ENV                   = "production"
-    RAILS_LOG_TO_STDOUT         = "enabled"
-    RAILS_MAX_THREADS           = "4"
-    RAILS_SERVE_STATIC_FILES    = "enabled"
-    ROLLBAR_CLIENT_ACCESS_TOKEN = rollbar_project_access_token.larp_library_post_client_item.access_token
-  }
+#   config_vars = {
+#     ASSETS_HOST                 = "assets.larplibrary.org"
+#     RACK_ENV                    = "production"
+#     RAILS_ENV                   = "production"
+#     RAILS_LOG_TO_STDOUT         = "enabled"
+#     RAILS_MAX_THREADS           = "4"
+#     RAILS_SERVE_STATIC_FILES    = "enabled"
+#     ROLLBAR_CLIENT_ACCESS_TOKEN = rollbar_project_access_token.larp_library_post_client_item.access_token
+#   }
 
-  sensitive_config_vars = {
-    AWS_ACCESS_KEY_ID     = aws_iam_access_key.larp_library.id
-    AWS_REGION            = data.aws_region.current.name
-    AWS_SECRET_ACCESS_KEY = aws_iam_access_key.larp_library.secret
-    AWS_S3_BUCKET         = aws_s3_bucket.larp_library_production.bucket
-    ROLLBAR_ACCESS_TOKEN  = rollbar_project_access_token.larp_library_post_server_item.access_token
-  }
-}
+#   sensitive_config_vars = {
+#     AWS_ACCESS_KEY_ID     = aws_iam_access_key.larp_library.id
+#     AWS_REGION            = data.aws_region.current.name
+#     AWS_SECRET_ACCESS_KEY = aws_iam_access_key.larp_library.secret
+#     AWS_S3_BUCKET         = aws_s3_bucket.larp_library_production.bucket
+#     ROLLBAR_ACCESS_TOKEN  = rollbar_project_access_token.larp_library_post_server_item.access_token
+#   }
+# }
 
 resource "rollbar_project" "larp_library" {
   name = "LarpLibrary"
@@ -140,16 +140,11 @@ resource "cloudflare_zone" "larplibrary_org" {
   zone = "larplibrary.org"
 }
 
-# For now, the CloudFlare terraform provider doesn't suport bulk redirects.  This has to be managed via
-# the web UI at the moment.  This will hopefully change soon.
-#
-# https://github.com/cloudflare/terraform-provider-cloudflare/issues/1342
 resource "cloudflare_record" "larplibrary_org_apex_redirect" {
   zone_id = cloudflare_zone.larplibrary_org.id
   name    = "larplibrary.org"
   type    = "A"
-  value   = "192.0.2.1"
-  proxied = true
+  value   = "216.24.57.1"
 }
 
 resource "cloudflare_record" "larplibrary_org_spf" {
@@ -163,7 +158,7 @@ resource "cloudflare_record" "larplibrary_org_www" {
   zone_id = cloudflare_zone.larplibrary_org.id
   name    = "www.larplibrary.org"
   type    = "CNAME"
-  value   = "www.larplibrary.org.herokudns.com"
+  value   = "larp-library.onrender.com"
 }
 
 resource "cloudflare_record" "larplibrary_org_mx" {
@@ -190,13 +185,13 @@ module "assets_larplibrary_org_cloudfront" {
   origin_domain_name       = "www.larplibrary.org"
   origin_protocol_policy   = "https-only"
   add_security_headers_arn = aws_lambda_function.addSecurityHeaders.qualified_arn
-  cloudflare_zone = cloudflare_zone.larplibrary_org
-  compress = true
+  cloudflare_zone          = cloudflare_zone.larplibrary_org
+  compress                 = true
 }
 
 resource "cloudflare_record" "interactiveliterature_org_library_cname" {
   zone_id = cloudflare_zone.interactiveliterature_org.id
   name    = "library"
   type    = "CNAME"
-  value   = "library.interactiveliterature.org.herokudns.com"
+  value   = "larp-library.onrender.com"
 }
