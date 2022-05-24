@@ -26,7 +26,6 @@ locals {
     "*.demo"                        = "neilhosting.onrender.com."
     "*.cyberol"                     = "neilhosting.onrender.com."
     "*.foambrain"                   = "neilhosting.onrender.com."
-    "furniture-test"                = "guarded-pinchusion-vxtvyw1enyzcafs3uhvx7x1q.herokudns.com."
     "*.gbls"                        = "neilhosting.onrender.com."
     "*.genericon"                   = "neilhosting.onrender.com."
     "*.larpi"                       = "neilhosting.onrender.com."

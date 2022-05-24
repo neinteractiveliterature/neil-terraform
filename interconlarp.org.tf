@@ -68,7 +68,7 @@ module "interconlarp_org_cloudfront" {
 
   domain_name       = "interconlarp.org"
   alternative_names = ["www.interconlarp.org"]
-  cloudflare_zone = cloudflare_zone.interconlarp_org
+  cloudflare_zone   = cloudflare_zone.interconlarp_org
   # TODO disable this once we're on CloudFlare DNS
   validation_method        = "EMAIL"
   origin_id                = "S3-interconlarp.org"
@@ -190,5 +190,5 @@ resource "cloudflare_record" "interconlarp_org_furniture_cname" {
   zone_id = cloudflare_zone.interconlarp_org.id
   name    = "furniture"
   type    = "CNAME"
-  value   = "modern-yucca-vjco2zf73o6zbem5h4vx5eog.herokudns.com"
+  value   = "intercon-furniture.onrender.com"
 }
