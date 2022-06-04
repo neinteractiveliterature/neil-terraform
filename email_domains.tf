@@ -6,12 +6,9 @@ resource "aws_ses_domain_dkim" "aegames_org" {
   domain = aws_ses_domain_identity.aegames_org.domain
 }
 
-resource "aws_ses_domain_identity" "concentral_net" {
-  domain = "concentral.net"
-}
-
-resource "aws_ses_domain_dkim" "concentral_net" {
-  domain = aws_ses_domain_identity.concentral_net.domain
+module "concentral_net_ses_sending_domain" {
+  source          = "./modules/ses_sending_domain"
+  cloudflare_zone = cloudflare_zone.concentral_net
 }
 
 resource "aws_ses_domain_identity" "cyberol_org" {
