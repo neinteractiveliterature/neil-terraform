@@ -4,33 +4,9 @@ resource "cloudflare_zone" "convention_host" {
 
 locals {
   convention_host_cnames = {
-    "*"                             = "neilhosting.onrender.com."
-    "_acme-challenge"               = "neilhosting.verify.renderdns.com."
-    "_acme-challenge.cyberol"       = "neilhosting.verify.renderdns.com."
-    "_acme-challenge.demo"          = "neilhosting.verify.renderdns.com."
-    "_acme-challenge.foambrain"     = "neilhosting.verify.renderdns.com."
-    "_acme-challenge.gbls"          = "neilhosting.verify.renderdns.com."
-    "_acme-challenge.genericon"     = "neilhosting.verify.renderdns.com."
-    "_acme-challenge.larpi"         = "neilhosting.verify.renderdns.com."
-    "_acme-challenge.slaw"          = "neilhosting.verify.renderdns.com."
-    "_acme-challenge.test"          = "neilhosting.verify.renderdns.com."
-    "_cf-custom-hostname"           = "neilhosting.hostname.renderdns.com."
-    "_cf-custom-hostname.cyberol"   = "neilhosting.hostname.renderdns.com."
-    "_cf-custom-hostname.demo"      = "neilhosting.hostname.renderdns.com."
-    "_cf-custom-hostname.foambrain" = "neilhosting.hostname.renderdns.com."
-    "_cf-custom-hostname.gbls"      = "neilhosting.hostname.renderdns.com."
-    "_cf-custom-hostname.genericon" = "neilhosting.hostname.renderdns.com."
-    "_cf-custom-hostname.larpi"     = "neilhosting.hostname.renderdns.com."
-    "_cf-custom-hostname.slaw"      = "neilhosting.hostname.renderdns.com."
-    "_cf-custom-hostname.test"      = "neilhosting.hostname.renderdns.com."
-    "*.demo"                        = "neilhosting.onrender.com."
-    "*.cyberol"                     = "neilhosting.onrender.com."
-    "*.foambrain"                   = "neilhosting.onrender.com."
-    "*.gbls"                        = "neilhosting.onrender.com."
-    "*.genericon"                   = "neilhosting.onrender.com."
-    "*.larpi"                       = "neilhosting.onrender.com."
-    "*.slaw"                        = "neilhosting.onrender.com."
-    "*.test"                        = "neilhosting.onrender.com."
+    "*"                   = "neilhosting.onrender.com."
+    "_acme-challenge"     = "neilhosting.verify.renderdns.com."
+    "_cf-custom-hostname" = "neilhosting.hostname.renderdns.com."
   }
 
   convention_host_migration_targets = {
