@@ -32,6 +32,45 @@ locals {
     "*.slaw"                        = "neilhosting.onrender.com."
     "*.test"                        = "neilhosting.onrender.com."
   }
+
+  convention_host_migration_targets = {
+    "22.genericon.convention.host"             = "genericon22.concentral.net"
+    "23.genericon.convention.host"             = "genericon23.concentral.net"
+    "2009.slaw.convention.host"                = "slaw2009.concentral.net"
+    "2010.slaw.convention.host"                = "slaw2010.concentral.net"
+    "2011.slaw.convention.host"                = "slaw2011.concentral.net"
+    "2020.cyberol.convention.host"             = "cyberol2020.concentral.net"
+    "becon.demo.convention.host"               = "becon.demo.concentral.net"
+    "consequences.demo.convention.host"        = "consequences.demo.concentral.net"
+    "davetest.convention.host"                 = "davetest.concentral.net"
+    "drums.gbls.convention.host"               = "drums.gbls.concentral.net"
+    "fallingstars.convention.host"             = "fallingstars.concentral.net"
+    "hrsfanssummerparty-2020.convention.host"  = "hrsfanssummerparty-2020.concentral.net"
+    "hrsfanssummerparty-2021.convention.host"  = "hrsfanssummerparty-2021.concentral.net"
+    "minigames.larpi.convention.host"          = "larpi-minigames.concentral.net"
+    "nov2019.gbls.convention.host"             = "nov2019.gbls.concentral.net"
+    "sea.gbls.convention.host"                 = "sea.gbls.concentral.net"
+    "templatecon.convention.host"              = "templatecon.concentral.net"
+    "weekendofhell4.foambrain.convention.host" = "weekendofhell4.concentral.net"
+    "weekendofhell5.foambrain.convention.host" = "weekendofhell5.concentral.net"
+
+    # not yet
+    # "wicked-hearts-june-2022.convention.host" = "wicked-hearts-june-2022.concentral.net"
+  }
+}
+
+module "convention_host_migration_redirect" {
+  for_each = local.convention_host_migration_targets
+
+  source = "./modules/cloudfront_apex_redirect"
+
+  # Hack: doing this as a "non-cloudflare domain name" even though it really is a cloudflare domain name,
+  # because this module is designed to only work with the apex domain
+  cloudflare_zone          = cloudflare_zone.convention_host
+  domain_name              = each.key
+  redirect_destination     = "https://${each.value}"
+  add_security_headers_arn = aws_lambda_function.addSecurityHeaders.qualified_arn
+  alternative_names        = []
 }
 
 # For now, the CloudFlare terraform provider doesn't suport bulk redirects.  This has to be managed via

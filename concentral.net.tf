@@ -4,11 +4,17 @@ resource "cloudflare_zone" "concentral_net" {
 
 locals {
   concentral_net_cnames = {
-    "*"                   = "neilhosting.onrender.com."
-    "_acme-challenge"     = "neilhosting.verify.renderdns.com."
-    "_cf-custom-hostname" = "neilhosting.hostname.renderdns.com."
-    "bridgewater2012"     = "bridgewater2012.concentral.net.s3-website-us-east-1.amazonaws.com."
-    "miskatonic2012"      = "miskatonic2012.concentral.net.s3-website-us-east-1.amazonaws.com."
+    "*"                        = "neilhosting.onrender.com."
+    "*.demo"                   = "neilhosting.onrender.com."
+    "*.gbls"                   = "neilhosting.onrender.com."
+    "_acme-challenge"          = "neilhosting.verify.renderdns.com."
+    "_acme-challenge.demo"     = "neilhosting.verify.renderdns.com."
+    "_acme-challenge.gbls"     = "neilhosting.verify.renderdns.com."
+    "_cf-custom-hostname"      = "neilhosting.hostname.renderdns.com."
+    "_cf-custom-hostname.demo" = "neilhosting.hostname.renderdns.com."
+    "_cf-custom-hostname.gbls" = "neilhosting.hostname.renderdns.com."
+    "bridgewater2012"          = "bridgewater2012.concentral.net.s3-website-us-east-1.amazonaws.com."
+    "miskatonic2012"           = "miskatonic2012.concentral.net.s3-website-us-east-1.amazonaws.com."
   }
 
   concentral_net_redirects = {

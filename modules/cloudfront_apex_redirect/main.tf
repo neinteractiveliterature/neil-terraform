@@ -37,16 +37,16 @@ variable "cloudflare_zone" {
   default = null
 }
 
-variable "non_cloudflare_domain_name" {
+variable "domain_name" {
   type    = string
   default = null
 }
 
 locals {
   domain_name = (
-    var.cloudflare_zone != null ?
-    var.cloudflare_zone.zone :
-    var.non_cloudflare_domain_name
+    var.domain_name != null ?
+    var.domain_name :
+    var.cloudflare_zone.zone
   )
 }
 
