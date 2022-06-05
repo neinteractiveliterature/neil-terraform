@@ -29,9 +29,6 @@ locals {
     "templatecon.convention.host"              = "templatecon.concentral.net"
     "weekendofhell4.foambrain.convention.host" = "weekendofhell4.concentral.net"
     "weekendofhell5.foambrain.convention.host" = "weekendofhell5.concentral.net"
-
-    # not yet
-    # "wicked-hearts-june-2022.convention.host" = "wicked-hearts-june-2022.concentral.net"
   }
 }
 
@@ -56,6 +53,16 @@ module "convention_host_migration_redirect" {
 resource "cloudflare_record" "convention_host_apex_redirect" {
   zone_id = cloudflare_zone.convention_host.id
   name    = "convention.host"
+  type    = "A"
+  value   = "192.0.2.1"
+  proxied = true
+}
+
+# We've hit our maximum lambda function associations for CloudFront, using a CloudFlare-hosted bulk redirect
+# for wicked hearts, lolsob
+resource "cloudflare_record" "convention_host_wicked_hearts_redirect" {
+  zone_id = cloudflare_zone.convention_host.id
+  name    = "wicked-hearts-june-2022.convention.host"
   type    = "A"
   value   = "192.0.2.1"
   proxied = true
