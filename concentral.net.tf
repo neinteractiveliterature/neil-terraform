@@ -1,5 +1,6 @@
 resource "cloudflare_zone" "concentral_net" {
-  zone = "concentral.net"
+  account_id = "9e36b5cabcd5529d3bd08131b7541c06"
+  zone       = "concentral.net"
 }
 
 locals {
@@ -19,7 +20,7 @@ locals {
 
   concentral_net_redirects = {
     "concentral.net"                    = "https://www.concentral.net"
-    "dicebubble.concentral.net"         = "https://dicebubble2020.concentral.net"
+    "dicebubble.concentral.net"         = "https://dicebubble2022.concentral.net"
     "dicebubble5.concentral.net"        = "https://dicebubble2016.concentral.net"
     "molw.concentral.net"               = "https://molw2017.concentral.net"
     "rpitheorycon.concentral.net"       = "https://rpitheorycon2020.concentral.net"

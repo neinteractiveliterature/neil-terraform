@@ -1,5 +1,6 @@
 resource "cloudflare_zone" "convention_host" {
-  zone = "convention.host"
+  account_id = "9e36b5cabcd5529d3bd08131b7541c06"
+  zone       = "convention.host"
 }
 
 locals {

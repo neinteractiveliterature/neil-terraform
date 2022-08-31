@@ -16,7 +16,8 @@ locals {
 }
 
 resource "cloudflare_zone" "interactiveliterature_org" {
-  zone = "interactiveliterature.org"
+  account_id = "9e36b5cabcd5529d3bd08131b7541c06"
+  zone       = "interactiveliterature.org"
 }
 
 resource "aws_s3_bucket" "www_interactiveliterature_org" {

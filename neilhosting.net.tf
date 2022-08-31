@@ -8,7 +8,8 @@ locals {
 }
 
 resource "cloudflare_zone" "neilhosting_net" {
-  zone = "neilhosting.net"
+  account_id = "9e36b5cabcd5529d3bd08131b7541c06"
+  zone       = "neilhosting.net"
 }
 
 resource "cloudflare_record" "neilhosting_net_a" {

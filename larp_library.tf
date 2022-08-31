@@ -137,7 +137,8 @@ resource "aws_iam_access_key" "larp_library" {
 }
 
 resource "cloudflare_zone" "larplibrary_org" {
-  zone = "larplibrary.org"
+  account_id = "9e36b5cabcd5529d3bd08131b7541c06"
+  zone       = "larplibrary.org"
 }
 
 resource "cloudflare_record" "larplibrary_org_apex_redirect" {

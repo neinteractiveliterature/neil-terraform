@@ -20,7 +20,8 @@ locals {
 }
 
 resource "cloudflare_zone" "interconlarp_org" {
-  zone = "interconlarp.org"
+  account_id = "9e36b5cabcd5529d3bd08131b7541c06"
+  zone       = "interconlarp.org"
 }
 
 resource "aws_s3_bucket" "interconlarp_org" {

@@ -5,7 +5,8 @@ locals {
 }
 
 resource "cloudflare_zone" "extraconlarp_org" {
-  zone = "extraconlarp.org"
+  account_id = "9e36b5cabcd5529d3bd08131b7541c06"
+  zone       = "extraconlarp.org"
 }
 
 module "extraconlarp_org_cloudfront" {
