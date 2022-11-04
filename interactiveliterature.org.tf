@@ -191,7 +191,7 @@ resource "cloudflare_record" "interactiveliterature_org_acme_challenge_cname" {
   zone_id = cloudflare_zone.interactiveliterature_org.id
   name    = "_acme-challenge"
   type    = "CNAME"
-  value   = "neilhosting.verify.renderdns.com"
+  value   = "_acme-challenge.neilhosting.net."
 }
 
 resource "cloudflare_record" "interactiveliterature_org_cf_custom_hostname_cname" {

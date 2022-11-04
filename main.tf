@@ -10,7 +10,7 @@ terraform {
     }
     heroku = {
       source  = "heroku/heroku"
-      version = "~> 4.8.0"
+      version = "~> 5.1"
     }
     rollbar = {
       source  = "rollbar/rollbar"
@@ -43,20 +43,6 @@ provider "cloudflare" {
   email   = var.cloudflare_email
   api_key = var.cloudflare_api_key
 }
-
-# variable "CONSTELLIX_API_KEY" {
-#   type = string
-# }
-
-# variable "CONSTELLIX_SECRET_KEY" {
-#   type = string
-# }
-
-# provider "constellix" {
-#   version = "~> 0.1"
-#   apikey    = var.CONSTELLIX_API_KEY
-#   secretkey = var.CONSTELLIX_SECRET_KEY
-# }
 
 terraform {
   backend "s3" {

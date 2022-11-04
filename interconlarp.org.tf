@@ -110,7 +110,7 @@ resource "cloudflare_record" "interconlarp_org_acme_challenge_cname" {
   zone_id = cloudflare_zone.interconlarp_org.id
   name    = "_acme-challenge"
   type    = "CNAME"
-  value   = "neilhosting.verify.renderdns.com"
+  value   = "_acme-challenge.neilhosting.net."
 }
 
 resource "cloudflare_record" "interconlarp_org_cf_custom_hostname_cname" {
@@ -185,6 +185,7 @@ resource "cloudflare_record" "interconlarp_org_wildcard_cname" {
   name    = "*"
   type    = "CNAME"
   value   = "neilhosting.onrender.com"
+  #  value   = heroku_domain.intercode["*.interconlarp.org"].cname
 }
 
 resource "cloudflare_record" "interconlarp_org_furniture_cname" {

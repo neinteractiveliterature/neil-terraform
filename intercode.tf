@@ -1,4 +1,16 @@
+variable "intercode_cloudflare_account_id" {
+  type = string
+}
+
+variable "intercode_cloudflare_token" {
+  type = string
+}
+
 variable "intercode_production_db_password" {
+  type = string
+}
+
+variable "intercode_heroku_api_token" {
   type = string
 }
 
@@ -42,6 +54,26 @@ variable "rds_neiladmin_password" {
   type = string
 }
 
+locals {
+  intercode_domains = toset([
+    "2019.beconlarp.com",
+    "*.neilhosting.net",
+    "*.aegames.org",
+    "*.demo.concentral.net",
+    "*.gbls.concentral.net",
+    "*.festivalofthelarps.com",
+    "*.convention.host",
+    "*.extraconlarp.org",
+    "neilhosting.net",
+    "www.neilhosting.net",
+    "5pi-con.natbudin.com",
+    "*.concentral.net",
+    "*.interactiveliterature.org",
+    "signups.greaterbostonlarpsociety.org",
+    "*.interconlarp.org"
+  ])
+}
+
 # # The Heroku app itself
 resource "heroku_app" "intercode" {
   name   = "intercode"
@@ -58,6 +90,7 @@ resource "heroku_app" "intercode" {
   config_vars = {
     ASSETS_HOST                         = "assets.neilhosting.net"
     CLOUDWATCH_LOG_GROUP                = aws_cloudwatch_log_group.intercode2_production.name
+    HEROKU_APP_NAME                     = "intercode"
     INTERCODE_CERTS_NO_WILDCARD_DOMAINS = "5pi-con.natbudin.com signups.greaterbostonlarpsociety.org"
     INTERCODE_HOST                      = "neilhosting.net"
     MALLOC_ARENA_MAX                    = 2
@@ -78,7 +111,10 @@ resource "heroku_app" "intercode" {
     AWS_REGION                     = data.aws_region.current.name
     AWS_SECRET_ACCESS_KEY          = aws_iam_access_key.intercode2_production.secret
     AWS_S3_BUCKET                  = aws_s3_bucket.intercode2_production.bucket
+    CF_Account_ID                  = var.intercode_cloudflare_account_id
+    CF_Token                       = var.intercode_cloudflare_token
     DATABASE_URL                   = "postgres://intercode_production:${var.intercode_production_db_password}@${aws_db_instance.intercode_production.endpoint}/intercode_production?sslrootcert=rds-combined-ca-bundle-2019.pem"
+    HEROKU_API_TOKEN               = var.intercode_heroku_api_token
     OPENID_CONNECT_SIGNING_KEY     = var.intercode_openid_connect_signing_key
     RECAPTCHA_SECRET_KEY           = var.intercode_recaptcha_secret_key
     RECAPTCHA_SITE_KEY             = var.intercode_recaptcha_site_key
@@ -90,6 +126,14 @@ resource "heroku_app" "intercode" {
     TWILIO_ACCOUNT_SID             = var.intercode_twilio_account_sid
     TWILIO_AUTH_TOKEN              = var.intercode_twilio_auth_token
   }
+}
+
+resource "heroku_domain" "intercode" {
+  for_each = local.intercode_domains
+
+  app_id          = heroku_app.intercode.uuid
+  hostname        = each.value
+  sni_endpoint_id = "4a07b836-0f3b-47d3-b4d1-f8b06f40145c"
 }
 
 resource "rollbar_project" "intercode" {
@@ -150,6 +194,7 @@ resource "aws_iam_role" "rds_enhanced_monitoring" {
 # The production Postgres database
 resource "aws_db_instance" "intercode_production" {
   instance_class        = "db.t4g.micro"
+  identifier            = "neil-production"
   engine                = "postgres"
   engine_version        = "14.4"
   username              = "neiladmin"
