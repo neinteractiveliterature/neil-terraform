@@ -2,8 +2,8 @@ locals {
   # TODO: delete this once we're off Route 53
   intercode_subdomains = ["www.neilhosting.net", "template.neilhosting.net"]
   hosted_org_subdomains = {
-    "becon" = "neilhosting.onrender.com.",
-    "gbls"  = "neilhosting.onrender.com."
+    "becon" = heroku_domain.intercode["2019.beconlarp.com"].cname,
+    "gbls"  = heroku_domain.intercode["signups.greaterbostonlarpsociety.org"].cname
   }
 }
 
@@ -45,7 +45,7 @@ resource "cloudflare_record" "neilhosting_net_wildcard_cname" {
   zone_id = cloudflare_zone.neilhosting_net.id
   name    = "*"
   type    = "CNAME"
-  value   = "neilhosting.onrender.com"
+  value   = heroku_domain.intercode["*.neilhosting.net"].cname
 }
 
 resource "cloudflare_record" "neilhosting_net_cf_custom_hostname_cname" {

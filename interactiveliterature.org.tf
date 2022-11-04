@@ -207,7 +207,7 @@ resource "cloudflare_record" "interactiveliterature_org_convention_subdomain_cna
   zone_id = cloudflare_zone.interactiveliterature_org.id
   name    = each.value
   type    = "CNAME"
-  value   = "neilhosting.onrender.com"
+  value   = heroku_domain.intercode["*.interactiveliterature.org"].cname
   proxied = true
 }
 
@@ -270,5 +270,5 @@ resource "cloudflare_record" "interactiveliterature_org_wildcard_cname" {
   zone_id = cloudflare_zone.interactiveliterature_org.id
   name    = "*"
   type    = "CNAME"
-  value   = "neilhosting.onrender.com"
+  value   = heroku_domain.intercode["*.interactiveliterature.org"].cname
 }

@@ -126,7 +126,7 @@ resource "cloudflare_record" "interconlarp_org_convention_subdomain_cname" {
   zone_id = cloudflare_zone.interconlarp_org.id
   name    = each.value
   type    = "CNAME"
-  value   = "neilhosting.onrender.com"
+  value   = heroku_domain.intercode["*.interconlarp.org"].cname
   proxied = true
 }
 
@@ -184,8 +184,7 @@ resource "cloudflare_record" "interconlarp_org_wildcard_cname" {
   zone_id = cloudflare_zone.interconlarp_org.id
   name    = "*"
   type    = "CNAME"
-  value   = "neilhosting.onrender.com"
-  #  value   = heroku_domain.intercode["*.interconlarp.org"].cname
+  value   = heroku_domain.intercode["*.interconlarp.org"].cname
 }
 
 resource "cloudflare_record" "interconlarp_org_furniture_cname" {

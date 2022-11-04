@@ -5,9 +5,9 @@ resource "cloudflare_zone" "concentral_net" {
 
 locals {
   concentral_net_cnames = {
-    "*"                        = "neilhosting.onrender.com."
-    "*.demo"                   = "neilhosting.onrender.com."
-    "*.gbls"                   = "neilhosting.onrender.com."
+    "*"                        = heroku_domain.intercode["*.concentral.net"].cname
+    "*.demo"                   = heroku_domain.intercode["*.demo.concentral.net"].cname
+    "*.gbls"                   = heroku_domain.intercode["*.gbls.concentral.net"].cname
     "_acme-challenge"          = "_acme-challenge.neilhosting.net."
     "_acme-challenge.demo"     = "_acme-challenge.neilhosting.net."
     "_acme-challenge.gbls"     = "_acme-challenge.neilhosting.net."
