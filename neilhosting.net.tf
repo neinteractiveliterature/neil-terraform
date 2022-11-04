@@ -48,13 +48,6 @@ resource "cloudflare_record" "neilhosting_net_wildcard_cname" {
   value   = heroku_domain.intercode["*.neilhosting.net"].cname
 }
 
-resource "cloudflare_record" "neilhosting_net_cf_custom_hostname_cname" {
-  zone_id = cloudflare_zone.neilhosting_net.id
-  name    = "_cf-custom-hostname"
-  type    = "CNAME"
-  value   = "neilhosting.hostname.renderdns.com"
-}
-
 resource "cloudflare_record" "neilhosting_net_hosted_orgs" {
   for_each = local.hosted_org_subdomains
   zone_id  = cloudflare_zone.neilhosting_net.id

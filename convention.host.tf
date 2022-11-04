@@ -5,9 +5,8 @@ resource "cloudflare_zone" "convention_host" {
 
 locals {
   convention_host_cnames = {
-    "*"                   = heroku_domain.intercode["*.convention.host"].cname
-    "_acme-challenge"     = "_acme-challenge.neilhosting.net."
-    "_cf-custom-hostname" = "neilhosting.hostname.renderdns.com."
+    "*"               = heroku_domain.intercode["*.convention.host"].cname
+    "_acme-challenge" = "_acme-challenge.neilhosting.net."
   }
 
   convention_host_migration_targets = {

@@ -5,17 +5,14 @@ resource "cloudflare_zone" "concentral_net" {
 
 locals {
   concentral_net_cnames = {
-    "*"                        = heroku_domain.intercode["*.concentral.net"].cname
-    "*.demo"                   = heroku_domain.intercode["*.demo.concentral.net"].cname
-    "*.gbls"                   = heroku_domain.intercode["*.gbls.concentral.net"].cname
-    "_acme-challenge"          = "_acme-challenge.neilhosting.net."
-    "_acme-challenge.demo"     = "_acme-challenge.neilhosting.net."
-    "_acme-challenge.gbls"     = "_acme-challenge.neilhosting.net."
-    "_cf-custom-hostname"      = "neilhosting.hostname.renderdns.com."
-    "_cf-custom-hostname.demo" = "neilhosting.hostname.renderdns.com."
-    "_cf-custom-hostname.gbls" = "neilhosting.hostname.renderdns.com."
-    "bridgewater2012"          = "bridgewater2012.concentral.net.s3-website-us-east-1.amazonaws.com."
-    "miskatonic2012"           = "miskatonic2012.concentral.net.s3-website-us-east-1.amazonaws.com."
+    "*"                    = heroku_domain.intercode["*.concentral.net"].cname
+    "*.demo"               = heroku_domain.intercode["*.demo.concentral.net"].cname
+    "*.gbls"               = heroku_domain.intercode["*.gbls.concentral.net"].cname
+    "_acme-challenge"      = "_acme-challenge.neilhosting.net."
+    "_acme-challenge.demo" = "_acme-challenge.neilhosting.net."
+    "_acme-challenge.gbls" = "_acme-challenge.neilhosting.net."
+    "bridgewater2012"      = "bridgewater2012.concentral.net.s3-website-us-east-1.amazonaws.com."
+    "miskatonic2012"       = "miskatonic2012.concentral.net.s3-website-us-east-1.amazonaws.com."
   }
 
   concentral_net_redirects = {

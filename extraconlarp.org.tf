@@ -33,13 +33,6 @@ resource "cloudflare_record" "extraconlarp_org_acme_challenge_cname" {
   value   = "_acme-challenge.neilhosting.net."
 }
 
-resource "cloudflare_record" "extraconlarp_org_cf_custom_hostname_cname" {
-  zone_id = cloudflare_zone.extraconlarp_org.id
-  name    = "_cf-custom-hostname"
-  type    = "CNAME"
-  value   = "neilhosting.hostname.renderdns.com"
-}
-
 resource "cloudflare_record" "extraconlarp_org_convention_subdomain_cname" {
   for_each = local.extraconlarp_org_intercode_subdomains
 
