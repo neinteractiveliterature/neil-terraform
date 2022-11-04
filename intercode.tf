@@ -133,7 +133,7 @@ resource "heroku_domain" "intercode" {
 
   app_id          = heroku_app.intercode.uuid
   hostname        = each.value
-  sni_endpoint_id = "4a07b836-0f3b-47d3-b4d1-f8b06f40145c"
+  sni_endpoint_id = "8b295f16-5ffb-4a02-831c-eac6a080a342"
 }
 
 resource "rollbar_project" "intercode" {
