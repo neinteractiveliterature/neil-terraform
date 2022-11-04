@@ -2,42 +2,95 @@ variable "intercode_production_db_password" {
   type = string
 }
 
+variable "intercode_openid_connect_signing_key" {
+  type = string
+}
+
+variable "intercode_recaptcha_secret_key" {
+  type = string
+}
+
+variable "intercode_recaptcha_site_key" {
+  type = string
+}
+
+variable "intercode_secret_key_base" {
+  type = string
+}
+
+variable "intercode_stripe_connect_endpoint_secret" {
+  type = string
+}
+
+variable "intercode_stripe_publishable_key" {
+  type = string
+}
+
+variable "intercode_stripe_secret_key" {
+  type = string
+}
+
+variable "intercode_twilio_account_sid" {
+  type = string
+}
+
+variable "intercode_twilio_auth_token" {
+  type = string
+}
+
+variable "rds_neiladmin_password" {
+  type = string
+}
+
 # # The Heroku app itself
-# resource "heroku_app" "intercode" {
-#   name   = "intercode"
-#   region = "us"
-#   stack  = "container"
+resource "heroku_app" "intercode" {
+  name   = "intercode"
+  region = "us"
+  stack  = "container"
 
-#   organization {
-#     name = "neinteractiveliterature"
-#   }
+  organization {
+    name = "neinteractiveliterature"
+  }
 
-#   # we do our own cert management shenanigans using scheduled jobs
-#   acm = false
+  # we do our own cert management shenanigans using scheduled jobs
+  acm = false
 
-#   config_vars = {
-#     CLOUDWATCH_LOG_GROUP                = aws_cloudwatch_log_group.intercode2_production.name
-#     INTERCODE_CERTS_NO_WILDCARD_DOMAINS = "5pi-con.natbudin.com signups.greaterbostonlarpsociety.org"
-#     INTERCODE_HOST                      = "neilhosting.net"
-#     RACK_ENV                            = "production"
-#     RAILS_ENV                           = "production"
-#     RAILS_LOG_TO_STDOUT                 = "enabled"
-#     RAILS_MAX_THREADS                   = "3"
-#     RAILS_SERVE_STATIC_FILES            = "enabled"
-#     ROLLBAR_CLIENT_ACCESS_TOKEN         = rollbar_project_access_token.intercode_post_client_item.access_token
-#     UPLOADS_HOST                        = "https://uploads.neilhosting.net"
-#     WEB_CONCURRENCY                     = "1"
-#   }
+  config_vars = {
+    ASSETS_HOST                         = "assets.neilhosting.net"
+    CLOUDWATCH_LOG_GROUP                = aws_cloudwatch_log_group.intercode2_production.name
+    INTERCODE_CERTS_NO_WILDCARD_DOMAINS = "5pi-con.natbudin.com signups.greaterbostonlarpsociety.org"
+    INTERCODE_HOST                      = "neilhosting.net"
+    MALLOC_ARENA_MAX                    = 2
+    RACK_ENV                            = "production"
+    RAILS_ENV                           = "production"
+    RAILS_LOG_TO_STDOUT                 = "enabled"
+    RAILS_MAX_THREADS                   = "3"
+    RAILS_SERVE_STATIC_FILES            = "enabled"
+    ROLLBAR_CLIENT_ACCESS_TOKEN         = rollbar_project_access_token.intercode_post_client_item.access_token
+    ROLLBAR_PUBLIC_PATH                 = "//neilhosting.net/packs"
+    TWILIO_SMS_NUMBER                   = "+14156345010"
+    UPLOADS_HOST                        = "https://uploads.neilhosting.net"
+    WEB_CONCURRENCY                     = "1"
+  }
 
-#   sensitive_config_vars = {
-#     AWS_ACCESS_KEY_ID     = aws_iam_access_key.intercode2_production.id
-#     AWS_REGION            = data.aws_region.current.name
-#     AWS_SECRET_ACCESS_KEY = aws_iam_access_key.intercode2_production.secret
-#     AWS_S3_BUCKET         = aws_s3_bucket.intercode2_production.bucket
-#     DATABASE_URL          = "postgres://intercode_production:${var.intercode_production_db_password}@${aws_db_instance.intercode_production.endpoint}/intercode_production?sslrootcert=rds-combined-ca-bundle-2019.pem"
-#     ROLLBAR_ACCESS_TOKEN  = rollbar_project_access_token.intercode_post_server_item.access_token
-#   }
-# }
+  sensitive_config_vars = {
+    AWS_ACCESS_KEY_ID              = aws_iam_access_key.intercode2_production.id
+    AWS_REGION                     = data.aws_region.current.name
+    AWS_SECRET_ACCESS_KEY          = aws_iam_access_key.intercode2_production.secret
+    AWS_S3_BUCKET                  = aws_s3_bucket.intercode2_production.bucket
+    DATABASE_URL                   = "postgres://intercode_production:${var.intercode_production_db_password}@${aws_db_instance.intercode_production.endpoint}/intercode_production?sslrootcert=rds-combined-ca-bundle-2019.pem"
+    OPENID_CONNECT_SIGNING_KEY     = var.intercode_openid_connect_signing_key
+    RECAPTCHA_SECRET_KEY           = var.intercode_recaptcha_secret_key
+    RECAPTCHA_SITE_KEY             = var.intercode_recaptcha_site_key
+    ROLLBAR_ACCESS_TOKEN           = rollbar_project_access_token.intercode_post_server_item.access_token
+    SECRET_KEY_BASE                = var.intercode_secret_key_base
+    STRIPE_CONNECT_ENDPOINT_SECRET = var.intercode_stripe_connect_endpoint_secret
+    STRIPE_PUBLISHABLE_KEY         = var.intercode_stripe_publishable_key
+    STRIPE_SECRET_KEY              = var.intercode_stripe_secret_key
+    TWILIO_ACCOUNT_SID             = var.intercode_twilio_account_sid
+    TWILIO_AUTH_TOKEN              = var.intercode_twilio_auth_token
+  }
+}
 
 resource "rollbar_project" "intercode" {
   name = "intercode"
@@ -57,43 +110,67 @@ resource "rollbar_project_access_token" "intercode_post_server_item" {
   scopes     = ["post_server_item"]
 }
 
-# resource "aws_db_parameter_group" "production_pg13" {
-#   name        = "production-pg13"
-#   description = "Production parameters (force SSL, tune max_connections)"
-#   family      = "postgres13"
+resource "aws_db_parameter_group" "production_pg14" {
+  name        = "production-pg14"
+  description = "Production parameters (force SSL, tune max_connections)"
+  family      = "postgres14"
 
-#   parameter {
-#     apply_method = "immediate"
-#     name         = "rds.force_ssl"
-#     value        = "1"
-#   }
-#   parameter {
-#     apply_method = "pending-reboot"
-#     name         = "max_connections"
-#     value        = "100"
-#   }
-# }
+  parameter {
+    apply_method = "immediate"
+    name         = "rds.force_ssl"
+    value        = "1"
+  }
+  parameter {
+    apply_method = "pending-reboot"
+    name         = "max_connections"
+    value        = "100"
+  }
+}
 
-# # The production Postgres database
-# resource "aws_db_instance" "intercode_production" {
-#   instance_class       = "db.t3.micro"
-#   engine               = "postgres"
-#   engine_version       = "13.4"
-#   username             = "neiladmin"
-#   parameter_group_name = "production-pg13"
-#   deletion_protection  = true
-#   publicly_accessible  = true
+# IAM Role for RDS Enhanced Monitoring
+resource "aws_iam_role" "rds_enhanced_monitoring" {
+  name = "iam_role_rds_enhanced_monitoring"
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
+        Sid    = ""
+        Principal = {
+          Service = "monitoring.rds.amazonaws.com"
+        }
+      },
+    ]
+  })
 
-#   monitoring_interval          = 60
-#   performance_insights_enabled = true
+  managed_policy_arns = ["arn:aws:iam::aws:policy/service-role/AmazonRDSEnhancedMonitoringRole"]
+}
 
-#   copy_tags_to_snapshot = true
-#   skip_final_snapshot   = true
+# The production Postgres database
+resource "aws_db_instance" "intercode_production" {
+  instance_class        = "db.t4g.micro"
+  engine                = "postgres"
+  engine_version        = "14.4"
+  username              = "neiladmin"
+  password              = var.rds_neiladmin_password
+  parameter_group_name  = "production-pg14"
+  deletion_protection   = true
+  publicly_accessible   = true
+  allocated_storage     = 10
+  max_allocated_storage = 100
 
-#   tags = {
-#     "workload-type" = "other"
-#   }
-# }
+  monitoring_role_arn          = aws_iam_role.rds_enhanced_monitoring.arn
+  monitoring_interval          = 60
+  performance_insights_enabled = true
+
+  copy_tags_to_snapshot = true
+  skip_final_snapshot   = true
+
+  tags = {
+    "workload-type" = "other"
+  }
+}
 
 # SQS queues used by Shoryuken for background processing
 resource "aws_sqs_queue" "intercode_production_dead_letter" {
