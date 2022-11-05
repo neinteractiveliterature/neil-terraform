@@ -96,6 +96,7 @@ resource "heroku_app" "intercode" {
     MALLOC_ARENA_MAX                    = 2
     RACK_ENV                            = "production"
     RAILS_ENV                           = "production"
+    RAILS_GROUPS                        = "skylight"
     RAILS_LOG_TO_STDOUT                 = "enabled"
     RAILS_MAX_THREADS                   = "3"
     RAILS_SERVE_STATIC_FILES            = "enabled"
@@ -135,6 +136,11 @@ resource "heroku_domain" "intercode" {
   app_id          = heroku_app.intercode.uuid
   hostname        = each.value
   sni_endpoint_id = "8b295f16-5ffb-4a02-831c-eac6a080a342"
+}
+
+resource "heroku_addon" "intercode_memcachedcloud" {
+  app_id = heroku_app.intercode.uuid
+  plan   = "memcachedcloud:30"
 }
 
 resource "rollbar_project" "intercode" {
