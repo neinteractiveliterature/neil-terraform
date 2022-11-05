@@ -14,6 +14,15 @@ variable "larp_library_secret_key_base" {
   type = string
 }
 
+locals {
+  larp_library_domains = toset([
+    "library.interactiveliterature.org",
+    "www.larplibrary.org"
+  ])
+
+  larp_library_cors_allowed_origins = [for domain in local.larp_library_domains : "https://${domain}"]
+}
+
 # The Heroku app itself
 resource "heroku_app" "larp_library" {
   name   = "larp-library"
@@ -50,6 +59,13 @@ resource "heroku_app" "larp_library" {
   }
 }
 
+resource "heroku_domain" "larp_library" {
+  for_each = local.larp_library_domains
+
+  app_id   = heroku_app.larp_library.uuid
+  hostname = each.value
+}
+
 resource "rollbar_project" "larp_library" {
   name = "LarpLibrary"
 }
@@ -83,11 +99,10 @@ resource "aws_s3_bucket" "larp_library_production" {
   cors_rule {
     allowed_headers = ["*"]
     allowed_methods = ["PUT", "POST", "DELETE", "GET"]
-    allowed_origins = [
-      "https://library.interactiveliterature.org",
-      "https://larp-library.herokuapp.com",
-      "https://www.larplibrary.org"
-    ]
+    allowed_origins = concat(
+      ["https://larp-library.herokuapp.com"],
+      local.larp_library_cors_allowed_origins
+    )
     expose_headers  = ["ETag"]
     max_age_seconds = 0
   }
@@ -181,7 +196,7 @@ resource "cloudflare_record" "larplibrary_org_www" {
   zone_id = cloudflare_zone.larplibrary_org.id
   name    = "www.larplibrary.org"
   type    = "CNAME"
-  value   = "larp-library.onrender.com"
+  value   = heroku_domain.larp_library["www.larplibrary.org"].cname
 }
 
 resource "cloudflare_record" "larplibrary_org_mx" {
@@ -216,5 +231,5 @@ resource "cloudflare_record" "interactiveliterature_org_library_cname" {
   zone_id = cloudflare_zone.interactiveliterature_org.id
   name    = "library"
   type    = "CNAME"
-  value   = "larp-library.onrender.com"
+  value   = heroku_domain.larp_library["library.interactiveliterature.org"].cname
 }
