@@ -1,32 +1,54 @@
+variable "larp_library_production_db_password" {
+  type = string
+}
+
+variable "larp_library_intercode_app_id" {
+  type = string
+}
+
+variable "larp_library_intercode_app_secret" {
+  type = string
+}
+
+variable "larp_library_secret_key_base" {
+  type = string
+}
+
 # The Heroku app itself
-# resource "heroku_app" "larp_library" {
-#   name   = "larp-library"
-#   region = "us"
-#   stack  = "heroku-20"
-#   acm    = true
+resource "heroku_app" "larp_library" {
+  name   = "larp-library"
+  region = "us"
+  stack  = "container"
+  acm    = true
 
-#   organization {
-#     name = "neinteractiveliterature"
-#   }
+  organization {
+    name = "neinteractiveliterature"
+  }
 
-#   config_vars = {
-#     ASSETS_HOST                 = "assets.larplibrary.org"
-#     RACK_ENV                    = "production"
-#     RAILS_ENV                   = "production"
-#     RAILS_LOG_TO_STDOUT         = "enabled"
-#     RAILS_MAX_THREADS           = "4"
-#     RAILS_SERVE_STATIC_FILES    = "enabled"
-#     ROLLBAR_CLIENT_ACCESS_TOKEN = rollbar_project_access_token.larp_library_post_client_item.access_token
-#   }
+  config_vars = {
+    ASSETS_HOST                 = "assets.larplibrary.org"
+    INTERCODE_URL               = "https://www.neilhosting.net"
+    LANG                        = "en"
+    RACK_ENV                    = "production"
+    RAILS_ENV                   = "production"
+    RAILS_LOG_TO_STDOUT         = "enabled"
+    RAILS_MAX_THREADS           = "4"
+    RAILS_SERVE_STATIC_FILES    = "enabled"
+    ROLLBAR_CLIENT_ACCESS_TOKEN = rollbar_project_access_token.larp_library_post_client_item.access_token
+  }
 
-#   sensitive_config_vars = {
-#     AWS_ACCESS_KEY_ID     = aws_iam_access_key.larp_library.id
-#     AWS_REGION            = data.aws_region.current.name
-#     AWS_SECRET_ACCESS_KEY = aws_iam_access_key.larp_library.secret
-#     AWS_S3_BUCKET         = aws_s3_bucket.larp_library_production.bucket
-#     ROLLBAR_ACCESS_TOKEN  = rollbar_project_access_token.larp_library_post_server_item.access_token
-#   }
-# }
+  sensitive_config_vars = {
+    AWS_ACCESS_KEY_ID     = aws_iam_access_key.larp_library.id
+    AWS_REGION            = data.aws_region.current.name
+    AWS_SECRET_ACCESS_KEY = aws_iam_access_key.larp_library.secret
+    AWS_S3_BUCKET         = aws_s3_bucket.larp_library_production.bucket
+    DATABASE_URL          = "postgres://larp_library_production:${var.larp_library_production_db_password}@${aws_db_instance.intercode_production.endpoint}/larp_library_production?sslrootcert=rds-combined-ca-bundle-2019.pem"
+    INTERCODE_APP_ID      = var.larp_library_intercode_app_id
+    INTERCODE_APP_SECRET  = var.larp_library_intercode_app_secret
+    ROLLBAR_ACCESS_TOKEN  = rollbar_project_access_token.larp_library_post_server_item.access_token
+    SECRET_KEY_BASE       = var.larp_library_secret_key_base
+  }
+}
 
 resource "rollbar_project" "larp_library" {
   name = "LarpLibrary"
