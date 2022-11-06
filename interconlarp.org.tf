@@ -184,5 +184,5 @@ resource "cloudflare_record" "interconlarp_org_furniture_cname" {
   zone_id = cloudflare_zone.interconlarp_org.id
   name    = "furniture"
   type    = "CNAME"
-  value   = "intercon-furniture.onrender.com"
+  value   = heroku_domain.intercon_furniture["furniture.interconlarp.org"].cname
 }

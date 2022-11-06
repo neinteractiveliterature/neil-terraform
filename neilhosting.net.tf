@@ -34,13 +34,6 @@ resource "cloudflare_record" "neilhosting_net_spf" {
   value   = "v=spf1 include:amazonses.com ~all"
 }
 
-resource "cloudflare_record" "neilhosting_net_acme_challenge_cname" {
-  zone_id = cloudflare_zone.neilhosting_net.id
-  name    = "_acme-challenge"
-  type    = "CNAME"
-  value   = "neilhosting.verify.renderdns.com"
-}
-
 resource "cloudflare_record" "neilhosting_net_wildcard_cname" {
   zone_id = cloudflare_zone.neilhosting_net.id
   name    = "*"

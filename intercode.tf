@@ -102,6 +102,7 @@ resource "heroku_app" "intercode" {
     RAILS_SERVE_STATIC_FILES            = "enabled"
     ROLLBAR_CLIENT_ACCESS_TOKEN         = rollbar_project_access_token.intercode_post_client_item.access_token
     ROLLBAR_PUBLIC_PATH                 = "//neilhosting.net/packs"
+    RUBY_GC_AUTO_COMPACT                = "enabled"
     RUBYOPT                             = "--yjit --yjit-exec-mem-size=16"
     TWILIO_SMS_NUMBER                   = "+14156345010"
     UPLOADS_HOST                        = "https://uploads.neilhosting.net"
