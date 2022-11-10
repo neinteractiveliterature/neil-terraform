@@ -21,7 +21,7 @@
 #   intercode_env = [
 #     {
 #       name = "DATABASE_URL"
-#       value = "postgres://intercode_production:${var.intercode_production_db_password}@${aws_db_instance.intercode_production.endpoint}/intercode_production?sslrootcert=rds-combined-ca-bundle-2019.pem"
+#       value = "postgres://intercode_production:${var.intercode_production_db_password}@${aws_db_instance.neil_production.endpoint}/intercode_production?sslrootcert=rds-combined-ca-bundle-2019.pem"
 #     },
 #     { name = "AWS_REGION", value = "us-east-1" },
 #     { name = "AWS_ACCESS_KEY_ID", value = aws_iam_access_key.intercode2_production.id },

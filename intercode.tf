@@ -102,8 +102,6 @@ resource "heroku_app" "intercode" {
     RAILS_SERVE_STATIC_FILES            = "enabled"
     ROLLBAR_CLIENT_ACCESS_TOKEN         = rollbar_project_access_token.intercode_post_client_item.access_token
     ROLLBAR_PUBLIC_PATH                 = "//neilhosting.net/packs"
-    RUBY_GC_AUTO_COMPACT                = "enabled"
-    RUBYOPT                             = "--yjit --yjit-exec-mem-size=16"
     TWILIO_SMS_NUMBER                   = "+14156345010"
     UPLOADS_HOST                        = "https://uploads.neilhosting.net"
     WEB_CONCURRENCY                     = "0"
@@ -116,7 +114,7 @@ resource "heroku_app" "intercode" {
     AWS_S3_BUCKET                  = aws_s3_bucket.intercode2_production.bucket
     CF_Account_ID                  = var.intercode_cloudflare_account_id
     CF_Token                       = var.intercode_cloudflare_token
-    DATABASE_URL                   = "postgres://intercode_production:${var.intercode_production_db_password}@${aws_db_instance.intercode_production.endpoint}/intercode_production?sslrootcert=rds-combined-ca-bundle-2019.pem"
+    DATABASE_URL                   = "postgres://intercode_production:${var.intercode_production_db_password}@${aws_db_instance.neil_production.endpoint}/intercode_production?sslrootcert=rds-combined-ca-bundle-2019.pem"
     HEROKU_API_TOKEN               = var.intercode_heroku_api_token
     OPENID_CONNECT_SIGNING_KEY     = var.intercode_openid_connect_signing_key
     RECAPTCHA_SECRET_KEY           = var.intercode_recaptcha_secret_key
@@ -144,6 +142,11 @@ resource "heroku_addon" "intercode_memcachedcloud" {
   plan   = "memcachedcloud:30"
 }
 
+resource "heroku_addon" "intercode_papertrail" {
+  app_id = heroku_app.intercode.uuid
+  plan   = "papertrail:choklad"
+}
+
 resource "rollbar_project" "intercode" {
   name = "intercode"
 }
@@ -160,69 +163,6 @@ resource "rollbar_project_access_token" "intercode_post_server_item" {
   name       = "post_server_item"
   depends_on = [rollbar_project.intercode]
   scopes     = ["post_server_item"]
-}
-
-resource "aws_db_parameter_group" "production_pg14" {
-  name        = "production-pg14"
-  description = "Production parameters (force SSL, tune max_connections)"
-  family      = "postgres14"
-
-  parameter {
-    apply_method = "immediate"
-    name         = "rds.force_ssl"
-    value        = "1"
-  }
-  parameter {
-    apply_method = "pending-reboot"
-    name         = "max_connections"
-    value        = "100"
-  }
-}
-
-# IAM Role for RDS Enhanced Monitoring
-resource "aws_iam_role" "rds_enhanced_monitoring" {
-  name = "iam_role_rds_enhanced_monitoring"
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Action = "sts:AssumeRole"
-        Effect = "Allow"
-        Sid    = ""
-        Principal = {
-          Service = "monitoring.rds.amazonaws.com"
-        }
-      },
-    ]
-  })
-
-  managed_policy_arns = ["arn:aws:iam::aws:policy/service-role/AmazonRDSEnhancedMonitoringRole"]
-}
-
-# The production Postgres database
-resource "aws_db_instance" "intercode_production" {
-  instance_class        = "db.t4g.micro"
-  identifier            = "neil-production"
-  engine                = "postgres"
-  engine_version        = "14.4"
-  username              = "neiladmin"
-  password              = var.rds_neiladmin_password
-  parameter_group_name  = "production-pg14"
-  deletion_protection   = true
-  publicly_accessible   = true
-  allocated_storage     = 10
-  max_allocated_storage = 100
-
-  monitoring_role_arn          = aws_iam_role.rds_enhanced_monitoring.arn
-  monitoring_interval          = 60
-  performance_insights_enabled = true
-
-  copy_tags_to_snapshot = true
-  skip_final_snapshot   = true
-
-  tags = {
-    "workload-type" = "other"
-  }
 }
 
 # SQS queues used by Shoryuken for background processing

@@ -47,7 +47,7 @@ resource "heroku_app" "intercon_furniture" {
   }
 
   sensitive_config_vars = {
-    DATABASE_URL                  = "postgres://intercon_furniture_production:${var.intercon_furniture_production_db_password}@${aws_db_instance.intercode_production.endpoint}/intercon_furniture_production?sslrootcert=rds-combined-ca-bundle-2019.pem"
+    DATABASE_URL                  = "postgres://intercon_furniture_production:${var.intercon_furniture_production_db_password}@${aws_db_instance.neil_production.endpoint}/intercon_furniture_production?sslrootcert=rds-combined-ca-bundle-2019.pem"
     INTERCODE_OAUTH_CLIENT_ID     = var.intercon_furniture_intercode_oauth_client_id
     INTERCODE_OAUTH_CLIENT_SECRET = var.intercon_furniture_intercode_oauth_client_secret
     PAPERTRAIL_API_TOKEN          = var.intercon_furniture_papertrail_api_token
