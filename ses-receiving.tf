@@ -1,6 +1,5 @@
 resource "aws_s3_bucket" "intercode_inbox" {
   bucket = "intercode-inbox"
-  acl = "private"
 
   policy = <<EOF
 {
@@ -23,9 +22,18 @@ resource "aws_s3_bucket" "intercode_inbox" {
   ]
 }
   EOF
+}
 
-  lifecycle_rule {
-    enabled = true
+resource "aws_s3_bucket_acl" "intercode_inbox" {
+  bucket = aws_s3_bucket.intercode_inbox.bucket
+  acl    = "private"
+}
+
+resource "aws_s3_bucket_lifecycle_configuration" "intercode_inbox" {
+  bucket = aws_s3_bucket.intercode_inbox.bucket
+  rule {
+    id     = "message_expiration"
+    status = "Enabled"
     expiration {
       days = 14
     }
@@ -33,103 +41,103 @@ resource "aws_s3_bucket" "intercode_inbox" {
 }
 
 resource "aws_iam_role" "sns_success_feedback" {
-  assume_role_policy    = jsonencode(
+  assume_role_policy = jsonencode(
     {
       Statement = [
         {
-          Action    = "sts:AssumeRole"
-          Effect    = "Allow"
+          Action = "sts:AssumeRole"
+          Effect = "Allow"
           Principal = {
             Service = "sns.amazonaws.com"
           }
         },
       ]
-      Version   = "2012-10-17"
+      Version = "2012-10-17"
     }
   )
 }
 
 resource "aws_iam_role_policy" "sns_success_feedback" {
-  name   = "oneClick_SNSSuccessFeedback_1584129549314"
-  role   = aws_iam_role.sns_success_feedback.name
+  name = "oneClick_SNSSuccessFeedback_1584129549314"
+  role = aws_iam_role.sns_success_feedback.name
   policy = jsonencode(
     {
       Statement = [
         {
-          Action   = [
+          Action = [
             "logs:CreateLogGroup",
             "logs:CreateLogStream",
             "logs:PutLogEvents",
             "logs:PutMetricFilter",
             "logs:PutRetentionPolicy",
           ]
-          Effect   = "Allow"
+          Effect = "Allow"
           Resource = [
             "*",
           ]
         },
       ]
-      Version   = "2012-10-17"
+      Version = "2012-10-17"
     }
   )
 }
 
 resource "aws_iam_role" "sns_failure_feedback" {
-  assume_role_policy    = jsonencode(
+  assume_role_policy = jsonencode(
     {
       Statement = [
         {
-          Action    = "sts:AssumeRole"
-          Effect    = "Allow"
+          Action = "sts:AssumeRole"
+          Effect = "Allow"
           Principal = {
             Service = "sns.amazonaws.com"
           }
         },
       ]
-      Version   = "2012-10-17"
+      Version = "2012-10-17"
     }
   )
 }
 
 resource "aws_iam_role_policy" "sns_failure_feedback" {
-  name   = "oneClick_SNSFailureFeedback_1584129549315"
-  role   = aws_iam_role.sns_failure_feedback.name
+  name = "oneClick_SNSFailureFeedback_1584129549315"
+  role = aws_iam_role.sns_failure_feedback.name
   policy = jsonencode(
     {
       Statement = [
         {
-          Action   = [
+          Action = [
             "logs:CreateLogGroup",
             "logs:CreateLogStream",
             "logs:PutLogEvents",
             "logs:PutMetricFilter",
             "logs:PutRetentionPolicy",
           ]
-          Effect   = "Allow"
+          Effect = "Allow"
           Resource = [
             "*",
           ]
         },
       ]
-      Version   = "2012-10-17"
+      Version = "2012-10-17"
     }
   )
 }
 
 resource "aws_sns_topic" "intercode_inbox_deliveries" {
-  name = "intercode-inbox-deliveries"
+  name                           = "intercode-inbox-deliveries"
   http_success_feedback_role_arn = aws_iam_role.sns_success_feedback.arn
   http_failure_feedback_role_arn = aws_iam_role.sns_failure_feedback.arn
 }
 
 resource "aws_sns_topic_subscription" "intercode_inbox_deliveries_webhook" {
-  topic_arn = aws_sns_topic.intercode_inbox_deliveries.arn
-  protocol = "https"
-  endpoint = "https://www.neilhosting.net/sns_notifications"
+  topic_arn              = aws_sns_topic.intercode_inbox_deliveries.arn
+  protocol               = "https"
+  endpoint               = "https://www.neilhosting.net/sns_notifications"
   endpoint_auto_confirms = true
 
   delivery_policy = jsonencode({
-    guaranteed         = false
+    guaranteed = false
     healthyRetryPolicy = {
       backoffFunction    = "linear"
       maxDelayTarget     = 300
@@ -139,8 +147,8 @@ resource "aws_sns_topic_subscription" "intercode_inbox_deliveries_webhook" {
       numNoDelayRetries  = 0
       numRetries         = 3
     }
-    sicklyRetryPolicy  = null
-    throttlePolicy     = null
+    sicklyRetryPolicy = null
+    throttlePolicy    = null
   })
 }
 
@@ -153,16 +161,16 @@ resource "aws_ses_active_receipt_rule_set" "active_rule_set" {
 }
 
 resource "aws_ses_receipt_rule" "store_and_notify" {
-  name = "store_and_notify"
+  name          = "store_and_notify"
   rule_set_name = aws_ses_receipt_rule_set.intercode_inbox.rule_set_name
-  enabled = true
-  scan_enabled = true
+  enabled       = true
+  scan_enabled  = true
 
   s3_action {
     bucket_name = aws_s3_bucket.intercode_inbox.bucket
-    position = 1
+    position    = 1
     kms_key_arn = "arn:aws:kms:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:alias/aws/ses"
-    topic_arn = aws_sns_topic.intercode_inbox_deliveries.arn
+    topic_arn   = aws_sns_topic.intercode_inbox_deliveries.arn
   }
 }
 

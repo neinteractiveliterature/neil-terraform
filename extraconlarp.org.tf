@@ -12,10 +12,11 @@ resource "cloudflare_zone" "extraconlarp_org" {
 module "extraconlarp_org_cloudfront" {
   source = "./modules/cloudfront_apex_redirect"
 
-  cloudflare_zone          = cloudflare_zone.extraconlarp_org
-  redirect_destination     = "https://2021.extraconlarp.org"
-  add_security_headers_arn = aws_lambda_function.addSecurityHeaders.qualified_arn
-  alternative_names        = ["www.extraconlarp.org"]
+  cloudflare_zone               = cloudflare_zone.extraconlarp_org
+  redirect_destination_hostname = "2021.extraconlarp.org"
+  redirect_destination_protocol = "https"
+  add_security_headers_arn      = aws_lambda_function.addSecurityHeaders.qualified_arn
+  alternative_names             = ["www.extraconlarp.org"]
 }
 
 resource "cloudflare_record" "extraconlarp_org_mx" {

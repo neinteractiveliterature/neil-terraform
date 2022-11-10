@@ -22,45 +22,52 @@ resource "cloudflare_zone" "interactiveliterature_org" {
 }
 
 resource "aws_s3_bucket" "www_interactiveliterature_org" {
-  bucket           = "www.interactiveliterature.org"
-  acl              = "public-read"
-  website_domain   = "s3-website-us-east-1.amazonaws.com"
-  website_endpoint = "www.interactiveliterature.org.s3-website-us-east-1.amazonaws.com"
+  bucket = "www.interactiveliterature.org"
+}
 
-  website {
-    index_document = "index.html"
-    routing_rules = jsonencode(
-      concat(
-        [
-          for letter in local.intercon_letters :
-          {
-            Condition = {
-              HttpErrorCodeReturnedEquals = "404"
-              KeyPrefixEquals             = letter
-            }
-            Redirect = {
-              HostName       = "${lower(letter)}.interconlarp.org"
-              Protocol       = "https"
-              ReplaceKeyWith = ""
-            }
-          }
-        ],
-        [
-          {
-            Condition = {
-              HttpErrorCodeReturnedEquals = "404"
-              KeyPrefixEquals             = "Wiki"
-            }
-            Redirect = {
-              HostName       = "drive.google.com"
-              Protocol       = "https"
-              ReplaceKeyWith = "drive/folders/1cw0RHoDGbtoy2i0YtU1aD3U-ww3rOcNN?usp=sharing"
-            }
-          },
-        ]
-      )
-    )
+resource "aws_s3_bucket_acl" "www_interactiveliterature_org" {
+  bucket = aws_s3_bucket.www_interactiveliterature_org.bucket
+  acl    = "public-read"
+}
+
+resource "aws_s3_bucket_website_configuration" "www_interactiveliterature_org" {
+  bucket = aws_s3_bucket.www_interactiveliterature_org.bucket
+  index_document {
+    suffix = "index.html"
   }
+
+  routing_rules = jsonencode(
+    concat(
+      [
+        for letter in local.intercon_letters :
+        {
+          Condition = {
+            HttpErrorCodeReturnedEquals = "404"
+            KeyPrefixEquals             = letter
+          }
+          Redirect = {
+            HostName       = "${lower(letter)}.interconlarp.org"
+            Protocol       = "https"
+            ReplaceKeyWith = ""
+          }
+        }
+      ],
+      [
+        {
+          Condition = {
+            HttpErrorCodeReturnedEquals = "404"
+            KeyPrefixEquals             = "Wiki"
+          }
+          Redirect = {
+            HostName       = "drive.google.com"
+            Protocol       = "https"
+            ReplaceKeyWith = "drive/folders/1cw0RHoDGbtoy2i0YtU1aD3U-ww3rOcNN?usp=sharing"
+          }
+        },
+      ]
+    )
+  )
+
 }
 
 resource "aws_iam_group" "interactiveliterature_org_admin" {
@@ -156,7 +163,7 @@ module "interactiveliterature_org_cloudfront" {
   cloudflare_zone          = cloudflare_zone.interactiveliterature_org
   alternative_names        = ["www.interactiveliterature.org"]
   origin_id                = "S3-Website-www.interactiveliterature.org.s3-website-us-east-1.amazonaws.com"
-  origin_domain_name       = aws_s3_bucket.www_interactiveliterature_org.website_endpoint
+  origin_domain_name       = aws_s3_bucket_website_configuration.www_interactiveliterature_org.website_endpoint
   add_security_headers_arn = aws_lambda_function.addSecurityHeaders.qualified_arn
 }
 

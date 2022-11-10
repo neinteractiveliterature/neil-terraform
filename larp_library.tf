@@ -85,8 +85,16 @@ resource "rollbar_project_access_token" "larp_library_post_server_item" {
 }
 
 resource "aws_s3_bucket" "larp_library_production" {
-  acl    = "private"
   bucket = "larp-library-production"
+}
+
+resource "aws_s3_bucket_acl" "larp_library_production" {
+  bucket = aws_s3_bucket.larp_library_production.bucket
+  acl    = "private"
+}
+
+resource "aws_s3_bucket_cors_configuration" "larp_library_production" {
+  bucket = aws_s3_bucket.larp_library_production.bucket
 
   cors_rule {
     allowed_headers = ["Authorization"]

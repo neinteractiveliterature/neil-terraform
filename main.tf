@@ -65,8 +65,12 @@ resource "aws_kms_key" "neil-terraform-state" {
 
 resource "aws_s3_bucket" "neil-terraform-state" {
   bucket = "neil-terraform-state"
-  # region = "us-east-1"
-  versioning {
-    enabled = true
+}
+
+resource "aws_s3_bucket_versioning" "neil-terraform-state" {
+  bucket = aws_s3_bucket.neil-terraform-state.bucket
+  versioning_configuration {
+    status = "Enabled"
   }
 }
+

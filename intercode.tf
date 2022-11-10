@@ -203,8 +203,16 @@ resource "aws_sqs_queue" "intercode_production_ahoy" {
 # uploads.neilhosting.net, aka intercode2_production, is the Cloudfront-served S3 bucket we use
 # for uploaded CMS content and product images
 resource "aws_s3_bucket" "intercode2_production" {
-  acl    = "private"
   bucket = "intercode2-production"
+}
+
+resource "aws_s3_bucket_acl" "intercode2_production" {
+  bucket = aws_s3_bucket.intercode2_production.bucket
+  acl    = "private"
+}
+
+resource "aws_s3_bucket_cors_configuration" "intercode2_production" {
+  bucket = aws_s3_bucket.intercode2_production.bucket
 
   cors_rule {
     allowed_headers = ["*"]

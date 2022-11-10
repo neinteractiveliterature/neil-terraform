@@ -40,11 +40,12 @@ module "convention_host_migration_redirect" {
 
   # Hack: doing this as a "non-cloudflare domain name" even though it really is a cloudflare domain name,
   # because this module is designed to only work with the apex domain
-  cloudflare_zone          = cloudflare_zone.convention_host
-  domain_name              = each.key
-  redirect_destination     = "https://${each.value}"
-  add_security_headers_arn = aws_lambda_function.addSecurityHeaders.qualified_arn
-  alternative_names        = []
+  cloudflare_zone               = cloudflare_zone.convention_host
+  domain_name                   = each.key
+  redirect_destination_hostname = each.value
+  redirect_destination_protocol = "https"
+  add_security_headers_arn      = aws_lambda_function.addSecurityHeaders.qualified_arn
+  alternative_names             = []
 }
 
 # For now, the CloudFlare terraform provider doesn't suport bulk redirects.  This has to be managed via

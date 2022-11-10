@@ -11,7 +11,11 @@ terraform {
   }
 }
 
-variable "redirect_destination" {
+variable "redirect_destination_hostname" {
+  type = string
+}
+
+variable "redirect_destination_protocol" {
   type = string
 }
 
@@ -51,11 +55,21 @@ locals {
 }
 
 resource "aws_s3_bucket" "redirect_bucket" {
-  acl    = "public-read"
   bucket = local.domain_name
+}
 
-  website {
-    redirect_all_requests_to = var.redirect_destination
+resource "aws_s3_bucket_acl" "redirect_bucket" {
+  bucket = aws_s3_bucket.redirect_bucket.bucket
+  acl    = "public-read"
+
+}
+
+resource "aws_s3_bucket_website_configuration" "redirect_bucket" {
+  bucket = aws_s3_bucket.redirect_bucket.bucket
+
+  redirect_all_requests_to {
+    host_name = var.redirect_destination_hostname
+    protocol  = var.redirect_destination_protocol
   }
 }
 
@@ -82,7 +96,7 @@ module "apex_redirect_cloudfront" {
 
   domain_name              = local.domain_name
   origin_id                = "S3-${local.domain_name}"
-  origin_domain_name       = aws_s3_bucket.redirect_bucket.website_endpoint
+  origin_domain_name       = aws_s3_bucket_website_configuration.redirect_bucket.website_endpoint
   add_security_headers_arn = var.add_security_headers_arn
   cloudflare_zone          = var.cloudflare_zone
   validation_method        = var.validation_method
