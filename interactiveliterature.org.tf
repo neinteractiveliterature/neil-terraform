@@ -259,6 +259,13 @@ resource "cloudflare_record" "interactiveliterature_org_intercode_cname" {
   value   = "neinteractiveliterature.github.io"
 }
 
+resource "cloudflare_record" "interactiveliterature_org_listmonk_cname" {
+  zone_id = cloudflare_zone.interactiveliterature_org.id
+  name    = "listmonk"
+  type    = "CNAME"
+  value   = heroku_domain.listmonk_interactiveliterature_org.cname
+}
+
 resource "cloudflare_record" "interactiveliterature_org_litform_cname" {
   zone_id = cloudflare_zone.interactiveliterature_org.id
   name    = "litform"
@@ -272,3 +279,5 @@ resource "cloudflare_record" "interactiveliterature_org_wildcard_cname" {
   type    = "CNAME"
   value   = heroku_domain.intercode["*.interactiveliterature.org"].cname
 }
+
+
