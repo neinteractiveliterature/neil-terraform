@@ -1,26 +1,29 @@
 resource "aws_s3_bucket" "intercode_inbox" {
   bucket = "intercode-inbox"
+}
 
+resource "aws_s3_bucket_policy" "intercode_inbox" {
+  bucket = aws_s3_bucket.intercode_inbox.bucket
   policy = <<EOF
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Sid": "AllowSESPuts",
-      "Effect": "Allow",
-      "Principal": {
-        "Service": "ses.amazonaws.com"
-      },
-      "Action": "s3:PutObject",
-      "Resource": "arn:aws:s3:::intercode-inbox/*",
-      "Condition": {
-        "StringEquals": {
-          "aws:Referer": "${data.aws_caller_identity.current.account_id}"
+  {
+    "Version": "2012-10-17",
+    "Statement": [
+      {
+        "Sid": "AllowSESPuts",
+        "Effect": "Allow",
+        "Principal": {
+          "Service": "ses.amazonaws.com"
+        },
+        "Action": "s3:PutObject",
+        "Resource": "arn:aws:s3:::intercode-inbox/*",
+        "Condition": {
+          "StringEquals": {
+            "aws:Referer": "${data.aws_caller_identity.current.account_id}"
+          }
         }
       }
-    }
-  ]
-}
+    ]
+  }
   EOF
 }
 

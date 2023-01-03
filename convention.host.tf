@@ -48,16 +48,14 @@ module "convention_host_migration_redirect" {
   alternative_names             = []
 }
 
-# For now, the CloudFlare terraform provider doesn't suport bulk redirects.  This has to be managed via
-# the web UI at the moment.  This will hopefully change soon.
-#
-# https://github.com/cloudflare/terraform-provider-cloudflare/issues/1342
-resource "cloudflare_record" "convention_host_apex_redirect" {
-  zone_id = cloudflare_zone.convention_host.id
-  name    = "convention.host"
-  type    = "A"
-  value   = "192.0.2.1"
-  proxied = true
+module "convention_host_apex_redirect" {
+  source = "./modules/cloudfront_apex_redirect"
+
+  cloudflare_zone = cloudflare_zone.convention_host
+  redirect_destination_hostname = "www.neilhosting.net"
+  redirect_destination_protocol = "https"
+  add_security_headers_arn = aws_lambda_function.addSecurityHeaders.qualified_arn
+  alternative_names = ["www.convention.host"]
 }
 
 resource "cloudflare_record" "convention_host_cname" {
