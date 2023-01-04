@@ -167,16 +167,15 @@ module "interactiveliterature_org_cloudfront" {
   add_security_headers_arn = aws_lambda_function.addSecurityHeaders.qualified_arn
 }
 
-# For now, the CloudFlare terraform provider doesn't suport bulk redirects.  This has to be managed via
-# the web UI at the moment.  This will hopefully change soon.
-#
-# https://github.com/cloudflare/terraform-provider-cloudflare/issues/1342
-resource "cloudflare_record" "interactiveliterature_org_nelco_redirect" {
-  zone_id = cloudflare_zone.interactiveliterature_org.id
-  name    = "nelco"
-  type    = "A"
-  value   = "192.0.2.1"
-  proxied = true
+module "interactiveliterature_org_nelco_redirect" {
+  source = "./modules/cloudfront_apex_redirect"
+
+  cloudflare_zone               = cloudflare_zone.interactiveliterature_org
+  domain_name                   = "nelco.interactiveliterature.org"
+  redirect_destination_hostname = "nelco2020.interactiveliterature.org"
+  redirect_destination_protocol = "https"
+  add_security_headers_arn      = aws_lambda_function.addSecurityHeaders.qualified_arn
+  alternative_names             = []
 }
 
 resource "cloudflare_record" "interactiveliterature_org_apex_alias" {

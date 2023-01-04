@@ -16,33 +16,32 @@ locals {
   }
 
   concentral_net_redirects = {
-    "concentral.net"                    = "https://www.concentral.net"
-    "dicebubble.concentral.net"         = "https://dicebubble2022.concentral.net"
-    "dicebubble5.concentral.net"        = "https://dicebubble2016.concentral.net"
-    "molw.concentral.net"               = "https://molw2017.concentral.net"
-    "rpitheorycon.concentral.net"       = "https://rpitheorycon2020.concentral.net"
-    "spacebubble.concentral.net"        = "https://virtualspacebubble2022.concentral.net"
-    "summerlarpin.concentral.net"       = "https://summerlarpin2022.concentral.net"
-    "summerlarping.concentral.net"      = "https://summerlarpin2022.concentral.net"
-    "timebubble.concentral.net"         = "https://timebubble2021.concentral.net"
-    "virtualspacebubble.concentral.net" = "https://virtualspacebubble2022.concentral.net"
-    "vsb.concentral.net"                = "https://virtualspacebubble2022.concentral.net"
-    "vsb2020.concentral.net"            = "https://virtualspacebubble2020.concentral.net"
+    "concentral.net"                    = "www.concentral.net"
+    "dicebubble.concentral.net"         = "dicebubble2022.concentral.net"
+    "dicebubble5.concentral.net"        = "dicebubble2016.concentral.net"
+    "molw.concentral.net"               = "molw2017.concentral.net"
+    "rpitheorycon.concentral.net"       = "rpitheorycon2020.concentral.net"
+    "spacebubble.concentral.net"        = "virtualspacebubble2022.concentral.net"
+    "summerlarpin.concentral.net"       = "summerlarpin2022.concentral.net"
+    "summerlarping.concentral.net"      = "summerlarpin2022.concentral.net"
+    "timebubble.concentral.net"         = "timebubble2023.concentral.net"
+    "virtualspacebubble.concentral.net" = "virtualspacebubble2022.concentral.net"
+    "vsb.concentral.net"                = "virtualspacebubble2022.concentral.net"
+    "vsb2020.concentral.net"            = "virtualspacebubble2020.concentral.net"
   }
 }
 
-# For now, the CloudFlare terraform provider doesn't suport bulk redirects.  This has to be managed via
-# the web UI at the moment.  This will hopefully change soon.
-#
-# https://github.com/cloudflare/terraform-provider-cloudflare/issues/1342
-resource "cloudflare_record" "concentral_net_apex_redirect" {
+module "concentral_net_apex_redirect" {
   for_each = local.concentral_net_redirects
 
-  zone_id = cloudflare_zone.concentral_net.id
-  name    = each.key
-  type    = "A"
-  value   = "192.0.2.1"
-  proxied = true
+  source = "./modules/cloudfront_apex_redirect"
+
+  cloudflare_zone               = cloudflare_zone.concentral_net
+  domain_name                   = each.key
+  redirect_destination_hostname = each.value
+  redirect_destination_protocol = "https"
+  add_security_headers_arn      = aws_lambda_function.addSecurityHeaders.qualified_arn
+  alternative_names             = []
 }
 
 resource "cloudflare_record" "concentral_net_cname" {

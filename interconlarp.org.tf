@@ -9,14 +9,14 @@ locals {
     "t",
     "u"
   ])
-  interconlarp_org_redirect_subdomains = toset([
-    "a",
-    "b",
-    "c",
-    "xiii",
-    "xiv",
-    "xv"
-  ])
+  interconlarp_org_redirect_subdomains = {
+    "a.interconlarp.org" = "www.interactiveliterature.org/A",
+    "b.interconlarp.org" = "www.interactiveliterature.org/B",
+    "c.interconlarp.org" = "www.interactiveliterature.org/C",
+    "xiii.interconlarp.org" = "www.interactiveliterature.org/XIII",
+    "xiv.interconlarp.org" = "www.interactiveliterature.org/XIV",
+    "xv.interconlarp.org" = "www.interactiveliterature.org/XV"
+  }
 }
 
 resource "cloudflare_zone" "interconlarp_org" {
@@ -77,18 +77,17 @@ module "interconlarp_org_cloudfront" {
   add_security_headers_arn = aws_lambda_function.addSecurityHeaders.qualified_arn
 }
 
-# For now, the CloudFlare terraform provider doesn't suport bulk redirects.  This has to be managed via
-# the web UI at the moment.  This will hopefully change soon.
-#
-# https://github.com/cloudflare/terraform-provider-cloudflare/issues/1342
-resource "cloudflare_record" "interconlarp_org_nelco_redirect" {
+module "interconlarp_org_redirect_subdomain" {
   for_each = local.interconlarp_org_redirect_subdomains
 
-  zone_id = cloudflare_zone.interconlarp_org.id
-  name    = each.value
-  type    = "A"
-  value   = "192.0.2.1"
-  proxied = true
+  source = "./modules/cloudfront_apex_redirect"
+
+  cloudflare_zone               = cloudflare_zone.interconlarp_org
+  domain_name                   = each.key
+  redirect_destination_hostname = each.value
+  redirect_destination_protocol = "https"
+  add_security_headers_arn      = aws_lambda_function.addSecurityHeaders.qualified_arn
+  alternative_names             = []
 }
 
 resource "cloudflare_record" "interconlarp_org_apex_alias" {
