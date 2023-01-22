@@ -7,15 +7,16 @@ locals {
     "r",
     "s",
     "t",
-    "u"
+    "u",
+    "v"
   ])
   interconlarp_org_redirect_subdomains = {
-    "a.interconlarp.org" = "www.interactiveliterature.org/A",
-    "b.interconlarp.org" = "www.interactiveliterature.org/B",
-    "c.interconlarp.org" = "www.interactiveliterature.org/C",
+    "a.interconlarp.org"    = "www.interactiveliterature.org/A",
+    "b.interconlarp.org"    = "www.interactiveliterature.org/B",
+    "c.interconlarp.org"    = "www.interactiveliterature.org/C",
     "xiii.interconlarp.org" = "www.interactiveliterature.org/XIII",
-    "xiv.interconlarp.org" = "www.interactiveliterature.org/XIV",
-    "xv.interconlarp.org" = "www.interactiveliterature.org/XV"
+    "xiv.interconlarp.org"  = "www.interactiveliterature.org/XIV",
+    "xv.interconlarp.org"   = "www.interactiveliterature.org/XV"
   }
 }
 
