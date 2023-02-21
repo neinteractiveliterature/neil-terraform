@@ -1,8 +1,6 @@
 locals {
-  # TODO: delete this once we're off Route 53
-  intercode_subdomains = ["www.neilhosting.net", "template.neilhosting.net"]
   hosted_org_subdomains = {
-    "becon" = heroku_domain.intercode["2019.beconlarp.com"].cname,
+    "becon" = heroku_domain.intercode["*.beconlarp.com"].cname,
     "gbls"  = heroku_domain.intercode["signups.greaterbostonlarpsociety.org"].cname
   }
 }

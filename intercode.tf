@@ -56,7 +56,7 @@ variable "rds_neiladmin_password" {
 
 locals {
   intercode_domains = toset([
-    "2019.beconlarp.com",
+    "*.beconlarp.com",
     "*.neilhosting.net",
     "*.aegames.org",
     "*.demo.concentral.net",
