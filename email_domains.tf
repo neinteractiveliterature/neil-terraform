@@ -19,11 +19,6 @@ resource "aws_ses_domain_dkim" "cyberol_org" {
   domain = aws_ses_domain_identity.cyberol_org.domain
 }
 
-module "convention_host_ses_sending_domain" {
-  source          = "./modules/ses_sending_domain"
-  cloudflare_zone = cloudflare_zone.convention_host
-}
-
 module "extraconlarp_org_ses_sending_domain" {
   source          = "./modules/ses_sending_domain"
   cloudflare_zone = cloudflare_zone.extraconlarp_org
