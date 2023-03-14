@@ -12,7 +12,8 @@ locals {
     "nelco2019",
     "nelco2020",
     "wbc2021",
-    "wintercon2022"
+    "wintercon2022",
+    "lbc-2023"
   ])
 }
 
