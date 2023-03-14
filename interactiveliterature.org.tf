@@ -4,7 +4,7 @@ locals {
     "K",                               # that one year in Waltham
     "L", "M", "N", "O",                # the Chelmsford years, part II
     "P",                               # that one year in Westborough
-    "Q", "R", "S", "T", "U"            # the Warwick years
+    "Q", "R", "S", "T", "U", "V"       # the Warwick years
   ]
   interactiveliterature_org_intercode_subdomains = toset([
     "irongm",
