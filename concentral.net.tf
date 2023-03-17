@@ -91,3 +91,13 @@ resource "cloudflare_record" "concentral_net_convention_events_mx" {
   value    = "inbound-smtp.us-east-1.amazonaws.com"
   priority = 10
 }
+
+# Having an MX record breaks the wildcard CNAME, so we have to have a specific one for each MX domain
+resource "cloudflare_record" "concentral_net_convention_mx_cname" {
+  for_each = local.concentral_net_convention_mx_subdomains
+
+  zone_id = cloudflare_zone.concentral_net.id
+  name    = each.value
+  type    = "CNAME"
+  value   = heroku_domain.intercode["*.concentral.net"].cname
+}
