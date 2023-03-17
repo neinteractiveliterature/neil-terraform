@@ -143,15 +143,6 @@ resource "cloudflare_record" "interconlarp_org_convention_subdomain_events_mx" {
   priority = 10
 }
 
-resource "cloudflare_record" "interconlarp_org_amazonses_dkim_record" {
-  count = 3
-
-  zone_id = cloudflare_zone.interconlarp_org.id
-  name    = "${element(aws_ses_domain_dkim.interconlarp_org.dkim_tokens, count.index)}._domainkey"
-  type    = "CNAME"
-  value   = "${element(aws_ses_domain_dkim.interconlarp_org.dkim_tokens, count.index)}.dkim.amazonses.com"
-}
-
 resource "cloudflare_record" "interconlarp_org_www_cname" {
   zone_id = cloudflare_zone.interconlarp_org.id
   name    = "www"

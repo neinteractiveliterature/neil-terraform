@@ -1,80 +1,83 @@
-resource "aws_ses_domain_identity" "aegames_org" {
-  domain = "aegames.org"
+locals {
+  unmanaged_sending_domains = toset([
+    "aegames.org",
+    "beconlarp.com",
+    "cyberol.org",
+    "festivalofthelarps.com",
+    "greaterbostonlarpsociety.org",
+    "natbudin.com"
+  ])
+
+  managed_sending_domain_zones = [
+    cloudflare_zone.concentral_net,
+    cloudflare_zone.extraconlarp_org,
+    cloudflare_zone.interactiveliterature_org,
+    cloudflare_zone.interconlarp_org,
+    cloudflare_zone.larplibrary_org,
+    cloudflare_zone.neilhosting_net
+  ]
+
+  managed_sending_domains = {
+    for zone in local.managed_sending_domain_zones :
+    trimsuffix(zone.zone, ".") => zone
+  }
 }
 
-resource "aws_ses_domain_dkim" "aegames_org" {
-  domain = aws_ses_domain_identity.aegames_org.domain
+resource "aws_ses_domain_identity" "unmanaged_domain" {
+  for_each = local.unmanaged_sending_domains
+
+  domain = each.value
 }
 
-resource "aws_ses_domain_identity" "beconlarp_com" {
-  domain = "beconlarp.com"
+resource "aws_ses_domain_dkim" "unmanaged_domain" {
+  for_each = local.unmanaged_sending_domains
+
+  domain = aws_ses_domain_identity.unmanaged_domain[each.value].domain
 }
 
-resource "aws_ses_domain_dkim" "beconlarp_com" {
-  domain = aws_ses_domain_identity.beconlarp_com.domain
-}
+module "managed_ses_sending_domain" {
+  for_each = local.managed_sending_domains
 
-module "concentral_net_ses_sending_domain" {
   source          = "./modules/ses_sending_domain"
-  cloudflare_zone = cloudflare_zone.concentral_net
+  cloudflare_zone = each.value
 }
 
-resource "aws_ses_domain_identity" "cyberol_org" {
-  domain = "cyberol.org"
+moved {
+  from = module.concentral_net_ses_sending_domain
+  to   = module.managed_ses_sending_domain["concentral.net"]
 }
 
-resource "aws_ses_domain_dkim" "cyberol_org" {
-  domain = aws_ses_domain_identity.cyberol_org.domain
+moved {
+  from = module.extraconlarp_org_ses_sending_domain
+  to   = module.managed_ses_sending_domain["extraconlarp.org"]
 }
 
-module "extraconlarp_org_ses_sending_domain" {
-  source          = "./modules/ses_sending_domain"
-  cloudflare_zone = cloudflare_zone.extraconlarp_org
+moved {
+  from = module.interactiveliterature_org_ses_sending_domain
+  to   = module.managed_ses_sending_domain["interactiveliterature.org"]
 }
 
-resource "aws_ses_domain_identity" "festivalofthelarps_com" {
-  domain = "festivalofthelarps.com"
+moved {
+  from = module.larplibrary_org_ses_sending_domain
+  to   = module.managed_ses_sending_domain["larplibrary.org"]
 }
 
-resource "aws_ses_domain_dkim" "festivalofthelarps_com" {
-  domain = aws_ses_domain_identity.festivalofthelarps_com.domain
+moved {
+  from = module.neilhosting_net_ses_sending_domain
+  to   = module.managed_ses_sending_domain["neilhosting.net"]
 }
 
-resource "aws_ses_domain_identity" "greaterbostonlarpsociety_org" {
-  domain = "greaterbostonlarpsociety.org"
+moved {
+  from = aws_ses_domain_dkim.unmanaged_domain["interconlarp.org"]
+  to   = module.managed_ses_sending_domain["interconlarp.org"].aws_ses_domain_dkim.domain_dkim
 }
 
-resource "aws_ses_domain_dkim" "greaterbostonlarpsociety_org" {
-  domain = aws_ses_domain_identity.greaterbostonlarpsociety_org.domain
+moved {
+  from = aws_ses_domain_identity.unmanaged_domain["interconlarp.org"]
+  to   = module.managed_ses_sending_domain["interconlarp.org"].aws_ses_domain_identity.domain_identity
 }
 
-module "interactiveliterature_org_ses_sending_domain" {
-  source          = "./modules/ses_sending_domain"
-  cloudflare_zone = cloudflare_zone.interactiveliterature_org
-}
-
-resource "aws_ses_domain_identity" "interconlarp_org" {
-  domain = "interconlarp.org"
-}
-
-resource "aws_ses_domain_dkim" "interconlarp_org" {
-  domain = aws_ses_domain_identity.interconlarp_org.domain
-}
-
-module "larplibrary_org_ses_sending_domain" {
-  source          = "./modules/ses_sending_domain"
-  cloudflare_zone = cloudflare_zone.larplibrary_org
-}
-
-resource "aws_ses_domain_identity" "natbudin_com" {
-  domain = "natbudin.com"
-}
-
-resource "aws_ses_domain_dkim" "natbudin_com" {
-  domain = aws_ses_domain_identity.natbudin_com.domain
-}
-
-module "neilhosting_net_ses_sending_domain" {
-  source          = "./modules/ses_sending_domain"
-  cloudflare_zone = cloudflare_zone.neilhosting_net
+moved {
+  from = cloudflare_record.interconlarp_org_amazonses_dkim_record
+  to   = module.managed_ses_sending_domain["interconlarp.org"].cloudflare_record.amazonses_verification_record
 }
