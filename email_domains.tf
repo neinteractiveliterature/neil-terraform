@@ -2,7 +2,6 @@ locals {
   unmanaged_sending_domains = toset([
     "aegames.org",
     "beconlarp.com",
-    "cyberol.org",
     "festivalofthelarps.com",
     "greaterbostonlarpsociety.org",
     "natbudin.com"
