@@ -1,7 +1,7 @@
 locals {
   hosted_org_subdomains = {
     "becon" = heroku_domain.intercode["*.beconlarp.com"].cname,
-    "gbls"  = heroku_domain.intercode["signups.greaterbostonlarpsociety.org"].cname
+    "gbls"  = heroku_domain.intercode["signups.greaterbostonlarpsociety.org"].cname,
   }
 }
 
