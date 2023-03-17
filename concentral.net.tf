@@ -29,6 +29,10 @@ locals {
     "vsb.concentral.net"                = "virtualspacebubble2022.concentral.net"
     "vsb2020.concentral.net"            = "virtualspacebubble2020.concentral.net"
   }
+
+  concentral_net_convention_mx_subdomains = toset([
+    "maxicon.concentral.net"
+  ])
 }
 
 module "concentral_net_apex_redirect" {
@@ -66,4 +70,24 @@ resource "cloudflare_record" "concentral_net_spf" {
   name    = "concentral.net"
   type    = "TXT"
   value   = "v=spf1 include:amazonses.com ~all"
+}
+
+resource "cloudflare_record" "concentral_net_convention_mx" {
+  for_each = local.concentral_net_convention_mx_subdomains
+
+  zone_id  = cloudflare_zone.concentral_net.id
+  name     = each.value
+  type     = "MX"
+  value    = "inbound-smtp.us-east-1.amazonaws.com"
+  priority = 10
+}
+
+resource "cloudflare_record" "concentral_net_convention_events_mx" {
+  for_each = local.concentral_net_convention_mx_subdomains
+
+  zone_id  = cloudflare_zone.concentral_net.id
+  name     = "events.${each.value}"
+  type     = "MX"
+  value    = "inbound-smtp.us-east-1.amazonaws.com"
+  priority = 10
 }
