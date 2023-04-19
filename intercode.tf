@@ -62,7 +62,6 @@ locals {
     "*.demo.concentral.net",
     "*.gbls.concentral.net",
     "*.festivalofthelarps.com",
-    "*.convention.host",
     "*.extraconlarp.org",
     "neilhosting.net",
     "www.neilhosting.net",
