@@ -21,12 +21,12 @@ locals {
     "dicebubble5.concentral.net"        = "dicebubble2016.concentral.net"
     "molw.concentral.net"               = "molw2017.concentral.net"
     "rpitheorycon.concentral.net"       = "rpitheorycon2020.concentral.net"
-    "spacebubble.concentral.net"        = "virtualspacebubble2022.concentral.net"
+    "spacebubble.concentral.net"        = "virtualspacebubble2023.concentral.net"
     "summerlarpin.concentral.net"       = "summerlarpin2023.concentral.net"
     "summerlarping.concentral.net"      = "summerlarpin2023.concentral.net"
     "timebubble.concentral.net"         = "timebubble2023.concentral.net"
-    "virtualspacebubble.concentral.net" = "virtualspacebubble2022.concentral.net"
-    "vsb.concentral.net"                = "virtualspacebubble2022.concentral.net"
+    "virtualspacebubble.concentral.net" = "virtualspacebubble2023.concentral.net"
+    "vsb.concentral.net"                = "virtualspacebubble2023.concentral.net"
     "vsb2020.concentral.net"            = "virtualspacebubble2020.concentral.net"
   }
 
