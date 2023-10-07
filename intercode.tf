@@ -58,7 +58,7 @@ locals {
   intercode_domains = toset([
     "*.beconlarp.com",
     "*.neilhosting.net",
-    "*.aegames.org",
+    "thepitch.aegames.org",
     "*.demo.concentral.net",
     "*.gbls.concentral.net",
     "*.festivalofthelarps.com",
@@ -90,7 +90,7 @@ resource "heroku_app" "intercode" {
     ASSETS_HOST                         = "assets.neilhosting.net"
     CLOUDWATCH_LOG_GROUP                = aws_cloudwatch_log_group.intercode2_production.name
     HEROKU_APP_NAME                     = "intercode"
-    INTERCODE_CERTS_NO_WILDCARD_DOMAINS = "5pi-con.natbudin.com signups.greaterbostonlarpsociety.org"
+    INTERCODE_CERTS_NO_WILDCARD_DOMAINS = "5pi-con.natbudin.com signups.greaterbostonlarpsociety.org thepitch.aegames.org"
     INTERCODE_HOST                      = "neilhosting.net"
     MALLOC_ARENA_MAX                    = 2
     RACK_ENV                            = "production"

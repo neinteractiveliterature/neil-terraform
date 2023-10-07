@@ -36,6 +36,7 @@ resource "heroku_app" "larp_library" {
 
   config_vars = {
     ASSETS_HOST                 = "assets.larplibrary.org"
+    CLOUDWATCH_LOG_GROUP        = aws_cloudwatch_log_group.larp_library_production.name
     INTERCODE_URL               = "https://www.neilhosting.net"
     LANG                        = "en"
     RACK_ENV                    = "production"
@@ -162,6 +163,17 @@ resource "aws_iam_group_policy" "larp_library_s3" {
       "Effect":"Allow",
       "Action":"ses:SendRawEmail",
       "Resource":"*"
+    },
+    {
+      "Sid": "CloudwatchLogsAccess",
+      "Effect": "Allow",
+      "Action": [
+        "logs:CreateLogStream",
+        "logs:DescribeLogStreams",
+        "logs:GetLogEvents",
+        "logs:PutLogEvents"
+      ],
+      "Resource": "${aws_cloudwatch_log_group.larp_library_production.arn}:*"
     }
   ]
 }
@@ -179,6 +191,17 @@ resource "aws_iam_user_group_membership" "larp_library" {
 
 resource "aws_iam_access_key" "larp_library" {
   user = aws_iam_user.larp_library.name
+}
+
+resource "aws_cloudwatch_log_group" "larp_library_production" {
+  name = "larp_library_production"
+
+  tags = {
+    Environment = "production"
+    Application = "larp_library"
+  }
+
+  retention_in_days = 30
 }
 
 resource "cloudflare_zone" "larplibrary_org" {

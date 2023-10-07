@@ -13,11 +13,15 @@ terraform {
       version = "~> 5.1"
     }
     rollbar = {
-      source  = "rollbar/rollbar"
-      version = "~> 1.6.0"
+      source = "rollbar/rollbar"
     }
   }
   required_version = ">= 1.1"
+}
+
+variable "rollbar_token" {
+  type      = string
+  sensitive = true
 }
 
 provider "aws" {
@@ -29,6 +33,7 @@ provider "heroku" {
 }
 
 provider "rollbar" {
+  api_key = var.rollbar_token
 }
 
 variable "cloudflare_email" {
