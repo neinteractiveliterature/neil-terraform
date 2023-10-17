@@ -17,7 +17,7 @@ locals {
 
   concentral_net_redirects = {
     "concentral.net"                    = "www.concentral.net"
-    "dicebubble.concentral.net"         = "dicebubble2022.concentral.net"
+    "dicebubble.concentral.net"         = "dicebubble2024.concentral.net"
     "dicebubble5.concentral.net"        = "dicebubble2016.concentral.net"
     "molw.concentral.net"               = "molw2017.concentral.net"
     "rpitheorycon.concentral.net"       = "rpitheorycon2020.concentral.net"
