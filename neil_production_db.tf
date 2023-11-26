@@ -1,7 +1,24 @@
-resource "aws_db_parameter_group" "production_pg14" {
-  name        = "production-pg14"
+resource "aws_db_parameter_group" "production_pg15" {
+  name        = "production-pg15"
   description = "Production parameters (force SSL, tune max_connections)"
-  family      = "postgres14"
+  family      = "postgres15"
+
+  parameter {
+    apply_method = "immediate"
+    name         = "rds.force_ssl"
+    value        = "1"
+  }
+  parameter {
+    apply_method = "pending-reboot"
+    name         = "max_connections"
+    value        = "100"
+  }
+}
+
+resource "aws_db_parameter_group" "production_pg16" {
+  name        = "production-pg16"
+  description = "Production parameters (force SSL, tune max_connections)"
+  family      = "postgres16"
 
   parameter {
     apply_method = "immediate"
@@ -40,10 +57,10 @@ resource "aws_db_instance" "neil_production" {
   instance_class        = "db.t4g.small"
   identifier            = "neil-production"
   engine                = "postgres"
-  engine_version        = "14.7"
+  engine_version        = "15.5"
   username              = "neiladmin"
   password              = var.rds_neiladmin_password
-  parameter_group_name  = "production-pg14"
+  parameter_group_name  = "production-pg15"
   deletion_protection   = true
   publicly_accessible   = true
   allocated_storage     = 10
