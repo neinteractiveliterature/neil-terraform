@@ -114,7 +114,7 @@ resource "heroku_app" "intercode" {
     AWS_S3_BUCKET                  = aws_s3_bucket.intercode2_production.bucket
     CF_Account_ID                  = var.intercode_cloudflare_account_id
     CF_Token                       = var.intercode_cloudflare_token
-    DATABASE_URL                   = "postgres://intercode_production:${var.intercode_production_db_password}@${aws_db_instance.neil_production.endpoint}/intercode_production?sslrootcert=rds-combined-ca-bundle-2019.pem"
+    DATABASE_URL                   = "postgres://intercode_production:${var.intercode_production_db_password}@${aws_db_instance.neil_production.endpoint}/intercode_production?sslrootcert=rds-global-bundle.pem"
     HEROKU_API_TOKEN               = var.intercode_heroku_api_token
     OPENID_CONNECT_SIGNING_KEY     = var.intercode_openid_connect_signing_key
     RECAPTCHA_SECRET_KEY           = var.intercode_recaptcha_secret_key
