@@ -52,12 +52,17 @@ resource "heroku_app" "larp_library" {
     AWS_REGION            = data.aws_region.current.name
     AWS_SECRET_ACCESS_KEY = aws_iam_access_key.larp_library.secret
     AWS_S3_BUCKET         = aws_s3_bucket.larp_library_production.bucket
-    DATABASE_URL          = "postgres://larp_library_production:${var.larp_library_production_db_password}@${aws_db_instance.neil_production.endpoint}/larp_library_production?sslrootcert=rds-combined-ca-bundle-2019.pem"
+    DATABASE_URL          = "postgres://larp_library_production:${var.larp_library_production_db_password}@${aws_db_instance.neil_production.endpoint}/larp_library_production?sslrootcert=rds-global-bundle.pem"
     INTERCODE_APP_ID      = var.larp_library_intercode_app_id
     INTERCODE_APP_SECRET  = var.larp_library_intercode_app_secret
     ROLLBAR_ACCESS_TOKEN  = rollbar_project_access_token.larp_library_post_server_item.access_token
     SECRET_KEY_BASE       = var.larp_library_secret_key_base
   }
+}
+
+resource "heroku_drain" "larp_library_vector" {
+  app_id = heroku_app.larp_library.id
+  url    = "https://${var.vector_heroku_source_username}:${var.vector_heroku_source_password}@${heroku_app.neil_vector.heroku_hostname}/events?application=larp-library"
 }
 
 resource "heroku_domain" "larp_library" {

@@ -129,6 +129,11 @@ resource "heroku_app" "intercode" {
   }
 }
 
+resource "heroku_drain" "intercode_vector" {
+  app_id = heroku_app.intercode.id
+  url    = "https://${var.vector_heroku_source_username}:${var.vector_heroku_source_password}@${heroku_app.neil_vector.heroku_hostname}/events?application=intercode"
+}
+
 resource "heroku_domain" "intercode" {
   for_each = local.intercode_domains
 

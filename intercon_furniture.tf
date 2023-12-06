@@ -54,9 +54,25 @@ resource "heroku_app" "intercon_furniture" {
   }
 }
 
+resource "heroku_drain" "intercon_furniture_vector" {
+  app_id = heroku_app.intercon_furniture.id
+  url    = "https://${var.vector_heroku_source_username}:${var.vector_heroku_source_password}@${heroku_app.neil_vector.heroku_hostname}/events?application=intercon-furniture"
+}
+
 resource "heroku_domain" "intercon_furniture" {
   for_each = local.intercon_furniture_domains
 
   app_id   = heroku_app.intercon_furniture.uuid
   hostname = each.value
+}
+
+resource "aws_cloudwatch_log_group" "intercon_furniture_production" {
+  name = "intercon_furniture_production"
+
+  tags = {
+    Environment = "production"
+    Application = "intercon-furniture"
+  }
+
+  retention_in_days = 30
 }
