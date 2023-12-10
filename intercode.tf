@@ -92,6 +92,7 @@ resource "heroku_app" "intercode" {
     HEROKU_APP_NAME                     = "intercode"
     INTERCODE_CERTS_NO_WILDCARD_DOMAINS = "5pi-con.natbudin.com signups.greaterbostonlarpsociety.org thepitch.aegames.org"
     INTERCODE_HOST                      = "neilhosting.net"
+    JSON_LOGGING                        = "1"
     MALLOC_ARENA_MAX                    = 2
     RACK_ENV                            = "production"
     RAILS_ENV                           = "production"
@@ -131,7 +132,7 @@ resource "heroku_app" "intercode" {
 
 resource "heroku_drain" "intercode_vector" {
   app_id = heroku_app.intercode.id
-  url    = "https://${var.vector_heroku_source_username}:${var.vector_heroku_source_password}@${heroku_app.neil_vector.heroku_hostname}/events?application=intercode"
+  url    = "https://${var.vector_heroku_source_username}:${var.vector_heroku_source_password}@vector.interactiveliterature.org/events?application=intercode"
 }
 
 resource "heroku_domain" "intercode" {
@@ -421,4 +422,32 @@ resource "aws_iam_user_group_membership" "intercode2_production" {
 
 resource "aws_iam_access_key" "intercode2_production" {
   user = aws_iam_user.intercode2_production.name
+}
+
+resource "github_repository" "intercode" {
+  name        = "intercode"
+  description = "The future of convention web applications"
+
+  delete_branch_on_merge = true
+  has_downloads          = true
+  has_issues             = true
+  has_projects           = true
+  has_wiki               = true
+  vulnerability_alerts   = true
+
+  pages {
+    build_type = "legacy"
+    cname      = cloudflare_record.interactiveliterature_org_intercode_cname.hostname
+
+    source {
+      branch = "gh-pages"
+      path   = "/"
+    }
+  }
+}
+
+resource "github_actions_secret" "intercode_fly_api_token" {
+  repository      = github_repository.intercode.id
+  secret_name     = "FLY_API_TOKEN"
+  plaintext_value = var.fly_gha_api_token
 }

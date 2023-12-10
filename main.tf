@@ -15,6 +15,9 @@ terraform {
     rollbar = {
       source = "rollbar/rollbar"
     }
+    github = {
+      source = "integrations/github"
+    }
   }
   required_version = ">= 1.1"
 }
@@ -47,6 +50,14 @@ variable "cloudflare_api_key" {
 provider "cloudflare" {
   email   = var.cloudflare_email
   api_key = var.cloudflare_api_key
+}
+
+variable "fly_gha_api_token" {
+  type = string
+}
+
+provider "github" {
+  owner = "neinteractiveliterature"
 }
 
 terraform {

@@ -281,4 +281,17 @@ resource "cloudflare_record" "interactiveliterature_org_wildcard_cname" {
   value   = heroku_domain.intercode["*.interactiveliterature.org"].cname
 }
 
+resource "cloudflare_record" "interactiveliterature_org_vector" {
+  zone_id = cloudflare_zone.interactiveliterature_org.id
+  name    = "vector"
+  type    = "CNAME"
+  value   = "neil-vector.fly.dev"
+}
 
+
+resource "cloudflare_record" "interactiveliterature_org_vector_acme_challenge" {
+  zone_id = cloudflare_zone.interactiveliterature_org.id
+  name    = "_acme-challenge.vector"
+  type    = "CNAME"
+  value   = "vector.interactiveliterature.org.yzrggx.flydns.net"
+}

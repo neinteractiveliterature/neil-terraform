@@ -31,7 +31,7 @@ resource "heroku_app" "listmonk" {
 
 resource "heroku_drain" "listmonk_vector" {
   app_id = heroku_app.listmonk.id
-  url    = "https://${var.vector_heroku_source_username}:${var.vector_heroku_source_password}@${heroku_app.neil_vector.heroku_hostname}/events?application=neil-listmonk"
+  url    = "https://${var.vector_heroku_source_username}:${var.vector_heroku_source_password}@vector.interactiveliterature.org/events?application=neil-listmonk"
 }
 
 resource "heroku_domain" "listmonk_interactiveliterature_org" {

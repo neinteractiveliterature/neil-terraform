@@ -62,7 +62,7 @@ resource "heroku_app" "larp_library" {
 
 resource "heroku_drain" "larp_library_vector" {
   app_id = heroku_app.larp_library.id
-  url    = "https://${var.vector_heroku_source_username}:${var.vector_heroku_source_password}@${heroku_app.neil_vector.heroku_hostname}/events?application=larp-library"
+  url    = "https://${var.vector_heroku_source_username}:${var.vector_heroku_source_password}@vector.interactiveliterature.org/events?application=larp-library"
 }
 
 resource "heroku_domain" "larp_library" {

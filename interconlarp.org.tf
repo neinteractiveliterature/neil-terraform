@@ -177,3 +177,17 @@ resource "cloudflare_record" "interconlarp_org_furniture_cname" {
   type    = "CNAME"
   value   = heroku_domain.intercon_furniture["furniture.interconlarp.org"].cname
 }
+
+resource "cloudflare_record" "interconlarp_org_i_fly_temp" {
+  zone_id = cloudflare_zone.interconlarp_org.id
+  name    = "i"
+  type    = "CNAME"
+  value   = "intercode.fly.dev"
+}
+
+resource "cloudflare_record" "interconlarp_org_i_acme_challenge_fly_temp" {
+  zone_id = cloudflare_zone.interconlarp_org.id
+  name    = "_acme-challenge.i"
+  type    = "CNAME"
+  value   = "i.interconlarp.org.j2o5oe.flydns.net"
+}

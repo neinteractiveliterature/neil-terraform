@@ -56,7 +56,7 @@ resource "heroku_app" "intercon_furniture" {
 
 resource "heroku_drain" "intercon_furniture_vector" {
   app_id = heroku_app.intercon_furniture.id
-  url    = "https://${var.vector_heroku_source_username}:${var.vector_heroku_source_password}@${heroku_app.neil_vector.heroku_hostname}/events?application=intercon-furniture"
+  url    = "https://${var.vector_heroku_source_username}:${var.vector_heroku_source_password}@vector.interactiveliterature.org/events?application=intercon-furniture"
 }
 
 resource "heroku_domain" "intercon_furniture" {
