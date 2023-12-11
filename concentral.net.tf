@@ -5,12 +5,12 @@ resource "cloudflare_zone" "concentral_net" {
 
 locals {
   concentral_net_cnames = {
-    "*"                    = heroku_domain.intercode["*.concentral.net"].cname
-    "*.demo"               = heroku_domain.intercode["*.demo.concentral.net"].cname
-    "*.gbls"               = heroku_domain.intercode["*.gbls.concentral.net"].cname
-    "_acme-challenge"      = "_acme-challenge.neilhosting.net."
-    "_acme-challenge.demo" = "_acme-challenge.neilhosting.net."
-    "_acme-challenge.gbls" = "_acme-challenge.neilhosting.net."
+    "*"                    = "intercode.fly.dev"
+    "*.demo"               = "intercode.fly.dev"
+    "*.gbls"               = "intercode.fly.dev"
+    "_acme-challenge"      = "concentral.net.j2o5oe.flydns.net"
+    "_acme-challenge.demo" = "demo.concentral.net.j2o5oe.flydns.net"
+    "_acme-challenge.gbls" = "gbls.concentral.net.j2o5oe.flydns.net"
     "bridgewater2012"      = "bridgewater2012.concentral.net.s3-website-us-east-1.amazonaws.com."
     "miskatonic2012"       = "miskatonic2012.concentral.net.s3-website-us-east-1.amazonaws.com."
   }
@@ -99,5 +99,5 @@ resource "cloudflare_record" "concentral_net_convention_mx_cname" {
   zone_id = cloudflare_zone.concentral_net.id
   name    = each.value
   type    = "CNAME"
-  value   = heroku_domain.intercode["*.concentral.net"].cname
+  value   = "intercode.fly.dev"
 }

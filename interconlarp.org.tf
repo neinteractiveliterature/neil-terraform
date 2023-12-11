@@ -110,7 +110,7 @@ resource "cloudflare_record" "interconlarp_org_acme_challenge_cname" {
   zone_id = cloudflare_zone.interconlarp_org.id
   name    = "_acme-challenge"
   type    = "CNAME"
-  value   = "_acme-challenge.neilhosting.net."
+  value   = "interconlarp.org.j2o5oe.flydns.net."
 }
 
 resource "cloudflare_record" "interconlarp_org_convention_subdomain_cname" {
@@ -119,7 +119,7 @@ resource "cloudflare_record" "interconlarp_org_convention_subdomain_cname" {
   zone_id = cloudflare_zone.interconlarp_org.id
   name    = each.value
   type    = "CNAME"
-  value   = heroku_domain.intercode["*.interconlarp.org"].cname
+  value   = "intercode.fly.dev"
   proxied = true
 }
 
@@ -168,7 +168,7 @@ resource "cloudflare_record" "interconlarp_org_wildcard_cname" {
   zone_id = cloudflare_zone.interconlarp_org.id
   name    = "*"
   type    = "CNAME"
-  value   = heroku_domain.intercode["*.interconlarp.org"].cname
+  value   = "intercode.fly.dev"
 }
 
 resource "cloudflare_record" "interconlarp_org_furniture_cname" {
@@ -176,18 +176,4 @@ resource "cloudflare_record" "interconlarp_org_furniture_cname" {
   name    = "furniture"
   type    = "CNAME"
   value   = heroku_domain.intercon_furniture["furniture.interconlarp.org"].cname
-}
-
-resource "cloudflare_record" "interconlarp_org_i_fly_temp" {
-  zone_id = cloudflare_zone.interconlarp_org.id
-  name    = "i"
-  type    = "CNAME"
-  value   = "intercode.fly.dev"
-}
-
-resource "cloudflare_record" "interconlarp_org_i_acme_challenge_fly_temp" {
-  zone_id = cloudflare_zone.interconlarp_org.id
-  name    = "_acme-challenge.i"
-  type    = "CNAME"
-  value   = "i.interconlarp.org.j2o5oe.flydns.net"
 }

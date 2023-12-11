@@ -199,7 +199,7 @@ resource "cloudflare_record" "interactiveliterature_org_acme_challenge_cname" {
   zone_id = cloudflare_zone.interactiveliterature_org.id
   name    = "_acme-challenge"
   type    = "CNAME"
-  value   = "_acme-challenge.neilhosting.net."
+  value   = "interactiveliterature.org.j2o5oe.flydns.net."
 }
 
 resource "cloudflare_record" "interactiveliterature_org_convention_subdomain_cname" {
@@ -208,7 +208,7 @@ resource "cloudflare_record" "interactiveliterature_org_convention_subdomain_cna
   zone_id = cloudflare_zone.interactiveliterature_org.id
   name    = each.value
   type    = "CNAME"
-  value   = heroku_domain.intercode["*.interactiveliterature.org"].cname
+  value   = "intercode.fly.dev"
   proxied = true
 }
 
@@ -278,7 +278,7 @@ resource "cloudflare_record" "interactiveliterature_org_wildcard_cname" {
   zone_id = cloudflare_zone.interactiveliterature_org.id
   name    = "*"
   type    = "CNAME"
-  value   = heroku_domain.intercode["*.interactiveliterature.org"].cname
+  value   = "intercode.fly.dev"
 }
 
 resource "cloudflare_record" "interactiveliterature_org_vector" {

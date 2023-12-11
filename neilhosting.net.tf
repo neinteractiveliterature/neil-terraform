@@ -1,7 +1,7 @@
 locals {
   hosted_org_subdomains = {
-    "becon" = heroku_domain.intercode["*.beconlarp.com"].cname,
-    "gbls"  = heroku_domain.intercode["signups.greaterbostonlarpsociety.org"].cname,
+    "becon" = "intercode.fly.dev",
+    "gbls"  = "intercode.fly.dev",
   }
 }
 
@@ -36,7 +36,14 @@ resource "cloudflare_record" "neilhosting_net_wildcard_cname" {
   zone_id = cloudflare_zone.neilhosting_net.id
   name    = "*"
   type    = "CNAME"
-  value   = heroku_domain.intercode["*.neilhosting.net"].cname
+  value   = "intercode.fly.dev"
+}
+
+resource "cloudflare_record" "neilhosting_net_www_acme_challenge_cname" {
+  zone_id = cloudflare_zone.neilhosting_net.id
+  name    = "_acme-challenge.www"
+  type    = "CNAME"
+  value   = "www.neilhosting.net.j2o5oe.flydns.net."
 }
 
 resource "cloudflare_record" "neilhosting_net_hosted_orgs" {
