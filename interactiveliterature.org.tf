@@ -264,7 +264,7 @@ resource "cloudflare_record" "interactiveliterature_org_listmonk_cname" {
   zone_id = cloudflare_zone.interactiveliterature_org.id
   name    = "listmonk"
   type    = "CNAME"
-  value   = heroku_domain.listmonk_interactiveliterature_org.cname
+  value   = "neil-listmonk.fly.dev"
 }
 
 resource "cloudflare_record" "interactiveliterature_org_litform_cname" {

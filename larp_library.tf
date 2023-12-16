@@ -232,7 +232,7 @@ resource "cloudflare_record" "larplibrary_org_www" {
   zone_id = cloudflare_zone.larplibrary_org.id
   name    = "www.larplibrary.org"
   type    = "CNAME"
-  value   = heroku_domain.larp_library["www.larplibrary.org"].cname
+  value   = "larp-library.fly.dev"
 }
 
 resource "cloudflare_record" "larplibrary_org_mx" {
@@ -267,5 +267,23 @@ resource "cloudflare_record" "interactiveliterature_org_library_cname" {
   zone_id = cloudflare_zone.interactiveliterature_org.id
   name    = "library"
   type    = "CNAME"
-  value   = heroku_domain.larp_library["library.interactiveliterature.org"].cname
+  value   = "larp-library.fly.dev"
+}
+
+resource "github_repository" "larp_library" {
+  name        = "larp_library"
+  description = "A site for hosting free-to-run larps"
+
+  delete_branch_on_merge = true
+  has_downloads          = true
+  has_issues             = true
+  has_projects           = true
+  has_wiki               = true
+  vulnerability_alerts   = true
+}
+
+resource "github_actions_secret" "larp_library_fly_api_token" {
+  repository      = github_repository.larp_library.id
+  secret_name     = "FLY_API_TOKEN"
+  plaintext_value = var.fly_gha_api_token
 }
