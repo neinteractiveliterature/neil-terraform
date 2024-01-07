@@ -16,6 +16,10 @@ locals {
     "wintercon2022",
     "lbc-2023"
   ])
+  interactiveliterature_org_redirects = {
+    "nelco.interactiveliterature.org" = "nelco2020.interactiveliterature.org"
+    "wbc.interactiveliterature.org"   = "wbc-2024.interactiveliterature.org"
+  }
 }
 
 resource "cloudflare_zone" "interactiveliterature_org" {
@@ -169,12 +173,14 @@ module "interactiveliterature_org_cloudfront" {
   add_security_headers_arn = aws_lambda_function.addSecurityHeaders.qualified_arn
 }
 
-module "interactiveliterature_org_nelco_redirect" {
+module "interactiveliterature_org_apex_redirect" {
+  for_each = local.interactiveliterature_org_redirects
+
   source = "./modules/cloudfront_apex_redirect"
 
   cloudflare_zone               = cloudflare_zone.interactiveliterature_org
-  domain_name                   = "nelco.interactiveliterature.org"
-  redirect_destination_hostname = "nelco2020.interactiveliterature.org"
+  domain_name                   = each.key
+  redirect_destination_hostname = each.value
   redirect_destination_protocol = "https"
   add_security_headers_arn      = aws_lambda_function.addSecurityHeaders.qualified_arn
   alternative_names             = []

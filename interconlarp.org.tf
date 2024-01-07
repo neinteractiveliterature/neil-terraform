@@ -175,7 +175,7 @@ resource "cloudflare_record" "interconlarp_org_furniture_cname" {
   zone_id = cloudflare_zone.interconlarp_org.id
   name    = "furniture"
   type    = "CNAME"
-  value   = heroku_domain.intercon_furniture["furniture.interconlarp.org"].cname
+  value   = "intercon-furniture.fly.dev"
 }
 
 resource "cloudflare_record" "interconlarp_org_security_forwarder_cname" {
