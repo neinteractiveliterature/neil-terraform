@@ -118,9 +118,8 @@ resource "cloudflare_record" "interconlarp_org_convention_subdomain_cname" {
 
   zone_id = cloudflare_zone.interconlarp_org.id
   name    = each.value
-  type    = "CNAME"
-  value   = "intercode.fly.dev"
-  proxied = true
+  type    = "A"
+  value   = "66.241.124.95"
 }
 
 resource "cloudflare_record" "interconlarp_org_convention_subdomain_mx" {
