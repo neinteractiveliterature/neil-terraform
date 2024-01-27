@@ -8,7 +8,8 @@ locals {
     "s",
     "t",
     "u",
-    "v"
+    "v",
+    "w"
   ])
   interconlarp_org_redirect_subdomains = {
     "a.interconlarp.org"    = "www.interactiveliterature.org/A",
