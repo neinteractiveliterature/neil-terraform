@@ -4,7 +4,7 @@ resource "aws_db_parameter_group" "production_pg15" {
   family      = "postgres15"
 
   parameter {
-    apply_method = "immediate"
+    apply_method = "pending-reboot"
     name         = "rds.force_ssl"
     value        = "1"
   }
@@ -21,7 +21,7 @@ resource "aws_db_parameter_group" "production_pg16" {
   family      = "postgres16"
 
   parameter {
-    apply_method = "immediate"
+    apply_method = "pending-reboot"
     name         = "rds.force_ssl"
     value        = "1"
   }

@@ -1,12 +1,10 @@
 terraform {
   required_providers {
     aws = {
-      source  = "hashicorp/aws"
-      version = "~> 4.48.0"
+      source = "hashicorp/aws"
     }
     cloudflare = {
-      source  = "cloudflare/cloudflare"
-      version = "~> 3.0"
+      source = "cloudflare/cloudflare"
     }
   }
 }
@@ -56,6 +54,13 @@ locals {
 
 resource "aws_s3_bucket" "redirect_bucket" {
   bucket = local.domain_name
+}
+
+resource "aws_s3_bucket_ownership_controls" "redirect-bucket" {
+  bucket = aws_s3_bucket.redirect_bucket.id
+  rule {
+    object_ownership = "BucketOwnerPreferred"
+  }
 }
 
 resource "aws_s3_bucket_acl" "redirect_bucket" {

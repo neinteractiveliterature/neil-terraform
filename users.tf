@@ -45,3 +45,27 @@ resource "aws_iam_user_group_membership" "jdiewald" {
     aws_iam_group.interactiveliterature_org_admin.name
   ]
 }
+
+resource "aws_iam_user" "neil_wordpress" {
+  name = "neil_wordpress"
+}
+
+resource "aws_iam_user_policy" "neil_wordpress" {
+  user   = aws_iam_user.neil_wordpress.name
+  policy = <<-EOF
+  {
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": "ses:SendRawEmail",
+            "Resource": "*"
+        }
+    ]
+  }
+  EOF
+}
+
+resource "aws_iam_access_key" "neil_wordpress" {
+  user = aws_iam_user.neil_wordpress.name
+}
