@@ -10,6 +10,20 @@ resource "cloudflare_zone" "neilhosting_net" {
   zone       = "neilhosting.net"
 }
 
+resource "cloudflare_zone_settings_override" "neilhosting_net" {
+  zone_id = cloudflare_zone.neilhosting_net.id
+  settings {
+    ssl              = "flexible"
+    always_use_https = "on"
+    security_header {
+      enabled            = true
+      include_subdomains = true
+      preload            = true
+      max_age            = 31536000
+    }
+  }
+}
+
 resource "cloudflare_record" "neilhosting_net_a" {
   zone_id = cloudflare_zone.neilhosting_net.id
   name    = "neilhosting.net"

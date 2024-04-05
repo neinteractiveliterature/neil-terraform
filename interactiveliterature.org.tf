@@ -17,6 +17,7 @@ locals {
     "lbc-2023"
   ])
   interactiveliterature_org_redirects = {
+    "interactiveliterature.org"       = "www.interactiveliterature.org"
     "nelco.interactiveliterature.org" = "nelco2020.interactiveliterature.org"
     "wbc.interactiveliterature.org"   = "wbc-2024.interactiveliterature.org"
   }
@@ -144,49 +145,6 @@ resource "aws_iam_group_policy" "interactiveliterature_org_s3" {
   EOF
 }
 
-resource "aws_iam_group_policy" "interactiveliterature_org_cloudfront" {
-  name  = "interactiveliterature.org-cloudfront"
-  group = aws_iam_group.interactiveliterature_org_admin.name
-
-  policy = <<-EOF
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Sid": "DistributionLevelAccess",
-      "Effect": "Allow",
-      "Action": [
-        "cloudfront:ListDistributions",
-        "cloudfront:ListStreamingDistributions"
-      ],
-      "Resource": ["*"]
-    },
-    {
-      "Sid": "Stmt1545167594000",
-      "Effect": "Allow",
-      "Action": [
-        "cloudfront:*"
-      ],
-      "Resource": [
-        "${module.interactiveliterature_org_cloudfront.cloudfront_distribution.arn}"
-      ]
-    }
-  ]
-}
-  EOF
-}
-
-module "interactiveliterature_org_cloudfront" {
-  source = "./modules/cloudfront_with_acm"
-
-  domain_name              = "interactiveliterature.org"
-  cloudflare_zone          = cloudflare_zone.interactiveliterature_org
-  alternative_names        = ["www.interactiveliterature.org"]
-  origin_id                = "S3-Website-www.interactiveliterature.org.s3-website-us-east-1.amazonaws.com"
-  origin_domain_name       = aws_s3_bucket_website_configuration.www_interactiveliterature_org.website_endpoint
-  add_security_headers_arn = aws_lambda_function.addSecurityHeaders.qualified_arn
-}
-
 module "interactiveliterature_org_apex_redirect" {
   for_each = local.interactiveliterature_org_redirects
 
@@ -197,13 +155,6 @@ module "interactiveliterature_org_apex_redirect" {
   redirect_destination_hostname = each.value
   redirect_destination_protocol = "https"
   alternative_names             = []
-}
-
-resource "cloudflare_record" "interactiveliterature_org_apex_alias" {
-  zone_id = cloudflare_zone.interactiveliterature_org.id
-  name    = "interactiveliterature.org"
-  type    = "CNAME"
-  value   = module.interactiveliterature_org_cloudfront.cloudfront_distribution.domain_name
 }
 
 resource "cloudflare_record" "interactiveliterature_org_mx" {
@@ -255,7 +206,8 @@ resource "cloudflare_record" "interactiveliterature_org_www_cname" {
   zone_id = cloudflare_zone.interactiveliterature_org.id
   name    = "www"
   type    = "CNAME"
-  value   = module.interactiveliterature_org_cloudfront.cloudfront_distribution.domain_name
+  proxied = true
+  value   = aws_s3_bucket_website_configuration.www_interactiveliterature_org.website_endpoint
 }
 
 resource "cloudflare_record" "interactiveliterature_org_spf_record" {

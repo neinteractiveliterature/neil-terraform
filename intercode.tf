@@ -253,8 +253,6 @@ module "uploads_neilhosting_net_cloudfront" {
   compress                 = true
 }
 
-# assets.neilhosting.net is a CloudFront distribution that caches whatever neilhosting.net is
-# serving.  Intercode points asset URLs at that domain so that they can be served over CDN
 resource "cloudflare_record" "assets_neilhosting_net" {
   zone_id = cloudflare_zone.neilhosting_net.id
   name    = "assets.neilhosting.net"
