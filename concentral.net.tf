@@ -1,8 +1,3 @@
-resource "cloudflare_zone" "concentral_net" {
-  account_id = "9e36b5cabcd5529d3bd08131b7541c06"
-  zone       = "concentral.net"
-}
-
 locals {
   concentral_net_cnames = {
     "*"                    = "intercode.fly.dev"
@@ -22,12 +17,13 @@ locals {
     "molw.concentral.net"               = "molw2017.concentral.net"
     "rpitheorycon.concentral.net"       = "rpitheorycon2020.concentral.net"
     "spacebubble.concentral.net"        = "virtualspacebubble2023.concentral.net"
-    "summerlarpin.concentral.net"       = "summerlarpin2023.concentral.net"
-    "summerlarping.concentral.net"      = "summerlarpin2023.concentral.net"
+    "summerlarpin.concentral.net"       = "summerlarpin2024.concentral.net"
+    "summerlarping.concentral.net"      = "summerlarpin2024.concentral.net"
     "timebubble.concentral.net"         = "timebubble2023.concentral.net"
     "virtualspacebubble.concentral.net" = "virtualspacebubble2023.concentral.net"
     "vsb.concentral.net"                = "virtualspacebubble2023.concentral.net"
     "vsb2020.concentral.net"            = "virtualspacebubble2020.concentral.net"
+    "writersblock.concentral.net"       = "writersblock2024.concentral.net"
   }
 
   concentral_net_convention_mx_subdomains = toset([
@@ -35,16 +31,34 @@ locals {
   ])
 }
 
+resource "cloudflare_zone" "concentral_net" {
+  account_id = "9e36b5cabcd5529d3bd08131b7541c06"
+  zone       = "concentral.net"
+}
+
+resource "cloudflare_zone_settings_override" "concentral_net" {
+  zone_id = cloudflare_zone.concentral_net.id
+  settings {
+    ssl              = "flexible"
+    always_use_https = "on"
+    security_header {
+      enabled            = true
+      include_subdomains = true
+      preload            = true
+      max_age            = 31536000
+    }
+  }
+}
+
 module "concentral_net_apex_redirect" {
   for_each = local.concentral_net_redirects
 
-  source = "./modules/cloudfront_apex_redirect"
+  source = "./modules/cloudflare_apex_redirect"
 
   cloudflare_zone               = cloudflare_zone.concentral_net
   domain_name                   = each.key
   redirect_destination_hostname = each.value
   redirect_destination_protocol = "https"
-  add_security_headers_arn      = aws_lambda_function.addSecurityHeaders.qualified_arn
   alternative_names             = []
 }
 

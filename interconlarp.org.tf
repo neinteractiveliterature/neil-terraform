@@ -12,18 +12,32 @@ locals {
     "w"
   ])
   interconlarp_org_redirect_subdomains = {
-    "a.interconlarp.org"    = "www.interactiveliterature.org/A",
-    "b.interconlarp.org"    = "www.interactiveliterature.org/B",
-    "c.interconlarp.org"    = "www.interactiveliterature.org/C",
-    "xiii.interconlarp.org" = "www.interactiveliterature.org/XIII",
-    "xiv.interconlarp.org"  = "www.interactiveliterature.org/XIV",
-    "xv.interconlarp.org"   = "www.interactiveliterature.org/XV"
+    "a.interconlarp.org"    = "A/",
+    "b.interconlarp.org"    = "B/",
+    "c.interconlarp.org"    = "C/",
+    "xiii.interconlarp.org" = "XIII/",
+    "xiv.interconlarp.org"  = "XIV/",
+    "xv.interconlarp.org"   = "XV/"
   }
 }
 
 resource "cloudflare_zone" "interconlarp_org" {
   account_id = "9e36b5cabcd5529d3bd08131b7541c06"
   zone       = "interconlarp.org"
+}
+
+resource "cloudflare_zone_settings_override" "interconlarp_org" {
+  zone_id = cloudflare_zone.interconlarp_org.id
+  settings {
+    ssl              = "flexible"
+    always_use_https = "on"
+    security_header {
+      enabled            = true
+      include_subdomains = true
+      preload            = true
+      max_age            = 31536000
+    }
+  }
 }
 
 resource "aws_s3_bucket" "interconlarp_org" {
@@ -82,13 +96,13 @@ module "interconlarp_org_cloudfront" {
 module "interconlarp_org_redirect_subdomain" {
   for_each = local.interconlarp_org_redirect_subdomains
 
-  source = "./modules/cloudfront_apex_redirect"
+  source = "./modules/cloudflare_apex_redirect"
 
   cloudflare_zone               = cloudflare_zone.interconlarp_org
   domain_name                   = each.key
-  redirect_destination_hostname = each.value
+  redirect_destination_hostname = "www.interactiveliterature.org"
+  redirect_destination_path     = each.value
   redirect_destination_protocol = "https"
-  add_security_headers_arn      = aws_lambda_function.addSecurityHeaders.qualified_arn
   alternative_names             = []
 }
 

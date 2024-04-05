@@ -9,13 +9,27 @@ resource "cloudflare_zone" "extraconlarp_org" {
   zone       = "extraconlarp.org"
 }
 
-module "extraconlarp_org_cloudfront" {
-  source = "./modules/cloudfront_apex_redirect"
+resource "cloudflare_zone_settings_override" "extraconlarp_org" {
+  zone_id = cloudflare_zone.extraconlarp_org.id
+  settings {
+    ssl              = "flexible"
+    always_use_https = "on"
+    min_tls_version  = "1.2"
+    security_header {
+      enabled            = true
+      include_subdomains = true
+      preload            = true
+      max_age            = 31536000
+    }
+  }
+}
+
+module "extraconlarp_org_apex_redirect" {
+  source = "./modules/cloudflare_apex_redirect"
 
   cloudflare_zone               = cloudflare_zone.extraconlarp_org
   redirect_destination_hostname = "2021.extraconlarp.org"
   redirect_destination_protocol = "https"
-  add_security_headers_arn      = aws_lambda_function.addSecurityHeaders.qualified_arn
   alternative_names             = ["www.extraconlarp.org"]
 }
 

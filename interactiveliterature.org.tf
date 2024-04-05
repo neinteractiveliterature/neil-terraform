@@ -27,6 +27,20 @@ resource "cloudflare_zone" "interactiveliterature_org" {
   zone       = "interactiveliterature.org"
 }
 
+resource "cloudflare_zone_settings_override" "interactiveliterature_org" {
+  zone_id = cloudflare_zone.interactiveliterature_org.id
+  settings {
+    ssl              = "flexible"
+    always_use_https = "on"
+    security_header {
+      enabled            = true
+      include_subdomains = true
+      preload            = true
+      max_age            = 31536000
+    }
+  }
+}
+
 resource "aws_s3_bucket" "www_interactiveliterature_org" {
   bucket = "www.interactiveliterature.org"
 }
@@ -176,13 +190,12 @@ module "interactiveliterature_org_cloudfront" {
 module "interactiveliterature_org_apex_redirect" {
   for_each = local.interactiveliterature_org_redirects
 
-  source = "./modules/cloudfront_apex_redirect"
+  source = "./modules/cloudflare_apex_redirect"
 
   cloudflare_zone               = cloudflare_zone.interactiveliterature_org
   domain_name                   = each.key
   redirect_destination_hostname = each.value
   redirect_destination_protocol = "https"
-  add_security_headers_arn      = aws_lambda_function.addSecurityHeaders.qualified_arn
   alternative_names             = []
 }
 

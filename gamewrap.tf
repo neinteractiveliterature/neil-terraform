@@ -35,5 +35,6 @@ resource "cloudflare_record" "interactiveliterature_org_gamewrap_cname" {
   zone_id = cloudflare_zone.interactiveliterature_org.id
   name    = "gamewrap"
   type    = "CNAME"
-  value   = module.gamewrap_cloudfront.cloudfront_distribution.domain_name
+  proxied = true
+  value   = aws_s3_bucket_website_configuration.gamewrap_interactiveliterature_org.website_endpoint
 }
