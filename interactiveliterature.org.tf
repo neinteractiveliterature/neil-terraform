@@ -14,7 +14,8 @@ locals {
     "wbc2021",
     "wbc-2024",
     "wintercon2022",
-    "lbc-2023"
+    "lbc-2023",
+    "lbc-2024"
   ])
   interactiveliterature_org_redirects = {
     "interactiveliterature.org"       = "www.interactiveliterature.org"
