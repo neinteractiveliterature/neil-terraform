@@ -4,7 +4,7 @@ locals {
     "K",                               # that one year in Waltham
     "L", "M", "N", "O",                # the Chelmsford years, part II
     "P",                               # that one year in Westborough
-    "Q", "R", "S", "T", "U", "V"       # the Warwick years
+    "Q", "R", "S", "T", "U", "V", "W"  # the Warwick years
   ]
   interactiveliterature_org_intercode_subdomains = toset([
     "irongm",
@@ -172,14 +172,13 @@ resource "cloudflare_record" "interactiveliterature_org_acme_challenge_cname" {
   value   = "interactiveliterature.org.j2o5oe.flydns.net."
 }
 
-resource "cloudflare_record" "interactiveliterature_org_convention_subdomain_cname" {
+resource "cloudflare_record" "interactiveliterature_org_convention_subdomain_a" {
   for_each = local.interactiveliterature_org_intercode_subdomains
 
   zone_id = cloudflare_zone.interactiveliterature_org.id
   name    = each.value
-  type    = "CNAME"
-  value   = "intercode.fly.dev"
-  proxied = true
+  type    = "A"
+  value   = "66.241.124.95"
 }
 
 resource "cloudflare_record" "interactiveliterature_org_convention_subdomain_mx" {

@@ -64,7 +64,7 @@ resource "aws_s3_bucket_website_configuration" "interconlarp_org" {
           KeyPrefixEquals = "policy"
         }
         Redirect = {
-          HostName         = "v.interconlarp.org"
+          HostName         = "w.interconlarp.org"
           HttpRedirectCode = "302"
           Protocol         = "https"
           ReplaceKeyWith   = "pages/rules"
@@ -72,7 +72,7 @@ resource "aws_s3_bucket_website_configuration" "interconlarp_org" {
       },
       {
         Redirect = {
-          HostName         = "v.interconlarp.org"
+          HostName         = "w.interconlarp.org"
           HttpRedirectCode = "302"
           Protocol         = "https"
           ReplaceKeyWith   = ""
