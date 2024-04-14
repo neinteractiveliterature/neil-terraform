@@ -214,11 +214,15 @@ resource "cloudflare_zone" "larplibrary_org" {
   zone       = "larplibrary.org"
 }
 
-resource "cloudflare_record" "larplibrary_org_apex_redirect" {
-  zone_id = cloudflare_zone.larplibrary_org.id
-  name    = "larplibrary.org"
-  type    = "A"
-  value   = "216.24.57.1"
+module "larplibrary_org_apex_redirect" {
+  source = "./modules/cloudflare_apex_redirect"
+
+  cloudflare_zone               = cloudflare_zone.larplibrary_org
+  domain_name                   = "larplibrary.org"
+  redirect_destination_hostname = "www.larplibrary.org"
+  redirect_destination_path     = "/"
+  redirect_destination_protocol = "https"
+  alternative_names             = []
 }
 
 resource "cloudflare_record" "larplibrary_org_spf" {
