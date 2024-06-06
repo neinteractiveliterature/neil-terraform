@@ -78,3 +78,51 @@ resource "aws_db_instance" "neil_production" {
     "workload-type" = "other"
   }
 }
+
+resource "aws_cloudwatch_metric_alarm" "neil_production_low_disk_space" {
+  alarm_name          = "NEIL Production DB low disk space"
+  alarm_description   = "Free disk space on NEIL production database has fallen below 5GB."
+  comparison_operator = "LessThanThreshold"
+  evaluation_periods  = 5
+  datapoints_to_alarm = 5
+  threshold           = 5
+
+  alarm_actions = [aws_sns_topic.intercode_production_alarms.arn]
+
+  metric_query {
+    id          = "q1"
+    return_data = true
+
+    metric {
+      namespace   = "AWS/RDS"
+      metric_name = "FreeStorageSpace"
+      period      = 300
+      stat        = "Average"
+      unit        = "Gigabytes"
+    }
+  }
+}
+
+resource "aws_cloudwatch_metric_alarm" "neil_production_high_read_latency" {
+  alarm_name          = "NEIL Production DB high read latency"
+  alarm_description   = "90th percentile read latency on the NEIL production database is greater than 100ms."
+  comparison_operator = "GreaterThanThreshold"
+  evaluation_periods  = 5
+  datapoints_to_alarm = 2
+  threshold           = 100
+
+  alarm_actions = [aws_sns_topic.intercode_production_alarms.arn]
+
+  metric_query {
+    id          = "q1"
+    return_data = true
+
+    metric {
+      namespace   = "AWS/RDS"
+      metric_name = "ReadLatency"
+      period      = 300
+      stat        = "p90"
+      unit        = "Milliseconds"
+    }
+  }
+}

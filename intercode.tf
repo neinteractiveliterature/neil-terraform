@@ -71,6 +71,11 @@ locals {
     "signups.greaterbostonlarpsociety.org",
     "*.interconlarp.org"
   ])
+
+  intercode_production_alarm_email_destinations = toset([
+    "natbudin@gmail.com",
+    "david@rigitech.com"
+  ])
 }
 
 # # The Heroku app itself
@@ -171,6 +176,18 @@ resource "rollbar_project_access_token" "intercode_post_server_item" {
   scopes     = ["post_server_item"]
 }
 
+resource "aws_sns_topic" "intercode_production_alarms" {
+  name = "intercode-production-alarms"
+}
+
+resource "aws_sns_topic_subscription" "intercode_production_alarms_email_subscription" {
+  for_each = local.intercode_production_alarm_email_destinations
+
+  topic_arn = aws_sns_topic.intercode_production_alarms.arn
+  protocol  = "email"
+  endpoint  = each.value
+}
+
 # SQS queues used by Shoryuken for background processing
 resource "aws_sqs_queue" "intercode_production_dead_letter" {
   name = "intercode_production_dead_letter"
@@ -204,6 +221,29 @@ resource "aws_sqs_queue" "intercode_production_ahoy" {
       maxReceiveCount     = 3
     }
   )
+}
+
+resource "aws_cloudwatch_metric_alarm" "intercode_queue_backup" {
+  alarm_name          = "Intercode production queue backup"
+  alarm_description   = "Oldest message in Intercode production SQS queue is older than 5 minutes."
+  comparison_operator = "GreaterThanThreshold"
+  evaluation_periods  = 5
+  datapoints_to_alarm = 5
+  threshold           = 600
+
+  alarm_actions = [aws_sns_topic.intercode_production_alarms.arn]
+
+  metric_query {
+    id          = "q1"
+    label       = "Oldest message age in queue"
+    period      = 300
+    return_data = true
+    expression  = <<-EOT
+      SELECT MAX(ApproximateAgeOfOldestMessage)
+      FROM SCHEMA("AWS/SQS", QueueName)
+      WHERE QueueName != '${aws_sqs_queue.intercode_production_dead_letter.name}'
+    EOT
+  }
 }
 
 # uploads.neilhosting.net, aka intercode2_production, is the Cloudfront-served S3 bucket we use
