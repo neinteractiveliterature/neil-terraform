@@ -85,22 +85,14 @@ resource "aws_cloudwatch_metric_alarm" "neil_production_low_disk_space" {
   comparison_operator = "LessThanThreshold"
   evaluation_periods  = 5
   datapoints_to_alarm = 5
-  threshold           = 5
+  threshold           = 5 * 1024 * 1024 * 1024
 
   alarm_actions = [aws_sns_topic.intercode_production_alarms.arn]
 
-  metric_query {
-    id          = "q1"
-    return_data = true
-
-    metric {
-      namespace   = "AWS/RDS"
-      metric_name = "FreeStorageSpace"
-      period      = 300
-      stat        = "Average"
-      unit        = "Gigabytes"
-    }
-  }
+  namespace   = "AWS/RDS"
+  metric_name = "FreeStorageSpace"
+  period      = 300
+  statistic   = "Average"
 }
 
 resource "aws_cloudwatch_metric_alarm" "neil_production_high_read_latency" {
@@ -109,7 +101,7 @@ resource "aws_cloudwatch_metric_alarm" "neil_production_high_read_latency" {
   comparison_operator = "GreaterThanThreshold"
   evaluation_periods  = 5
   datapoints_to_alarm = 2
-  threshold           = 100
+  threshold           = 0.1
 
   alarm_actions = [aws_sns_topic.intercode_production_alarms.arn]
 
@@ -120,9 +112,8 @@ resource "aws_cloudwatch_metric_alarm" "neil_production_high_read_latency" {
     metric {
       namespace   = "AWS/RDS"
       metric_name = "ReadLatency"
-      period      = 300
+      period      = 10
       stat        = "p90"
-      unit        = "Milliseconds"
     }
   }
 }
