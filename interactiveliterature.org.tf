@@ -217,13 +217,6 @@ resource "cloudflare_record" "interactiveliterature_org_spf_record" {
   value   = "v=spf1 include:amazonses.com ~all"
 }
 
-resource "cloudflare_record" "interactiveliterature_org_glitchtip_cname" {
-  zone_id = cloudflare_zone.interactiveliterature_org.id
-  name    = "glitchtip"
-  type    = "CNAME"
-  value   = "neil-glitchtip.fly.dev"
-}
-
 resource "cloudflare_record" "interactiveliterature_org_google_site_verification_record" {
   zone_id = cloudflare_zone.interactiveliterature_org.id
   name    = "interactiveliterature.org"
