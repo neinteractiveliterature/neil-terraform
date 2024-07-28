@@ -6,10 +6,10 @@ terraform {
     cloudflare = {
       source = "cloudflare/cloudflare"
     }
-    heroku = {
-      source  = "heroku/heroku"
-      version = "~> 5.1"
-    }
+    # heroku = {
+    #   source  = "heroku/heroku"
+    #   version = "~> 5.1"
+    # }
     rollbar = {
       source = "rollbar/rollbar"
     }
@@ -30,8 +30,8 @@ provider "aws" {
   region  = "us-east-1"
 }
 
-provider "heroku" {
-}
+# provider "heroku" {
+# }
 
 provider "rollbar" {
   api_key = var.rollbar_token

@@ -97,19 +97,20 @@ resource "aws_db_instance" "neil_production" {
   instance_class        = "db.t4g.small"
   identifier            = "neil-production"
   engine                = "postgres"
-  engine_version        = "15.5"
+  engine_version        = "16.3"
   username              = "neiladmin"
   password              = var.rds_neiladmin_password
-  parameter_group_name  = "production-pg15"
+  parameter_group_name  = "production-pg16"
   deletion_protection   = true
   publicly_accessible   = true
   allocated_storage     = 10
   max_allocated_storage = 100
   iops                  = 3000
 
-  monitoring_role_arn          = aws_iam_role.rds_enhanced_monitoring.arn
-  monitoring_interval          = 60
-  performance_insights_enabled = true
+  enabled_cloudwatch_logs_exports = ["postgresql", "upgrade"]
+  monitoring_role_arn             = aws_iam_role.rds_enhanced_monitoring.arn
+  monitoring_interval             = 60
+  performance_insights_enabled    = true
 
   copy_tags_to_snapshot = true
   skip_final_snapshot   = true

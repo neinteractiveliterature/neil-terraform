@@ -24,53 +24,53 @@ locals {
 }
 
 # The Heroku app itself
-resource "heroku_app" "larp_library" {
-  name   = "larp-library"
-  region = "us"
-  stack  = "container"
-  acm    = true
+# resource "heroku_app" "larp_library" {
+#   name   = "larp-library"
+#   region = "us"
+#   stack  = "container"
+#   acm    = true
 
-  organization {
-    name = "neinteractiveliterature"
-  }
+#   organization {
+#     name = "neinteractiveliterature"
+#   }
 
-  config_vars = {
-    ASSETS_HOST                 = "assets.larplibrary.org"
-    CLOUDWATCH_LOG_GROUP        = aws_cloudwatch_log_group.larp_library_production.name
-    INTERCODE_URL               = "https://www.neilhosting.net"
-    LANG                        = "en"
-    RACK_ENV                    = "production"
-    RAILS_ENV                   = "production"
-    RAILS_LOG_TO_STDOUT         = "enabled"
-    RAILS_MAX_THREADS           = "4"
-    RAILS_SERVE_STATIC_FILES    = "enabled"
-    ROLLBAR_CLIENT_ACCESS_TOKEN = rollbar_project_access_token.larp_library_post_client_item.access_token
-  }
+#   config_vars = {
+#     ASSETS_HOST                 = "assets.larplibrary.org"
+#     CLOUDWATCH_LOG_GROUP        = aws_cloudwatch_log_group.larp_library_production.name
+#     INTERCODE_URL               = "https://www.neilhosting.net"
+#     LANG                        = "en"
+#     RACK_ENV                    = "production"
+#     RAILS_ENV                   = "production"
+#     RAILS_LOG_TO_STDOUT         = "enabled"
+#     RAILS_MAX_THREADS           = "4"
+#     RAILS_SERVE_STATIC_FILES    = "enabled"
+#     ROLLBAR_CLIENT_ACCESS_TOKEN = rollbar_project_access_token.larp_library_post_client_item.access_token
+#   }
 
-  sensitive_config_vars = {
-    AWS_ACCESS_KEY_ID     = aws_iam_access_key.larp_library.id
-    AWS_REGION            = data.aws_region.current.name
-    AWS_SECRET_ACCESS_KEY = aws_iam_access_key.larp_library.secret
-    AWS_S3_BUCKET         = aws_s3_bucket.larp_library_production.bucket
-    DATABASE_URL          = "postgres://larp_library_production:${var.larp_library_production_db_password}@${aws_db_instance.neil_production.endpoint}/larp_library_production?sslrootcert=rds-global-bundle.pem"
-    INTERCODE_APP_ID      = var.larp_library_intercode_app_id
-    INTERCODE_APP_SECRET  = var.larp_library_intercode_app_secret
-    ROLLBAR_ACCESS_TOKEN  = rollbar_project_access_token.larp_library_post_server_item.access_token
-    SECRET_KEY_BASE       = var.larp_library_secret_key_base
-  }
-}
+#   sensitive_config_vars = {
+#     AWS_ACCESS_KEY_ID     = aws_iam_access_key.larp_library.id
+#     AWS_REGION            = data.aws_region.current.name
+#     AWS_SECRET_ACCESS_KEY = aws_iam_access_key.larp_library.secret
+#     AWS_S3_BUCKET         = aws_s3_bucket.larp_library_production.bucket
+#     DATABASE_URL          = "postgres://larp_library_production:${var.larp_library_production_db_password}@${aws_db_instance.neil_production.endpoint}/larp_library_production?sslrootcert=rds-global-bundle.pem"
+#     INTERCODE_APP_ID      = var.larp_library_intercode_app_id
+#     INTERCODE_APP_SECRET  = var.larp_library_intercode_app_secret
+#     ROLLBAR_ACCESS_TOKEN  = rollbar_project_access_token.larp_library_post_server_item.access_token
+#     SECRET_KEY_BASE       = var.larp_library_secret_key_base
+#   }
+# }
 
-resource "heroku_drain" "larp_library_vector" {
-  app_id = heroku_app.larp_library.id
-  url    = "https://${var.vector_heroku_source_username}:${var.vector_heroku_source_password}@vector.interactiveliterature.org/events?application=larp-library"
-}
+# resource "heroku_drain" "larp_library_vector" {
+#   app_id = heroku_app.larp_library.id
+#   url    = "https://${var.vector_heroku_source_username}:${var.vector_heroku_source_password}@vector.interactiveliterature.org/events?application=larp-library"
+# }
 
-resource "heroku_domain" "larp_library" {
-  for_each = local.larp_library_domains
+# resource "heroku_domain" "larp_library" {
+#   for_each = local.larp_library_domains
 
-  app_id   = heroku_app.larp_library.uuid
-  hostname = each.value
-}
+#   app_id   = heroku_app.larp_library.uuid
+#   hostname = each.value
+# }
 
 resource "rollbar_project" "larp_library" {
   name = "LarpLibrary"
