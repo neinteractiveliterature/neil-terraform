@@ -13,11 +13,31 @@ resource "aws_db_parameter_group" "production_pg15" {
     name         = "max_connections"
     value        = "100"
   }
+  parameter {
+    apply_method = "pending-reboot"
+    name         = "rds.logical_replication"
+    value        = "1"
+  }
+  parameter {
+    apply_method = "pending-reboot"
+    name         = "max_wal_senders"
+    value        = "35"
+  }
+  parameter {
+    apply_method = "pending-reboot"
+    name         = "max_logical_replication_workers"
+    value        = "35"
+  }
+  parameter {
+    apply_method = "pending-reboot"
+    name         = "max_worker_processes"
+    value        = "40"
+  }
 }
 
 resource "aws_db_parameter_group" "production_pg16" {
   name        = "production-pg16"
-  description = "Production parameters (force SSL, tune max_connections)"
+  description = "Production parameters (force SSL, tune max_connections, enable logical replication)"
   family      = "postgres16"
 
   parameter {
@@ -29,6 +49,26 @@ resource "aws_db_parameter_group" "production_pg16" {
     apply_method = "pending-reboot"
     name         = "max_connections"
     value        = "100"
+  }
+  parameter {
+    apply_method = "pending-reboot"
+    name         = "rds.logical_replication"
+    value        = "1"
+  }
+  parameter {
+    apply_method = "pending-reboot"
+    name         = "max_wal_senders"
+    value        = "35"
+  }
+  parameter {
+    apply_method = "pending-reboot"
+    name         = "max_logical_replication_workers"
+    value        = "35"
+  }
+  parameter {
+    apply_method = "pending-reboot"
+    name         = "max_worker_processes"
+    value        = "40"
   }
 }
 
