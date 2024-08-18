@@ -1,7 +1,8 @@
 locals {
   hosted_org_subdomains = {
-    "becon" = "intercode.fly.dev",
-    "gbls"  = "intercode.fly.dev",
+    "becon"      = "intercode.fly.dev",
+    "gbls"       = "intercode.fly.dev",
+    "tapestries" = "intercode.fly.dev"
   }
 }
 
