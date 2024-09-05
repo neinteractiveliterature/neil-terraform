@@ -25,11 +25,14 @@ resource "cloudflare_zone_settings_override" "neilhosting_net" {
   }
 }
 
-resource "cloudflare_record" "neilhosting_net_a" {
-  zone_id = cloudflare_zone.neilhosting_net.id
-  name    = "neilhosting.net"
-  type    = "A"
-  value   = "216.24.57.1"
+module "neilhosting_net_apex_redirect" {
+  source = "./modules/cloudflare_apex_redirect"
+
+  cloudflare_zone               = cloudflare_zone.neilhosting_net
+  domain_name                   = "neilhosting.net"
+  redirect_destination_hostname = "www.neilhosting.net"
+  redirect_destination_protocol = "https"
+  alternative_names             = []
 }
 
 resource "cloudflare_record" "neilhosting_net_mx" {
