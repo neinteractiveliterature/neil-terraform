@@ -241,7 +241,7 @@ resource "aws_cloudwatch_metric_alarm" "intercode_queue_backup" {
     expression  = <<-EOT
       SELECT MAX(ApproximateAgeOfOldestMessage)
       FROM SCHEMA("AWS/SQS", QueueName)
-      WHERE QueueName != '${aws_sqs_queue.intercode_production_dead_letter.name}'
+      WHERE QueueName != '${aws_sqs_queue.intercode_production_dead_letter.name}' AND QueueName != 'intercode_production_cloudwatch_scheduler-failures'
     EOT
   }
 }
