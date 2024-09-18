@@ -4,7 +4,8 @@ locals {
     "beconlarp.com",
     "festivalofthelarps.com",
     "greaterbostonlarpsociety.org",
-    "natbudin.com"
+    "natbudin.com",
+    "tapestrieslarp.org"
   ])
 
   managed_sending_domain_zones = [
