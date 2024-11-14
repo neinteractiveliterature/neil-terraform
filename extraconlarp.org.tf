@@ -54,7 +54,7 @@ resource "cloudflare_record" "extraconlarp_org_convention_subdomain_a" {
   zone_id = cloudflare_zone.extraconlarp_org.id
   name    = each.value
   type    = "A"
-  value   = "66.241.124.95"
+  value   = "137.66.59.126"
 }
 
 resource "cloudflare_record" "extraconlarp_org_convention_subdomain_aaaa" {

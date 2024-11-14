@@ -179,7 +179,16 @@ resource "cloudflare_record" "interactiveliterature_org_convention_subdomain_a" 
   zone_id = cloudflare_zone.interactiveliterature_org.id
   name    = each.value
   type    = "A"
-  value   = "66.241.124.95"
+  value   = "137.66.59.126"
+}
+
+resource "cloudflare_record" "interactiveliterature_org_convention_subdomain_aaaa" {
+  for_each = local.interactiveliterature_org_intercode_subdomains
+
+  zone_id = cloudflare_zone.interactiveliterature_org.id
+  name    = each.value
+  type    = "AAAA"
+  value   = "2a09:8280:1::4e:bee4"
 }
 
 resource "cloudflare_record" "interactiveliterature_org_convention_subdomain_mx" {

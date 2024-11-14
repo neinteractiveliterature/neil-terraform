@@ -134,7 +134,16 @@ resource "cloudflare_record" "interconlarp_org_convention_subdomain_cname" {
   zone_id = cloudflare_zone.interconlarp_org.id
   name    = each.value
   type    = "A"
-  value   = "66.241.124.95"
+  value   = "137.66.59.126"
+}
+
+resource "cloudflare_record" "interconlarp_org_convention_subdomain_aaaa" {
+  for_each = local.interconlarp_org_intercode_subdomains
+
+  zone_id = cloudflare_zone.interconlarp_org.id
+  name    = each.value
+  type    = "AAAA"
+  value   = "2a09:8280:1::4e:bee4"
 }
 
 resource "cloudflare_record" "interconlarp_org_convention_subdomain_mx" {
