@@ -1,7 +1,7 @@
-resource "aws_db_parameter_group" "production_pg16" {
-  name        = "production-pg16"
+resource "aws_db_parameter_group" "production_pg17" {
+  name        = "production-pg17"
   description = "Production parameters (force SSL, tune max_connections, enable logical replication)"
-  family      = "postgres16"
+  family      = "postgres17"
 
   parameter {
     apply_method = "pending-reboot"
@@ -60,10 +60,10 @@ resource "aws_db_instance" "neil_production" {
   instance_class        = "db.t4g.small"
   identifier            = "neil-production"
   engine                = "postgres"
-  engine_version        = "16.3"
+  engine_version        = "17.2"
   username              = "neiladmin"
   password              = var.rds_neiladmin_password
-  parameter_group_name  = "production-pg16"
+  parameter_group_name  = "production-pg17"
   deletion_protection   = true
   publicly_accessible   = true
   allocated_storage     = 10
