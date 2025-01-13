@@ -9,7 +9,8 @@ locals {
     "t",
     "u",
     "v",
-    "w"
+    "w",
+    "x"
   ])
   interconlarp_org_redirect_subdomains = {
     "a.interconlarp.org"    = "A/",
