@@ -254,6 +254,13 @@ resource "cloudflare_record" "interactiveliterature_org_litform_cname" {
   value   = "neinteractiveliterature.github.io"
 }
 
+resource "cloudflare_record" "interactiveliterature_org_rotator_cname" {
+  zone_id = cloudflare_zone.interactiveliterature_org.id
+  name    = "rotator"
+  type    = "CNAME"
+  value   = "rotator.fly.dev"
+}
+
 resource "cloudflare_record" "interactiveliterature_org_wildcard_cname" {
   zone_id = cloudflare_zone.interactiveliterature_org.id
   name    = "*"
