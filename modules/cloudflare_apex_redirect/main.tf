@@ -31,7 +31,7 @@ variable "cloudflare_zone" {
   nullable = false
   type = object({
     id   = string
-    zone = string
+    name = string
   })
 }
 
@@ -44,7 +44,7 @@ locals {
   domain_name = (
     var.domain_name != null ?
     var.domain_name :
-    var.cloudflare_zone.zone
+    var.cloudflare_zone.name
   )
 }
 
@@ -103,21 +103,23 @@ resource "aws_s3_bucket_website_configuration" "redirect_bucket" {
   }
 }
 
-resource "cloudflare_record" "apex_alias" {
+resource "cloudflare_dns_record" "apex_alias" {
   zone_id = var.cloudflare_zone.id
   name    = local.domain_name
   type    = "CNAME"
   proxied = true
-  value   = aws_s3_bucket_website_configuration.redirect_bucket.website_endpoint
+  content = aws_s3_bucket_website_configuration.redirect_bucket.website_endpoint
+  ttl     = 1
 }
 
-resource "cloudflare_record" "alternative_name_cname" {
+resource "cloudflare_dns_record" "alternative_name_cname" {
   for_each = toset(var.alternative_names)
   zone_id  = var.cloudflare_zone.id
   name     = each.key
   type     = "CNAME"
   proxied  = true
-  value    = var.cloudflare_zone.zone
+  content  = var.cloudflare_zone.name
+  ttl      = 1
 }
 
 output "redirect_bucket" {
@@ -125,5 +127,5 @@ output "redirect_bucket" {
 }
 
 output "apex_alias_record" {
-  value = cloudflare_record.apex_alias
+  value = cloudflare_dns_record.apex_alias
 }

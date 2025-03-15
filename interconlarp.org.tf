@@ -24,22 +24,31 @@ locals {
 
 resource "cloudflare_zone" "interconlarp_org" {
   account = {
-      id = "9e36b5cabcd5529d3bd08131b7541c06"
-    }
+    id = "9e36b5cabcd5529d3bd08131b7541c06"
+  }
   name = "interconlarp.org"
 }
 
-resource "cloudflare_zone_settings_override" "interconlarp_org" {
-  zone_id = cloudflare_zone.interconlarp_org.id
-  settings =[ {
-    ssl              = "flexible"
-    always_use_https = "on"
-    security_header =[ {
-      enabled            = true
-      include_subdomains = true
-      preload            = true
-      max_age            = 31536000
-    }]
+resource "cloudflare_zone_setting" "interconlarp_org_ssl" {
+  zone_id    = cloudflare_zone.interconlarp_org.id
+  setting_id = "ssl"
+  value      = "flexible"
+}
+
+resource "cloudflare_zone_setting" "interconlarp_org_always_use_https" {
+  zone_id    = cloudflare_zone.interconlarp_org.id
+  setting_id = "always_use_https"
+  value      = "on"
+}
+
+resource "cloudflare_zone_setting" "interconlarp_org_security_header" {
+  zone_id    = cloudflare_zone.interconlarp_org.id
+  setting_id = "security_header"
+  value = [{
+    enabled            = true
+    include_subdomains = true
+    preload            = true
+    max_age            = 31536000
   }]
 }
 
@@ -109,104 +118,117 @@ module "interconlarp_org_redirect_subdomain" {
   alternative_names             = []
 }
 
-resource "cloudflare_record" "interconlarp_org_apex_alias" {
+resource "cloudflare_dns_record" "interconlarp_org_apex_alias" {
   zone_id = cloudflare_zone.interconlarp_org.id
   name    = "interconlarp.org"
   type    = "CNAME"
-  value   = module.interconlarp_org_cloudfront.cloudfront_distribution.domain_name
+  content = module.interconlarp_org_cloudfront.cloudfront_distribution.domain_name
+  ttl     = 1
 }
 
-resource "cloudflare_record" "interconlarp_org_mx" {
+resource "cloudflare_dns_record" "interconlarp_org_mx" {
   zone_id  = cloudflare_zone.interconlarp_org.id
   name     = "interconlarp.org"
   type     = "MX"
-  value    = "inbound-smtp.us-east-1.amazonaws.com"
+  content  = "inbound-smtp.us-east-1.amazonaws.com"
   priority = 10
+  ttl      = 1
 }
 
-resource "cloudflare_record" "interconlarp_org_acme_challenge_cname" {
+resource "cloudflare_dns_record" "interconlarp_org_acme_challenge_cname" {
   zone_id = cloudflare_zone.interconlarp_org.id
   name    = "_acme-challenge"
   type    = "CNAME"
-  value   = "interconlarp.org.j2o5oe.flydns.net."
+  content = "interconlarp.org.j2o5oe.flydns.net."
+  ttl     = 1
 }
 
-resource "cloudflare_record" "interconlarp_org_convention_subdomain_cname" {
+resource "cloudflare_dns_record" "interconlarp_org_convention_subdomain_cname" {
   for_each = local.interconlarp_org_intercode_subdomains
 
   zone_id = cloudflare_zone.interconlarp_org.id
   name    = each.value
   type    = "A"
-  value   = "137.66.59.126"
+  content = "137.66.59.126"
+  ttl     = 1
 }
 
-resource "cloudflare_record" "interconlarp_org_convention_subdomain_aaaa" {
+resource "cloudflare_dns_record" "interconlarp_org_convention_subdomain_aaaa" {
   for_each = local.interconlarp_org_intercode_subdomains
 
   zone_id = cloudflare_zone.interconlarp_org.id
   name    = each.value
   type    = "AAAA"
-  value   = "2a09:8280:1::4e:bee4"
+  content = "2a09:8280:1::4e:bee4"
+  ttl     = 1
 }
 
-resource "cloudflare_record" "interconlarp_org_convention_subdomain_mx" {
+resource "cloudflare_dns_record" "interconlarp_org_convention_subdomain_mx" {
   for_each = local.interconlarp_org_intercode_subdomains
 
   zone_id  = cloudflare_zone.interconlarp_org.id
   name     = each.value
   type     = "MX"
-  value    = "inbound-smtp.us-east-1.amazonaws.com"
+  content  = "inbound-smtp.us-east-1.amazonaws.com"
   priority = 10
+  ttl      = 1
 }
 
-resource "cloudflare_record" "interconlarp_org_convention_subdomain_events_mx" {
+resource "cloudflare_dns_record" "interconlarp_org_convention_subdomain_events_mx" {
   for_each = local.interconlarp_org_intercode_subdomains
 
   zone_id  = cloudflare_zone.interconlarp_org.id
   name     = "events.${each.value}"
   type     = "MX"
-  value    = "inbound-smtp.us-east-1.amazonaws.com"
+  content  = "inbound-smtp.us-east-1.amazonaws.com"
   priority = 10
+  ttl      = 1
 }
 
-resource "cloudflare_record" "interconlarp_org_www_cname" {
+resource "cloudflare_dns_record" "interconlarp_org_www_cname" {
   zone_id = cloudflare_zone.interconlarp_org.id
   name    = "www"
   type    = "CNAME"
-  value   = module.interconlarp_org_cloudfront.cloudfront_distribution.domain_name
+  content = module.interconlarp_org_cloudfront.cloudfront_distribution.domain_name
+  ttl     = 1
 }
 
-resource "cloudflare_record" "interconlarp_org_spf_record" {
+resource "cloudflare_dns_record" "interconlarp_org_spf_record" {
   zone_id = cloudflare_zone.interconlarp_org.id
   name    = "interconlarp.org"
   type    = "TXT"
-  value   = "v=spf1 include:amazonses.com ~all"
+  content = "v=spf1 include:amazonses.com ~all"
+  ttl     = 1
 }
 
-resource "cloudflare_record" "interconlarp_org_google_site_verification_record" {
+resource "cloudflare_dns_record" "interconlarp_org_google_site_verification_record" {
   zone_id = cloudflare_zone.interconlarp_org.id
   name    = "interconlarp.org"
   type    = "TXT"
-  value   = "google-site-verification=RzGiDCnUV6z9mlwsITO48YkMEx6g3V44fGoD7qMYMDE"
+  content = "google-site-verification=RzGiDCnUV6z9mlwsITO48YkMEx6g3V44fGoD7qMYMDE"
+  ttl     = 1
 }
 
-resource "cloudflare_record" "interconlarp_org_wildcard_cname" {
+resource "cloudflare_dns_record" "interconlarp_org_wildcard_cname" {
   zone_id = cloudflare_zone.interconlarp_org.id
   name    = "*"
   type    = "CNAME"
-  value   = "intercode.fly.dev"
+  content = "intercode.fly.dev"
+  ttl     = 1
 }
 
-resource "cloudflare_record" "interconlarp_org_furniture_cname" {
+resource "cloudflare_dns_record" "interconlarp_org_furniture_cname" {
   zone_id = cloudflare_zone.interconlarp_org.id
   name    = "furniture"
   type    = "CNAME"
-  value   = "intercon-furniture.fly.dev"
+  content = "intercon-furniture.fly.dev"
+  ttl     = 1
 }
 
-resource "cloudflare_record" "interconlarp_org_security_forwarder_cname" {
+resource "cloudflare_dns_record" "interconlarp_org_security_forwarder_cname" {
   zone_id = cloudflare_zone.interconlarp_org.id
   name    = "security-forwarder"
   type    = "CNAME"
-  value   = "intercon-security-forwarder.fly.dev"
+  content = "intercon-security-forwarder.fly.dev"
+  ttl     = 1
 }

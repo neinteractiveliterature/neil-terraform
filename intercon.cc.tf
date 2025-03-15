@@ -15,8 +15,8 @@ locals {
 
 resource "cloudflare_zone" "intercon_cc" {
   account = {
-      id = "9e36b5cabcd5529d3bd08131b7541c06"
-    }
+    id = "9e36b5cabcd5529d3bd08131b7541c06"
+  }
   name = "intercon.cc"
 }
 
@@ -82,18 +82,20 @@ resource "aws_s3_bucket_website_configuration" "intercon_cc" {
   )
 }
 
-resource "cloudflare_record" "intercon_cc_apex_alias" {
+resource "cloudflare_dns_record" "intercon_cc_apex_alias" {
   zone_id = cloudflare_zone.intercon_cc.id
-  name    = cloudflare_zone.intercon_cc.zone
+  name    = cloudflare_zone.intercon_cc.name
   type    = "CNAME"
   proxied = true
-  value   = aws_s3_bucket_website_configuration.intercon_cc.website_endpoint
+  content = aws_s3_bucket_website_configuration.intercon_cc.website_endpoint
+  ttl     = 1
 }
 
-resource "cloudflare_record" "www_intercon_cc_cname" {
+resource "cloudflare_dns_record" "www_intercon_cc_cname" {
   zone_id = cloudflare_zone.intercon_cc.id
   name    = "www"
   type    = "CNAME"
   proxied = true
-  value   = cloudflare_zone.intercon_cc.zone
+  content = cloudflare_zone.intercon_cc.name
+  ttl     = 1
 }
