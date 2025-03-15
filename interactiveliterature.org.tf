@@ -219,6 +219,26 @@ resource "cloudflare_record" "interactiveliterature_org_www_cname" {
   value   = aws_s3_bucket_website_configuration.www_interactiveliterature_org.website_endpoint
 }
 
+resource "cloudflare_record" "interactiveliterature_org_old_cname" {
+  zone_id = cloudflare_zone.interactiveliterature_org.id
+  name    = "old"
+  type    = "CNAME"
+  proxied = false
+  value   = module.old_interactiveliterature_org_cloudfront.cloudfront_distribution.domain_name
+}
+
+module "old_interactiveliterature_org_cloudfront" {
+  source = "./modules/cloudfront_with_acm"
+
+  domain_name              = "old.interactiveliterature.org"
+  origin_id                = "interactiveliterature-org-s3"
+  origin_domain_name       = aws_s3_bucket_website_configuration.www_interactiveliterature_org.website_endpoint
+  origin_protocol_policy   = "http-only"
+  add_security_headers_arn = aws_lambda_function.addSecurityHeaders.qualified_arn
+  cloudflare_zone          = cloudflare_zone.interactiveliterature_org
+  compress                 = true
+}
+
 resource "cloudflare_record" "interactiveliterature_org_spf_record" {
   zone_id = cloudflare_zone.interactiveliterature_org.id
   name    = "interactiveliterature.org"
