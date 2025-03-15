@@ -210,8 +210,10 @@ resource "aws_cloudwatch_log_group" "larp_library_production" {
 }
 
 resource "cloudflare_zone" "larplibrary_org" {
-  account_id = "9e36b5cabcd5529d3bd08131b7541c06"
-  zone       = "larplibrary.org"
+  account = {
+      id = "9e36b5cabcd5529d3bd08131b7541c06"
+    }
+  name = "larplibrary.org"
 }
 
 module "larplibrary_org_apex_redirect" {

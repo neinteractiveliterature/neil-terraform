@@ -23,22 +23,24 @@ locals {
 }
 
 resource "cloudflare_zone" "interconlarp_org" {
-  account_id = "9e36b5cabcd5529d3bd08131b7541c06"
-  zone       = "interconlarp.org"
+  account = {
+      id = "9e36b5cabcd5529d3bd08131b7541c06"
+    }
+  name = "interconlarp.org"
 }
 
 resource "cloudflare_zone_settings_override" "interconlarp_org" {
   zone_id = cloudflare_zone.interconlarp_org.id
-  settings {
+  settings =[ {
     ssl              = "flexible"
     always_use_https = "on"
-    security_header {
+    security_header =[ {
       enabled            = true
       include_subdomains = true
       preload            = true
       max_age            = 31536000
-    }
-  }
+    }]
+  }]
 }
 
 resource "aws_s3_bucket" "interconlarp_org" {

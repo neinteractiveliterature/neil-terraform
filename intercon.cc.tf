@@ -14,8 +14,10 @@ locals {
 }
 
 resource "cloudflare_zone" "intercon_cc" {
-  account_id = "9e36b5cabcd5529d3bd08131b7541c06"
-  zone       = "intercon.cc"
+  account = {
+      id = "9e36b5cabcd5529d3bd08131b7541c06"
+    }
+  name = "intercon.cc"
 }
 
 resource "aws_s3_bucket" "intercon_cc" {

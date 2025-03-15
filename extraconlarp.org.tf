@@ -5,23 +5,25 @@ locals {
 }
 
 resource "cloudflare_zone" "extraconlarp_org" {
-  account_id = "9e36b5cabcd5529d3bd08131b7541c06"
-  zone       = "extraconlarp.org"
+  account = {
+      id = "9e36b5cabcd5529d3bd08131b7541c06"
+    }
+  name = "extraconlarp.org"
 }
 
 resource "cloudflare_zone_settings_override" "extraconlarp_org" {
   zone_id = cloudflare_zone.extraconlarp_org.id
-  settings {
+  settings =[ {
     ssl              = "flexible"
     always_use_https = "on"
     min_tls_version  = "1.2"
-    security_header {
+    security_header =[ {
       enabled            = true
       include_subdomains = true
       preload            = true
       max_age            = 31536000
-    }
-  }
+    }]
+  }]
 }
 
 module "extraconlarp_org_apex_redirect" {

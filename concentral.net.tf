@@ -33,22 +33,24 @@ locals {
 }
 
 resource "cloudflare_zone" "concentral_net" {
-  account_id = "9e36b5cabcd5529d3bd08131b7541c06"
-  zone       = "concentral.net"
+  account = {
+      id = "9e36b5cabcd5529d3bd08131b7541c06"
+    }
+  name = "concentral.net"
 }
 
 resource "cloudflare_zone_settings_override" "concentral_net" {
   zone_id = cloudflare_zone.concentral_net.id
-  settings {
+  settings =[ {
     ssl              = "flexible"
     always_use_https = "on"
-    security_header {
+    security_header =[ {
       enabled            = true
       include_subdomains = true
       preload            = true
       max_age            = 31536000
-    }
-  }
+    }]
+  }]
 }
 
 module "concentral_net_apex_redirect" {
