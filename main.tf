@@ -97,6 +97,23 @@ resource "aws_s3_bucket_versioning" "neil-terraform-state" {
   }
 }
 
+resource "aws_iam_policy" "neil-terraform-state-read" {
+  name = "neil-terraform-state-read"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = [
+          "s3:GetObject"
+        ]
+        Effect   = "Allow"
+        Resource = "arn:aws:s3:::${aws_s3_bucket.neil-terraform-state.bucket}/*"
+      },
+    ]
+  })
+}
+
 module "github-oidc" {
   source  = "terraform-module/github-oidc-provider/aws"
   version = "~> 1"
@@ -105,7 +122,7 @@ module "github-oidc" {
   create_oidc_role     = true
 
   repositories              = ["neinteractiveliterature/neil-terraform"]
-  oidc_role_attach_policies = []
+  oidc_role_attach_policies = [aws_iam_policy.neil-terraform-state-read.arn]
 }
 
 output "oidc_provider_arn" {
