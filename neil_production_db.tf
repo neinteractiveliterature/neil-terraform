@@ -51,8 +51,16 @@ resource "aws_iam_role" "rds_enhanced_monitoring" {
       },
     ]
   })
+}
 
-  managed_policy_arns = ["arn:aws:iam::aws:policy/service-role/AmazonRDSEnhancedMonitoringRole"]
+resource "aws_iam_role_policy_attachment" "rds_enhanced_monitoring" {
+  role       = aws_iam_role.rds_enhanced_monitoring.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonRDSEnhancedMonitoringRole"
+}
+
+resource "aws_iam_role_policy_attachments_exclusive" "rds_enhanced_monitoring" {
+  role_name   = aws_iam_role.rds_enhanced_monitoring.name
+  policy_arns = [aws_iam_role_policy_attachment.rds_enhanced_monitoring.policy_arn]
 }
 
 # The production Postgres database
