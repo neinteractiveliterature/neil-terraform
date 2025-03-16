@@ -65,7 +65,7 @@ provider "github" {
 
 terraform {
   backend "s3" {
-    profile      = "neil"
+    profile      = var.aws_profile
     region       = "us-east-1"
     bucket       = "neil-terraform-state"
     key          = "terraform.tfstate"
