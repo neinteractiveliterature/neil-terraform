@@ -14,6 +14,7 @@ jobs:
       - uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: us-east-1
+          role-to-assume: arn:aws:iam::689053117832:role/github-oidc-provider-aws
 
       - name: Terraform fmt
         id: fmt
