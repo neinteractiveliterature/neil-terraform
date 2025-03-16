@@ -52,14 +52,15 @@ variable "add_security_headers_arn" {
 
 variable "cloudflare_zone" {
   type = object({
-    id = string
+    id   = string
+    name = string
   })
   default = null
 }
 
 resource "aws_acm_certificate_validation" "cert_validation" {
   certificate_arn         = aws_acm_certificate.cloudfront_cert.arn
-  validation_record_fqdns = [for record in cloudflare_record.cert_validation_records : record.hostname]
+  validation_record_fqdns = [for record in cloudflare_dns_record.cert_validation_records : record.name]
 }
 
 resource "aws_acm_certificate" "cloudfront_cert" {
@@ -121,7 +122,7 @@ resource "aws_cloudfront_distribution" "cloudfront_distribution" {
   }
 }
 
-resource "cloudflare_record" "cert_validation_records" {
+resource "cloudflare_dns_record" "cert_validation_records" {
   for_each = {
     for dvo in(var.cloudflare_zone != null ? aws_acm_certificate.cloudfront_cert.domain_validation_options : []) : dvo.domain_name => {
       name   = dvo.resource_record_name
@@ -131,10 +132,11 @@ resource "cloudflare_record" "cert_validation_records" {
   }
 
   name    = each.value.name
-  value   = trimsuffix(each.value.record, ".")
+  content = trimsuffix(each.value.record, ".")
   type    = each.value.type
   zone_id = var.cloudflare_zone.id
   proxied = false
+  ttl     = 1
 }
 
 output "cloudfront_distribution" {
@@ -150,5 +152,5 @@ output "cert_validation" {
 }
 
 output "cert_validation_records" {
-  value = cloudflare_record.cert_validation_records
+  value = cloudflare_dns_record.cert_validation_records
 }

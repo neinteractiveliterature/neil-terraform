@@ -19,7 +19,7 @@ locals {
 
   managed_sending_domains = {
     for zone in local.managed_sending_domain_zones :
-    trimsuffix(zone.zone, ".") => zone
+    trimsuffix(zone.name, ".") => zone
   }
 }
 

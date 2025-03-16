@@ -274,11 +274,12 @@ resource "aws_s3_bucket_cors_configuration" "intercode2_production" {
   }
 }
 
-resource "cloudflare_record" "uploads_neilhosting_net" {
+resource "cloudflare_dns_record" "uploads_neilhosting_net" {
   zone_id = cloudflare_zone.neilhosting_net.id
   name    = "uploads.neilhosting.net"
   type    = "CNAME"
-  value   = module.uploads_neilhosting_net_cloudfront.cloudfront_distribution.domain_name
+  content = module.uploads_neilhosting_net_cloudfront.cloudfront_distribution.domain_name
+  ttl     = 1
 }
 
 module "uploads_neilhosting_net_cloudfront" {
@@ -293,11 +294,12 @@ module "uploads_neilhosting_net_cloudfront" {
   compress                 = true
 }
 
-resource "cloudflare_record" "assets_neilhosting_net" {
+resource "cloudflare_dns_record" "assets_neilhosting_net" {
   zone_id = cloudflare_zone.neilhosting_net.id
   name    = "assets.neilhosting.net"
   type    = "CNAME"
-  value   = module.assets_neilhosting_net_cloudfront.cloudfront_distribution.domain_name
+  content = module.assets_neilhosting_net_cloudfront.cloudfront_distribution.domain_name
+  ttl     = 1
 }
 
 module "assets_neilhosting_net_cloudfront" {
@@ -475,7 +477,7 @@ resource "github_repository" "intercode" {
 
   pages {
     build_type = "legacy"
-    cname      = cloudflare_record.interactiveliterature_org_intercode_cname.hostname
+    cname      = "${cloudflare_dns_record.interactiveliterature_org_intercode_cname.name}.${cloudflare_zone.interactiveliterature_org.name}"
 
     source {
       branch = "gh-pages"

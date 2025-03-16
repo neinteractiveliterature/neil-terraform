@@ -33,22 +33,33 @@ locals {
 }
 
 resource "cloudflare_zone" "concentral_net" {
-  account_id = "9e36b5cabcd5529d3bd08131b7541c06"
-  zone       = "concentral.net"
+  account = {
+    id = "9e36b5cabcd5529d3bd08131b7541c06"
+  }
+  name = "concentral.net"
 }
 
-resource "cloudflare_zone_settings_override" "concentral_net" {
-  zone_id = cloudflare_zone.concentral_net.id
-  settings {
-    ssl              = "flexible"
-    always_use_https = "on"
-    security_header {
-      enabled            = true
-      include_subdomains = true
-      preload            = true
-      max_age            = 31536000
-    }
-  }
+resource "cloudflare_zone_setting" "concentral_net_ssl" {
+  zone_id    = cloudflare_zone.concentral_net.id
+  setting_id = "ssl"
+  value      = "flexible"
+}
+
+resource "cloudflare_zone_setting" "concentral_net_always_use_https" {
+  zone_id    = cloudflare_zone.concentral_net.id
+  setting_id = "always_use_https"
+  value      = "on"
+}
+
+resource "cloudflare_zone_setting" "concentral_net_security_header" {
+  zone_id    = cloudflare_zone.concentral_net.id
+  setting_id = "security_header"
+  value = [{
+    enabled            = true
+    include_subdomains = true
+    preload            = true
+    max_age            = 31536000
+  }]
 }
 
 module "concentral_net_apex_redirect" {
@@ -63,56 +74,62 @@ module "concentral_net_apex_redirect" {
   alternative_names             = []
 }
 
-resource "cloudflare_record" "concentral_net_cname" {
+resource "cloudflare_dns_record" "concentral_net_cname" {
   for_each = local.concentral_net_cnames
 
   zone_id = cloudflare_zone.concentral_net.id
   name    = "${each.key}.concentral.net"
   type    = "CNAME"
-  value   = trimsuffix(each.value, ".")
+  content = trimsuffix(each.value, ".")
+  ttl     = 1
 }
 
-resource "cloudflare_record" "concentral_net_mx" {
+resource "cloudflare_dns_record" "concentral_net_mx" {
   zone_id  = cloudflare_zone.concentral_net.id
   name     = "concentral.net"
   type     = "MX"
-  value    = "inbound-smtp.us-east-1.amazonaws.com"
+  content  = "inbound-smtp.us-east-1.amazonaws.com"
+  ttl      = 1
   priority = 10
 }
 
-resource "cloudflare_record" "concentral_net_spf" {
+resource "cloudflare_dns_record" "concentral_net_spf" {
   zone_id = cloudflare_zone.concentral_net.id
   name    = "concentral.net"
   type    = "TXT"
-  value   = "v=spf1 include:amazonses.com ~all"
+  content = "v=spf1 include:amazonses.com ~all"
+  ttl     = 1
 }
 
-resource "cloudflare_record" "concentral_net_convention_mx" {
+resource "cloudflare_dns_record" "concentral_net_convention_mx" {
   for_each = local.concentral_net_convention_mx_subdomains
 
   zone_id  = cloudflare_zone.concentral_net.id
   name     = each.value
   type     = "MX"
-  value    = "inbound-smtp.us-east-1.amazonaws.com"
+  content  = "inbound-smtp.us-east-1.amazonaws.com"
+  ttl      = 1
   priority = 10
 }
 
-resource "cloudflare_record" "concentral_net_convention_events_mx" {
+resource "cloudflare_dns_record" "concentral_net_convention_events_mx" {
   for_each = local.concentral_net_convention_mx_subdomains
 
   zone_id  = cloudflare_zone.concentral_net.id
   name     = "events.${each.value}"
   type     = "MX"
-  value    = "inbound-smtp.us-east-1.amazonaws.com"
+  content  = "inbound-smtp.us-east-1.amazonaws.com"
+  ttl      = 1
   priority = 10
 }
 
 # Having an MX record breaks the wildcard CNAME, so we have to have a specific one for each MX domain
-resource "cloudflare_record" "concentral_net_convention_mx_cname" {
+resource "cloudflare_dns_record" "concentral_net_convention_mx_cname" {
   for_each = local.concentral_net_convention_mx_subdomains
 
   zone_id = cloudflare_zone.concentral_net.id
   name    = each.value
   type    = "CNAME"
-  value   = "intercode.fly.dev"
+  content = "intercode.fly.dev"
+  ttl     = 1
 }

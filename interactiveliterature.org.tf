@@ -25,22 +25,33 @@ locals {
 }
 
 resource "cloudflare_zone" "interactiveliterature_org" {
-  account_id = "9e36b5cabcd5529d3bd08131b7541c06"
-  zone       = "interactiveliterature.org"
+  account = {
+    id = "9e36b5cabcd5529d3bd08131b7541c06"
+  }
+  name = "interactiveliterature.org"
 }
 
-resource "cloudflare_zone_settings_override" "interactiveliterature_org" {
-  zone_id = cloudflare_zone.interactiveliterature_org.id
-  settings {
-    ssl              = "flexible"
-    always_use_https = "on"
-    security_header {
-      enabled            = true
-      include_subdomains = true
-      preload            = true
-      max_age            = 31536000
-    }
-  }
+resource "cloudflare_zone_setting" "interactiveliterature_org_ssl" {
+  zone_id    = cloudflare_zone.interactiveliterature_org.id
+  setting_id = "ssl"
+  value      = "flexible"
+}
+
+resource "cloudflare_zone_setting" "interactiveliterature_org_always_use_https" {
+  zone_id    = cloudflare_zone.interactiveliterature_org.id
+  setting_id = "always_use_https"
+  value      = "on"
+}
+
+resource "cloudflare_zone_setting" "interactiveliterature_org_security_header" {
+  zone_id    = cloudflare_zone.interactiveliterature_org.id
+  setting_id = "security_header"
+  value = [{
+    enabled            = true
+    include_subdomains = true
+    preload            = true
+    max_age            = 31536000
+  }]
 }
 
 resource "aws_s3_bucket" "www_interactiveliterature_org" {
@@ -158,73 +169,81 @@ module "interactiveliterature_org_apex_redirect" {
   alternative_names             = []
 }
 
-resource "cloudflare_record" "interactiveliterature_org_mx" {
+resource "cloudflare_dns_record" "interactiveliterature_org_mx" {
   zone_id  = cloudflare_zone.interactiveliterature_org.id
   name     = "interactiveliterature.org"
   type     = "MX"
-  value    = "inbound-smtp.us-east-1.amazonaws.com"
+  content  = "inbound-smtp.us-east-1.amazonaws.com"
+  ttl      = 1
   priority = 10
 }
 
-resource "cloudflare_record" "interactiveliterature_org_acme_challenge_cname" {
+resource "cloudflare_dns_record" "interactiveliterature_org_acme_challenge_cname" {
   zone_id = cloudflare_zone.interactiveliterature_org.id
   name    = "_acme-challenge"
   type    = "CNAME"
-  value   = "interactiveliterature.org.j2o5oe.flydns.net."
+  content = "interactiveliterature.org.j2o5oe.flydns.net."
+  ttl     = 1
 }
 
-resource "cloudflare_record" "interactiveliterature_org_convention_subdomain_a" {
+resource "cloudflare_dns_record" "interactiveliterature_org_convention_subdomain_a" {
   for_each = local.interactiveliterature_org_intercode_subdomains
 
   zone_id = cloudflare_zone.interactiveliterature_org.id
   name    = each.value
   type    = "A"
-  value   = "137.66.59.126"
+  content = "137.66.59.126"
+  ttl     = 1
 }
 
-resource "cloudflare_record" "interactiveliterature_org_convention_subdomain_aaaa" {
+resource "cloudflare_dns_record" "interactiveliterature_org_convention_subdomain_aaaa" {
   for_each = local.interactiveliterature_org_intercode_subdomains
 
   zone_id = cloudflare_zone.interactiveliterature_org.id
   name    = each.value
   type    = "AAAA"
-  value   = "2a09:8280:1::4e:bee4"
+  content = "2a09:8280:1::4e:bee4"
+  ttl     = 1
 }
 
-resource "cloudflare_record" "interactiveliterature_org_convention_subdomain_mx" {
+resource "cloudflare_dns_record" "interactiveliterature_org_convention_subdomain_mx" {
   for_each = local.interactiveliterature_org_intercode_subdomains
 
   zone_id  = cloudflare_zone.interactiveliterature_org.id
   name     = each.value
   type     = "MX"
-  value    = "inbound-smtp.us-east-1.amazonaws.com"
+  content  = "inbound-smtp.us-east-1.amazonaws.com"
+  ttl      = 1
   priority = 10
 }
 
-resource "cloudflare_record" "interactiveliterature_org_convention_subdomain_events_mx" {
+resource "cloudflare_dns_record" "interactiveliterature_org_convention_subdomain_events_mx" {
   for_each = local.interactiveliterature_org_intercode_subdomains
 
   zone_id  = cloudflare_zone.interactiveliterature_org.id
   name     = "events.${each.value}"
   type     = "MX"
-  value    = "inbound-smtp.us-east-1.amazonaws.com"
+  content  = "inbound-smtp.us-east-1.amazonaws.com"
+  ttl      = 1
   priority = 10
 }
 
-resource "cloudflare_record" "interactiveliterature_org_www_cname" {
+resource "cloudflare_dns_record" "interactiveliterature_org_www_cname" {
   zone_id = cloudflare_zone.interactiveliterature_org.id
   name    = "www"
   type    = "CNAME"
   proxied = true
-  value   = aws_s3_bucket_website_configuration.www_interactiveliterature_org.website_endpoint
+  content = aws_s3_bucket_website_configuration.www_interactiveliterature_org.website_endpoint
+  ttl     = 1
 }
 
-resource "cloudflare_record" "interactiveliterature_org_old_cname" {
+resource "cloudflare_dns_record" "interactiveliterature_org_old_cname" {
   zone_id = cloudflare_zone.interactiveliterature_org.id
   name    = "old"
   type    = "CNAME"
   proxied = false
-  value   = module.old_interactiveliterature_org_cloudfront.cloudfront_distribution.domain_name
+  content = module.old_interactiveliterature_org_cloudfront.cloudfront_distribution.domain_name
+  ttl     = 1
 }
 
 module "old_interactiveliterature_org_cloudfront" {
@@ -239,66 +258,75 @@ module "old_interactiveliterature_org_cloudfront" {
   compress                 = true
 }
 
-resource "cloudflare_record" "interactiveliterature_org_spf_record" {
+resource "cloudflare_dns_record" "interactiveliterature_org_spf_record" {
   zone_id = cloudflare_zone.interactiveliterature_org.id
   name    = "interactiveliterature.org"
   type    = "TXT"
-  value   = "v=spf1 include:amazonses.com ~all"
+  content = "v=spf1 include:amazonses.com ~all"
+  ttl     = 1
 }
 
-resource "cloudflare_record" "interactiveliterature_org_google_site_verification_record" {
+resource "cloudflare_dns_record" "interactiveliterature_org_google_site_verification_record" {
   zone_id = cloudflare_zone.interactiveliterature_org.id
   name    = "interactiveliterature.org"
   type    = "TXT"
-  value   = "google-site-verification=iP41tocP1AHGrYev0oaDM8YcwTtCEBYPA9dJddZZ6Yc"
+  content = "google-site-verification=iP41tocP1AHGrYev0oaDM8YcwTtCEBYPA9dJddZZ6Yc"
+  ttl     = 1
 }
 
-resource "cloudflare_record" "interactiveliterature_org_intercode_cname" {
+resource "cloudflare_dns_record" "interactiveliterature_org_intercode_cname" {
   zone_id = cloudflare_zone.interactiveliterature_org.id
   name    = "intercode"
   type    = "CNAME"
-  value   = "neinteractiveliterature.github.io"
+  content = "neinteractiveliterature.github.io"
+  ttl     = 1
 }
 
-resource "cloudflare_record" "interactiveliterature_org_listmonk_cname" {
+resource "cloudflare_dns_record" "interactiveliterature_org_listmonk_cname" {
   zone_id = cloudflare_zone.interactiveliterature_org.id
   name    = "listmonk"
   type    = "CNAME"
-  value   = "neil-listmonk.fly.dev"
+  content = "neil-listmonk.fly.dev"
+  ttl     = 1
 }
 
-resource "cloudflare_record" "interactiveliterature_org_litform_cname" {
+resource "cloudflare_dns_record" "interactiveliterature_org_litform_cname" {
   zone_id = cloudflare_zone.interactiveliterature_org.id
   name    = "litform"
   type    = "CNAME"
-  value   = "neinteractiveliterature.github.io"
+  content = "neinteractiveliterature.github.io"
+  ttl     = 1
 }
 
-resource "cloudflare_record" "interactiveliterature_org_rotator_cname" {
+resource "cloudflare_dns_record" "interactiveliterature_org_rotator_cname" {
   zone_id = cloudflare_zone.interactiveliterature_org.id
   name    = "rotator"
   type    = "CNAME"
-  value   = "rotator.fly.dev"
+  content = "rotator.fly.dev"
+  ttl     = 1
 }
 
-resource "cloudflare_record" "interactiveliterature_org_wildcard_cname" {
+resource "cloudflare_dns_record" "interactiveliterature_org_wildcard_cname" {
   zone_id = cloudflare_zone.interactiveliterature_org.id
   name    = "*"
   type    = "CNAME"
-  value   = "intercode.fly.dev"
+  content = "intercode.fly.dev"
+  ttl     = 1
 }
 
-resource "cloudflare_record" "interactiveliterature_org_vector" {
+resource "cloudflare_dns_record" "interactiveliterature_org_vector" {
   zone_id = cloudflare_zone.interactiveliterature_org.id
   name    = "vector"
   type    = "CNAME"
-  value   = "neil-vector.fly.dev"
+  content = "neil-vector.fly.dev"
+  ttl     = 1
 }
 
 
-resource "cloudflare_record" "interactiveliterature_org_vector_acme_challenge" {
+resource "cloudflare_dns_record" "interactiveliterature_org_vector_acme_challenge" {
   zone_id = cloudflare_zone.interactiveliterature_org.id
   name    = "_acme-challenge.vector"
   type    = "CNAME"
-  value   = "vector.interactiveliterature.org.yzrggx.flydns.net"
+  content = "vector.interactiveliterature.org.yzrggx.flydns.net"
+  ttl     = 1
 }

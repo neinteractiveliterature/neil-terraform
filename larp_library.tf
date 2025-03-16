@@ -210,8 +210,10 @@ resource "aws_cloudwatch_log_group" "larp_library_production" {
 }
 
 resource "cloudflare_zone" "larplibrary_org" {
-  account_id = "9e36b5cabcd5529d3bd08131b7541c06"
-  zone       = "larplibrary.org"
+  account = {
+    id = "9e36b5cabcd5529d3bd08131b7541c06"
+  }
+  name = "larplibrary.org"
 }
 
 module "larplibrary_org_apex_redirect" {
@@ -225,33 +227,37 @@ module "larplibrary_org_apex_redirect" {
   alternative_names             = []
 }
 
-resource "cloudflare_record" "larplibrary_org_spf" {
+resource "cloudflare_dns_record" "larplibrary_org_spf" {
   zone_id = cloudflare_zone.larplibrary_org.id
   name    = "larplibrary.org"
   type    = "TXT"
-  value   = "v=spf1 include:amazonses.com ~all"
+  content = "v=spf1 include:amazonses.com ~all"
+  ttl     = 1
 }
 
-resource "cloudflare_record" "larplibrary_org_www" {
+resource "cloudflare_dns_record" "larplibrary_org_www" {
   zone_id = cloudflare_zone.larplibrary_org.id
   name    = "www.larplibrary.org"
   type    = "CNAME"
-  value   = "larp-library.fly.dev"
+  content = "larp-library.fly.dev"
+  ttl     = 1
 }
 
-resource "cloudflare_record" "larplibrary_org_mx" {
+resource "cloudflare_dns_record" "larplibrary_org_mx" {
   zone_id  = cloudflare_zone.larplibrary_org.id
   name     = "larplibrary.org"
   type     = "MX"
-  value    = "inbound-smtp.us-east-1.amazonaws.com"
+  content  = "inbound-smtp.us-east-1.amazonaws.com"
+  ttl      = 1
   priority = 10
 }
 
-resource "cloudflare_record" "assets_larplibrary_org" {
+resource "cloudflare_dns_record" "assets_larplibrary_org" {
   zone_id = cloudflare_zone.larplibrary_org.id
   name    = "assets.larplibrary.org"
   type    = "CNAME"
-  value   = module.assets_larplibrary_org_cloudfront.cloudfront_distribution.domain_name
+  content = module.assets_larplibrary_org_cloudfront.cloudfront_distribution.domain_name
+  ttl     = 1
 }
 
 
@@ -267,11 +273,12 @@ module "assets_larplibrary_org_cloudfront" {
   compress                 = true
 }
 
-resource "cloudflare_record" "interactiveliterature_org_library_cname" {
+resource "cloudflare_dns_record" "interactiveliterature_org_library_cname" {
   zone_id = cloudflare_zone.interactiveliterature_org.id
   name    = "library"
   type    = "CNAME"
-  value   = "larp-library.fly.dev"
+  content = "larp-library.fly.dev"
+  ttl     = 1
 }
 
 resource "github_repository" "larp_library" {
