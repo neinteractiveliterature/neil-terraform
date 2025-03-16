@@ -26,9 +26,13 @@ variable "rollbar_token" {
   sensitive = true
 }
 
+variable "aws_profile" {
+  type = string
+}
+
 provider "aws" {
-  profile = "neil"
   region  = "us-east-1"
+  profile = var.aws_profile
 }
 
 # provider "heroku" {
