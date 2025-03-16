@@ -232,8 +232,8 @@ resource "cloudflare_dns_record" "interactiveliterature_org_www_cname" {
   zone_id = cloudflare_zone.interactiveliterature_org.id
   name    = "www"
   type    = "CNAME"
-  proxied = true
-  content = aws_s3_bucket_website_configuration.www_interactiveliterature_org.website_endpoint
+  proxied = false
+  content = "www-interactiveliterature-org.fly.dev"
   ttl     = 1
 }
 
