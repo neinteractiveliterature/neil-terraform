@@ -3,7 +3,7 @@ resource "aws_iam_group" "terraform_admin" {
 }
 
 resource "aws_iam_group_policy" "terraform_admin" {
-  group = aws_iam_group.terraform_admin.name
+  group  = aws_iam_group.terraform_admin.name
   policy = <<-EOF
   {
     "Version": "2012-10-17",
@@ -43,6 +43,6 @@ resource "aws_iam_group" "ops_admin" {
 }
 
 resource "aws_iam_group_policy_attachment" "ops_admin_administrator_access" {
-  group = aws_iam_group.ops_admin.name
+  group      = aws_iam_group.ops_admin.name
   policy_arn = "arn:aws:iam::aws:policy/AdministratorAccess"
 }
