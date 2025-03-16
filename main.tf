@@ -61,12 +61,12 @@ provider "github" {
 
 terraform {
   backend "s3" {
-    profile        = "neil"
-    region         = "us-east-1"
-    bucket         = "neil-terraform-state"
-    key            = "terraform.tfstate"
-    encrypt        = true
-    dynamodb_table = "terraform_state_locks"
+    profile      = "neil"
+    region       = "us-east-1"
+    bucket       = "neil-terraform-state"
+    key          = "terraform.tfstate"
+    encrypt      = true
+    use_lockfile = true
   }
 }
 
