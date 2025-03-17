@@ -76,7 +76,7 @@ resource "aws_s3_bucket_website_configuration" "interconlarp_org" {
           KeyPrefixEquals = "policy"
         }
         Redirect = {
-          HostName         = "w.interconlarp.org"
+          HostName         = "x.interconlarp.org"
           HttpRedirectCode = "302"
           Protocol         = "https"
           ReplaceKeyWith   = "pages/rules"
@@ -84,7 +84,7 @@ resource "aws_s3_bucket_website_configuration" "interconlarp_org" {
       },
       {
         Redirect = {
-          HostName         = "w.interconlarp.org"
+          HostName         = "x.interconlarp.org"
           HttpRedirectCode = "302"
           Protocol         = "https"
           ReplaceKeyWith   = ""
@@ -103,6 +103,16 @@ module "interconlarp_org_cloudfront" {
   origin_id                = "S3-interconlarp.org"
   origin_domain_name       = aws_s3_bucket_website_configuration.interconlarp_org.website_endpoint
   add_security_headers_arn = aws_lambda_function.addSecurityHeaders.qualified_arn
+}
+
+resource "null_resource" "interconlarp_org_cloudfront_invalidate" {
+  provisioner "local-exec" {
+    command = "aws cloudfront create-invalidation --distribution-id ${module.interconlarp_org_cloudfront.cloudfront_distribution.id} --paths '/*'"
+  }
+
+  triggers = {
+    routing_rules_changed = aws_s3_bucket_website_configuration.interconlarp_org.routing_rules
+  }
 }
 
 module "interconlarp_org_redirect_subdomain" {
