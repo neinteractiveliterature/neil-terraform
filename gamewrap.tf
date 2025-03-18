@@ -19,6 +19,16 @@ resource "aws_s3_bucket_website_configuration" "gamewrap_interactiveliterature_o
   }
 }
 
+resource "github_repository" "game_wrap" {
+  name                 = "game_wrap"
+  description          = "The web site for Game Wrap"
+  has_downloads        = true
+  has_issues           = true
+  has_projects         = true
+  has_wiki             = true
+  vulnerability_alerts = true
+}
+
 resource "aws_iam_role" "gamewrap_deploy" {
   name = "gamewrap_deploy"
   assume_role_policy = jsonencode({
@@ -30,7 +40,7 @@ resource "aws_iam_role" "gamewrap_deploy" {
 
       Condition = {
         StringLike = {
-          "token.actions.githubusercontent.com:sub" : "repo:neinteractiveliterature/game_wrap:*"
+          "token.actions.githubusercontent.com:sub" : "repo:${github_repository.game_wrap.full_name}:*"
         }
       }
 
