@@ -19,6 +19,52 @@ resource "aws_s3_bucket_website_configuration" "gamewrap_interactiveliterature_o
   }
 }
 
+resource "aws_iam_role" "gamewrap_deploy" {
+  name = "gamewrap_deploy"
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+
+    Statement = [{
+      Action = "sts:AssumeRoleWithWebIdentity"
+      Effect = "Allow"
+
+      Condition = {
+        StringLike = {
+          "token.actions.githubusercontent.com:sub" : "repo:neinteractiveliterature/game_wrap:*"
+        }
+      }
+
+      Principal = {
+        Federated = module.github-oidc.oidc_provider_arn
+      }
+    }]
+  })
+}
+
+resource "aws_iam_role_policy" "gamewrap_deploy" {
+  role = aws_iam_role.gamewrap_deploy.name
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+
+    Statement = [{
+      Action = [
+        "s3:PutObject",
+        "s3:PutObjectAcl",
+        "s3:DeleteObject"
+      ]
+      Effect = "Allow"
+
+      Resource = "${aws_s3_bucket.gamewrap_interactiveliterature_org.arn}/*"
+    }]
+  })
+}
+
+output "gamewrap_github_oidc_role" {
+  description = "Game Wrap deploy role ARN"
+  value       = aws_iam_role.gamewrap_deploy.arn
+}
+
 resource "cloudflare_dns_record" "interactiveliterature_org_gamewrap_cname" {
   zone_id = cloudflare_zone.interactiveliterature_org.id
   name    = "gamewrap"
