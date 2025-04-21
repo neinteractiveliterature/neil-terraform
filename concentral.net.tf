@@ -86,22 +86,6 @@ resource "cloudflare_dns_record" "concentral_net_cname" {
   ttl     = 1
 }
 
-resource "cloudflare_dns_record" "concentral_net_mx" {
-  zone_id  = cloudflare_zone.concentral_net.id
-  name     = "concentral.net"
-  type     = "MX"
-  content  = "inbound-smtp.us-east-1.amazonaws.com"
-  ttl      = 1
-  priority = 10
-}
-
-resource "cloudflare_dns_record" "concentral_net_spf" {
-  zone_id = cloudflare_zone.concentral_net.id
-  name    = "concentral.net"
-  type    = "TXT"
-  content = "v=spf1 include:amazonses.com ~all"
-  ttl     = 1
-}
 
 resource "cloudflare_dns_record" "concentral_net_convention_mx" {
   for_each = local.concentral_net_convention_mx_subdomains
@@ -134,4 +118,12 @@ resource "cloudflare_dns_record" "concentral_net_convention_mx_cname" {
   type    = "CNAME"
   content = "intercode.fly.dev"
   ttl     = 1
+}
+
+resource "cloudflare_dns_record" "concentral_net_forwardemail_verification" {
+  zone_id = cloudflare_zone.concentral_net.id
+  name    = "@"
+  type    = "TXT"
+  content = "forward-email-site-verification=XhOr28dCAG"
+  ttl     = 3600
 }

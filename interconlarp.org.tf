@@ -145,6 +145,14 @@ resource "cloudflare_dns_record" "interconlarp_org_mx" {
   ttl      = 1
 }
 
+resource "cloudflare_dns_record" "interconlarp_org_forwardemail_verification_txt" {
+  zone_id = cloudflare_zone.interconlarp_org.id
+  name    = "interconlarp.org"
+  type    = "TXT"
+  content = "forward-email-site-verification=${local.forwardemail_verification_records_by_domain["interconlarp.org"]}"
+  ttl     = 3600
+}
+
 resource "cloudflare_dns_record" "interconlarp_org_acme_challenge_cname" {
   zone_id = cloudflare_zone.interconlarp_org.id
   name    = "_acme-challenge"
@@ -184,6 +192,16 @@ resource "cloudflare_dns_record" "interconlarp_org_convention_subdomain_mx" {
   ttl      = 1
 }
 
+resource "cloudflare_dns_record" "interconlarp_org_convention_subdomain_forwardemail_verification_txt" {
+  for_each = local.interconlarp_org_intercode_subdomains
+
+  zone_id = cloudflare_zone.interconlarp_org.id
+  name    = each.value
+  type    = "TXT"
+  content = "forward-email-site-verification=${local.forwardemail_verification_records_by_domain["${each.value}.interconlarp.org"]}"
+  ttl     = 3600
+}
+
 resource "cloudflare_dns_record" "interconlarp_org_convention_subdomain_events_mx" {
   for_each = local.interconlarp_org_intercode_subdomains
 
@@ -194,6 +212,17 @@ resource "cloudflare_dns_record" "interconlarp_org_convention_subdomain_events_m
   priority = 10
   ttl      = 1
 }
+
+resource "cloudflare_dns_record" "interconlarp_org_convention_subdomain_events_forwardemail_verification_txt" {
+  for_each = local.interconlarp_org_intercode_subdomains
+
+  zone_id = cloudflare_zone.interconlarp_org.id
+  name    = "events.${each.value}"
+  type    = "TXT"
+  content = "forward-email-site-verification=${local.forwardemail_verification_records_by_domain["events.${each.value}.interconlarp.org"]}"
+  ttl     = 3600
+}
+
 
 resource "cloudflare_dns_record" "interconlarp_org_www_cname" {
   zone_id = cloudflare_zone.interconlarp_org.id

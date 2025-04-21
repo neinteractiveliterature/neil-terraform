@@ -47,7 +47,8 @@ variable "cloudflare_email" {
 }
 
 variable "cloudflare_api_key" {
-  type = string
+  type      = string
+  sensitive = true
 }
 
 provider "cloudflare" {
@@ -56,7 +57,13 @@ provider "cloudflare" {
 }
 
 variable "fly_gha_api_token" {
-  type = string
+  type      = string
+  sensitive = true
+}
+
+variable "forwardemail_api_key" {
+  type      = string
+  sensitive = true
 }
 
 provider "github" {
