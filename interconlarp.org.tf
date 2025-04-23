@@ -1,4 +1,16 @@
 locals {
+  interconlarp_org_forward_only_subdomains = toset([
+    "d",
+    "e",
+    "f",
+    "g",
+    "h",
+    "i",
+    "j",
+    "k",
+    "l",
+    "m"
+  ])
   interconlarp_org_intercode_subdomains = toset([
     "n",
     "o",
@@ -10,7 +22,8 @@ locals {
     "u",
     "v",
     "w",
-    "x"
+    "x",
+    "x-demo"
   ])
   interconlarp_org_redirect_subdomains = {
     "a.interconlarp.org"    = "A/",
@@ -136,28 +149,19 @@ resource "cloudflare_dns_record" "interconlarp_org_apex_alias" {
   ttl     = 1
 }
 
-resource "cloudflare_dns_record" "interconlarp_org_mx" {
-  zone_id  = cloudflare_zone.interconlarp_org.id
-  name     = "interconlarp.org"
-  type     = "MX"
-  content  = "inbound-smtp.us-east-1.amazonaws.com"
-  priority = 10
-  ttl      = 1
-}
+module "interconlarp_org_forwardemail_receiving_domain" {
+  source = "./modules/forwardemail_receiving_domain"
 
-resource "cloudflare_dns_record" "interconlarp_org_forwardemail_verification_txt" {
-  zone_id = cloudflare_zone.interconlarp_org.id
-  name    = "interconlarp.org"
-  type    = "TXT"
-  content = "forward-email-site-verification=${local.forwardemail_verification_records_by_domain["interconlarp.org"]}"
-  ttl     = 3600
+  cloudflare_zone   = cloudflare_zone.interconlarp_org
+  name              = "interconlarp.org"
+  verification_code = local.forwardemail_verification_records_by_domain["interconlarp.org"]
 }
 
 resource "cloudflare_dns_record" "interconlarp_org_acme_challenge_cname" {
   zone_id = cloudflare_zone.interconlarp_org.id
-  name    = "_acme-challenge"
+  name    = "_acme-challenge.interconlarp.org"
   type    = "CNAME"
-  content = "interconlarp.org.j2o5oe.flydns.net."
+  content = "interconlarp.org.j2o5oe.flydns.net"
   ttl     = 1
 }
 
@@ -165,7 +169,7 @@ resource "cloudflare_dns_record" "interconlarp_org_convention_subdomain_cname" {
   for_each = local.interconlarp_org_intercode_subdomains
 
   zone_id = cloudflare_zone.interconlarp_org.id
-  name    = each.value
+  name    = "${each.value}.interconlarp.org"
   type    = "A"
   content = "137.66.59.126"
   ttl     = 1
@@ -175,58 +179,45 @@ resource "cloudflare_dns_record" "interconlarp_org_convention_subdomain_aaaa" {
   for_each = local.interconlarp_org_intercode_subdomains
 
   zone_id = cloudflare_zone.interconlarp_org.id
-  name    = each.value
+  name    = "${each.value}.interconlarp.org"
   type    = "AAAA"
   content = "2a09:8280:1::4e:bee4"
   ttl     = 1
 }
 
-resource "cloudflare_dns_record" "interconlarp_org_convention_subdomain_mx" {
-  for_each = local.interconlarp_org_intercode_subdomains
+module "interconlarp_org_convention_subdomain_forwardemail_receiving_domain" {
+  for_each = toset([for subdomain in local.interconlarp_org_intercode_subdomains : "${subdomain}.interconlarp.org"])
+  source   = "./modules/forwardemail_receiving_domain"
 
-  zone_id  = cloudflare_zone.interconlarp_org.id
-  name     = each.value
-  type     = "MX"
-  content  = "inbound-smtp.us-east-1.amazonaws.com"
-  priority = 10
-  ttl      = 1
+  cloudflare_zone   = cloudflare_zone.interconlarp_org
+  name              = each.value
+  verification_code = local.forwardemail_verification_records_by_domain[each.value]
 }
 
-resource "cloudflare_dns_record" "interconlarp_org_convention_subdomain_forwardemail_verification_txt" {
-  for_each = local.interconlarp_org_intercode_subdomains
+module "interconlarp_org_forward_only_subdomain_forwardemail_receiving_domain" {
+  for_each = toset([for subdomain in local.interconlarp_org_forward_only_subdomains : "${subdomain}.interconlarp.org"])
+  source   = "./modules/forwardemail_receiving_domain"
 
-  zone_id = cloudflare_zone.interconlarp_org.id
-  name    = each.value
-  type    = "TXT"
-  content = "forward-email-site-verification=${local.forwardemail_verification_records_by_domain["${each.value}.interconlarp.org"]}"
-  ttl     = 3600
+  cloudflare_zone   = cloudflare_zone.interconlarp_org
+  name              = each.value
+  verification_code = local.forwardemail_verification_records_by_domain[each.value]
 }
 
-resource "cloudflare_dns_record" "interconlarp_org_convention_subdomain_events_mx" {
-  for_each = local.interconlarp_org_intercode_subdomains
+module "interconlarp_org_convention_subdomain_events_forwardemail_receiving_domain" {
+  for_each = setintersection(
+    keys(local.forwardemail_verification_records_by_domain),
+    [for subdomain in local.interconlarp_org_intercode_subdomains : "${subdomain}.events.interconlarp.org"]
+  )
+  source = "./modules/forwardemail_receiving_domain"
 
-  zone_id  = cloudflare_zone.interconlarp_org.id
-  name     = "events.${each.value}"
-  type     = "MX"
-  content  = "inbound-smtp.us-east-1.amazonaws.com"
-  priority = 10
-  ttl      = 1
+  cloudflare_zone   = cloudflare_zone.interconlarp_org
+  name              = each.value
+  verification_code = local.forwardemail_verification_records_by_domain[each.value]
 }
-
-resource "cloudflare_dns_record" "interconlarp_org_convention_subdomain_events_forwardemail_verification_txt" {
-  for_each = local.interconlarp_org_intercode_subdomains
-
-  zone_id = cloudflare_zone.interconlarp_org.id
-  name    = "events.${each.value}"
-  type    = "TXT"
-  content = "forward-email-site-verification=${local.forwardemail_verification_records_by_domain["events.${each.value}.interconlarp.org"]}"
-  ttl     = 3600
-}
-
 
 resource "cloudflare_dns_record" "interconlarp_org_www_cname" {
   zone_id = cloudflare_zone.interconlarp_org.id
-  name    = "www"
+  name    = "www.interconlarp.org"
   type    = "CNAME"
   content = module.interconlarp_org_cloudfront.cloudfront_distribution.domain_name
   ttl     = 1
@@ -250,7 +241,7 @@ resource "cloudflare_dns_record" "interconlarp_org_google_site_verification_reco
 
 resource "cloudflare_dns_record" "interconlarp_org_wildcard_cname" {
   zone_id = cloudflare_zone.interconlarp_org.id
-  name    = "*"
+  name    = "*.interconlarp.org"
   type    = "CNAME"
   content = "intercode.fly.dev"
   ttl     = 1
@@ -258,7 +249,7 @@ resource "cloudflare_dns_record" "interconlarp_org_wildcard_cname" {
 
 resource "cloudflare_dns_record" "interconlarp_org_furniture_cname" {
   zone_id = cloudflare_zone.interconlarp_org.id
-  name    = "furniture"
+  name    = "furniture.interconlarp.org"
   type    = "CNAME"
   content = "intercon-furniture.fly.dev"
   ttl     = 1
@@ -266,7 +257,7 @@ resource "cloudflare_dns_record" "interconlarp_org_furniture_cname" {
 
 resource "cloudflare_dns_record" "interconlarp_org_security_forwarder_cname" {
   zone_id = cloudflare_zone.interconlarp_org.id
-  name    = "security-forwarder"
+  name    = "security-forwarder.interconlarp.org"
   type    = "CNAME"
   content = "intercon-security-forwarder.fly.dev"
   ttl     = 1

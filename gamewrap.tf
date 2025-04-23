@@ -77,7 +77,7 @@ output "gamewrap_github_oidc_role" {
 
 resource "cloudflare_dns_record" "interactiveliterature_org_gamewrap_cname" {
   zone_id = cloudflare_zone.interactiveliterature_org.id
-  name    = "gamewrap"
+  name    = "gamewrap.interactiveliterature.org"
   type    = "CNAME"
   proxied = true
   content = aws_s3_bucket_website_configuration.gamewrap_interactiveliterature_org.website_endpoint

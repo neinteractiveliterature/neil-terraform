@@ -60,7 +60,7 @@ variable "cloudflare_zone" {
 
 resource "aws_acm_certificate_validation" "cert_validation" {
   certificate_arn         = aws_acm_certificate.cloudfront_cert.arn
-  validation_record_fqdns = [for record in cloudflare_dns_record.cert_validation_records : record.name]
+  validation_record_fqdns = [for record in cloudflare_dns_record.cert_validation_records : "${record.name}."]
 }
 
 resource "aws_acm_certificate" "cloudfront_cert" {
@@ -131,7 +131,7 @@ resource "cloudflare_dns_record" "cert_validation_records" {
     }
   }
 
-  name    = each.value.name
+  name    = trimsuffix(each.value.name, ".")
   content = trimsuffix(each.value.record, ".")
   type    = each.value.type
   zone_id = var.cloudflare_zone.id

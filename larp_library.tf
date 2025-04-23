@@ -243,13 +243,12 @@ resource "cloudflare_dns_record" "larplibrary_org_www" {
   ttl     = 1
 }
 
-resource "cloudflare_dns_record" "larplibrary_org_mx" {
-  zone_id  = cloudflare_zone.larplibrary_org.id
-  name     = "larplibrary.org"
-  type     = "MX"
-  content  = "inbound-smtp.us-east-1.amazonaws.com"
-  ttl      = 1
-  priority = 10
+module "larplibrary_org_forwardemail_receiving_domain" {
+  source = "./modules/forwardemail_receiving_domain"
+
+  cloudflare_zone   = cloudflare_zone.larplibrary_org
+  name              = "larplibrary.org"
+  verification_code = local.forwardemail_verification_records_by_domain["larplibrary.org"]
 }
 
 resource "cloudflare_dns_record" "assets_larplibrary_org" {
@@ -275,7 +274,7 @@ module "assets_larplibrary_org_cloudfront" {
 
 resource "cloudflare_dns_record" "interactiveliterature_org_library_cname" {
   zone_id = cloudflare_zone.interactiveliterature_org.id
-  name    = "library"
+  name    = "library.interactiveliterature.org"
   type    = "CNAME"
   content = "larp-library.fly.dev"
   ttl     = 1

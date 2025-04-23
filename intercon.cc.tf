@@ -93,7 +93,7 @@ resource "cloudflare_dns_record" "intercon_cc_apex_alias" {
 
 resource "cloudflare_dns_record" "www_intercon_cc_cname" {
   zone_id = cloudflare_zone.intercon_cc.id
-  name    = "www"
+  name    = "www.intercon.cc"
   type    = "CNAME"
   proxied = true
   content = cloudflare_zone.intercon_cc.name

@@ -12,10 +12,12 @@ locals {
     "nelco2019",
     "nelco2020",
     "wbc2021",
+    "wbc-2023",
     "wbc-2024",
     "wintercon2022",
     "lbc-2023",
-    "lbc-2024"
+    "lbc-2024",
+    "lbc-2025"
   ])
   interactiveliterature_org_redirects = {
     "interactiveliterature.org"       = "www.interactiveliterature.org"
@@ -169,20 +171,19 @@ module "interactiveliterature_org_apex_redirect" {
   alternative_names             = []
 }
 
-resource "cloudflare_dns_record" "interactiveliterature_org_mx" {
-  zone_id  = cloudflare_zone.interactiveliterature_org.id
-  name     = "interactiveliterature.org"
-  type     = "MX"
-  content  = "inbound-smtp.us-east-1.amazonaws.com"
-  ttl      = 1
-  priority = 10
+module "interactiveliterature_org_forwardemail_receiving_domain" {
+  source = "./modules/forwardemail_receiving_domain"
+
+  cloudflare_zone   = cloudflare_zone.interactiveliterature_org
+  name              = "interactiveliterature.org"
+  verification_code = local.forwardemail_verification_records_by_domain["interactiveliterature.org"]
 }
 
 resource "cloudflare_dns_record" "interactiveliterature_org_acme_challenge_cname" {
   zone_id = cloudflare_zone.interactiveliterature_org.id
-  name    = "_acme-challenge"
+  name    = "_acme-challenge.interactiveliterature.org"
   type    = "CNAME"
-  content = "interactiveliterature.org.j2o5oe.flydns.net."
+  content = "interactiveliterature.org.j2o5oe.flydns.net"
   ttl     = 1
 }
 
@@ -190,7 +191,7 @@ resource "cloudflare_dns_record" "interactiveliterature_org_convention_subdomain
   for_each = local.interactiveliterature_org_intercode_subdomains
 
   zone_id = cloudflare_zone.interactiveliterature_org.id
-  name    = each.value
+  name    = "${each.value}.interactiveliterature.org"
   type    = "A"
   content = "137.66.59.126"
   ttl     = 1
@@ -200,37 +201,39 @@ resource "cloudflare_dns_record" "interactiveliterature_org_convention_subdomain
   for_each = local.interactiveliterature_org_intercode_subdomains
 
   zone_id = cloudflare_zone.interactiveliterature_org.id
-  name    = each.value
+  name    = "${each.value}.interactiveliterature.org"
   type    = "AAAA"
   content = "2a09:8280:1::4e:bee4"
   ttl     = 1
 }
 
-resource "cloudflare_dns_record" "interactiveliterature_org_convention_subdomain_mx" {
-  for_each = local.interactiveliterature_org_intercode_subdomains
+module "interactiveliterature_org_convention_subdomain_forwardemail_receiving_domain" {
+  source = "./modules/forwardemail_receiving_domain"
+  for_each = setintersection(
+    keys(local.forwardemail_verification_records_by_domain),
+    [for subdomain in local.interactiveliterature_org_intercode_subdomains : "${subdomain}.interactiveliterature.org"]
+  )
 
-  zone_id  = cloudflare_zone.interactiveliterature_org.id
-  name     = each.value
-  type     = "MX"
-  content  = "inbound-smtp.us-east-1.amazonaws.com"
-  ttl      = 1
-  priority = 10
+  cloudflare_zone   = cloudflare_zone.interactiveliterature_org
+  name              = each.value
+  verification_code = local.forwardemail_verification_records_by_domain[each.value]
 }
 
-resource "cloudflare_dns_record" "interactiveliterature_org_convention_subdomain_events_mx" {
-  for_each = local.interactiveliterature_org_intercode_subdomains
+module "interactiveliterature_org_convention_subdomain_events_forwardemail_receiving_domain" {
+  source = "./modules/forwardemail_receiving_domain"
+  for_each = setintersection(
+    keys(local.forwardemail_verification_records_by_domain),
+    [for subdomain in local.interactiveliterature_org_intercode_subdomains : "${subdomain}.events.interactiveliterature.org"]
+  )
 
-  zone_id  = cloudflare_zone.interactiveliterature_org.id
-  name     = "events.${each.value}"
-  type     = "MX"
-  content  = "inbound-smtp.us-east-1.amazonaws.com"
-  ttl      = 1
-  priority = 10
+  cloudflare_zone   = each.value
+  name              = "events.${each.value}"
+  verification_code = local.forwardemail_verification_records_by_domain[each.value]
 }
 
 resource "cloudflare_dns_record" "interactiveliterature_org_www_cname" {
   zone_id = cloudflare_zone.interactiveliterature_org.id
-  name    = "www"
+  name    = "www.interactiveliterature.org"
   type    = "CNAME"
   proxied = false
   content = "www-interactiveliterature-org.fly.dev"
@@ -239,7 +242,7 @@ resource "cloudflare_dns_record" "interactiveliterature_org_www_cname" {
 
 resource "cloudflare_dns_record" "interactiveliterature_org_old_cname" {
   zone_id = cloudflare_zone.interactiveliterature_org.id
-  name    = "old"
+  name    = "old.interactiveliterature.org"
   type    = "CNAME"
   proxied = false
   content = module.old_interactiveliterature_org_cloudfront.cloudfront_distribution.domain_name
@@ -276,7 +279,7 @@ resource "cloudflare_dns_record" "interactiveliterature_org_google_site_verifica
 
 resource "cloudflare_dns_record" "interactiveliterature_org_intercode_cname" {
   zone_id = cloudflare_zone.interactiveliterature_org.id
-  name    = "intercode"
+  name    = "intercode.interactiveliterature.org"
   type    = "CNAME"
   content = "neinteractiveliterature.github.io"
   ttl     = 1
@@ -284,7 +287,7 @@ resource "cloudflare_dns_record" "interactiveliterature_org_intercode_cname" {
 
 resource "cloudflare_dns_record" "interactiveliterature_org_listmonk_cname" {
   zone_id = cloudflare_zone.interactiveliterature_org.id
-  name    = "listmonk"
+  name    = "listmonk.interactiveliterature.org"
   type    = "CNAME"
   content = "neil-listmonk.fly.dev"
   ttl     = 1
@@ -292,7 +295,7 @@ resource "cloudflare_dns_record" "interactiveliterature_org_listmonk_cname" {
 
 resource "cloudflare_dns_record" "interactiveliterature_org_litform_cname" {
   zone_id = cloudflare_zone.interactiveliterature_org.id
-  name    = "litform"
+  name    = "litform.interactiveliterature.org"
   type    = "CNAME"
   content = "neinteractiveliterature.github.io"
   ttl     = 1
@@ -300,7 +303,7 @@ resource "cloudflare_dns_record" "interactiveliterature_org_litform_cname" {
 
 resource "cloudflare_dns_record" "interactiveliterature_org_rotator_cname" {
   zone_id = cloudflare_zone.interactiveliterature_org.id
-  name    = "rotator"
+  name    = "rotator.interactiveliterature.org"
   type    = "CNAME"
   content = "rotator.fly.dev"
   ttl     = 1
@@ -308,7 +311,7 @@ resource "cloudflare_dns_record" "interactiveliterature_org_rotator_cname" {
 
 resource "cloudflare_dns_record" "interactiveliterature_org_wildcard_cname" {
   zone_id = cloudflare_zone.interactiveliterature_org.id
-  name    = "*"
+  name    = "*.interactiveliterature.org"
   type    = "CNAME"
   content = "intercode.fly.dev"
   ttl     = 1
@@ -316,7 +319,7 @@ resource "cloudflare_dns_record" "interactiveliterature_org_wildcard_cname" {
 
 resource "cloudflare_dns_record" "interactiveliterature_org_vector" {
   zone_id = cloudflare_zone.interactiveliterature_org.id
-  name    = "vector"
+  name    = "vector.interactiveliterature.org"
   type    = "CNAME"
   content = "neil-vector.fly.dev"
   ttl     = 1
@@ -325,7 +328,7 @@ resource "cloudflare_dns_record" "interactiveliterature_org_vector" {
 
 resource "cloudflare_dns_record" "interactiveliterature_org_vector_acme_challenge" {
   zone_id = cloudflare_zone.interactiveliterature_org.id
-  name    = "_acme-challenge.vector"
+  name    = "_acme-challenge.vector.interactiveliterature.org"
   type    = "CNAME"
   content = "vector.interactiveliterature.org.yzrggx.flydns.net"
   ttl     = 1

@@ -29,8 +29,18 @@ locals {
   }
 
   concentral_net_convention_mx_subdomains = toset([
-    "maxicon.concentral.net",
-    "maxcon2025.concentral.net"
+    "alarpfestival-2024",
+    "alarpfestival-2025",
+    "cyberol2020",
+    "hrsfanssummerparty-2020",
+    "hrsfanssummerparty-2021",
+    "jennylarps",
+    "summerlarpin2020",
+    "summerlarpin2021",
+    "summerlarpin2022",
+    "summerlarpin2023",
+    "tidalpull2023",
+    "tidalpull2025"
   ])
 }
 
@@ -86,44 +96,55 @@ resource "cloudflare_dns_record" "concentral_net_cname" {
   ttl     = 1
 }
 
+module "concentral_net_forwardemail_receiving_domain" {
+  source = "./modules/forwardemail_receiving_domain"
 
-resource "cloudflare_dns_record" "concentral_net_convention_mx" {
-  for_each = local.concentral_net_convention_mx_subdomains
-
-  zone_id  = cloudflare_zone.concentral_net.id
-  name     = each.value
-  type     = "MX"
-  content  = "inbound-smtp.us-east-1.amazonaws.com"
-  ttl      = 1
-  priority = 10
+  cloudflare_zone   = cloudflare_zone.concentral_net
+  name              = "concentral.net"
+  verification_code = local.forwardemail_verification_records_by_domain["concentral.net"]
 }
 
-resource "cloudflare_dns_record" "concentral_net_convention_events_mx" {
-  for_each = local.concentral_net_convention_mx_subdomains
+module "concentral_net_convention_mx_forwardemail_receiving_domain" {
+  for_each = setintersection(
+    keys(local.forwardemail_verification_records_by_domain),
+    [for subdomain in local.concentral_net_convention_mx_subdomains : "${subdomain}.concentral.net"]
+  )
+  source = "./modules/forwardemail_receiving_domain"
 
-  zone_id  = cloudflare_zone.concentral_net.id
-  name     = "events.${each.value}"
-  type     = "MX"
-  content  = "inbound-smtp.us-east-1.amazonaws.com"
-  ttl      = 1
-  priority = 10
+  cloudflare_zone   = cloudflare_zone.concentral_net
+  name              = each.value
+  verification_code = local.forwardemail_verification_records_by_domain[each.value]
 }
 
-# Having an MX record breaks the wildcard CNAME, so we have to have a specific one for each MX domain
-resource "cloudflare_dns_record" "concentral_net_convention_mx_cname" {
+module "concentral_net_convention_mx_events_forwardemail_receiving_domain" {
+  for_each = setintersection(
+    keys(local.forwardemail_verification_records_by_domain),
+    [for subdomain in local.concentral_net_convention_mx_subdomains : "events.${subdomain}.concentral.net"]
+  )
+  source = "./modules/forwardemail_receiving_domain"
+
+  cloudflare_zone   = cloudflare_zone.concentral_net
+  name              = each.value
+  verification_code = local.forwardemail_verification_records_by_domain[each.value]
+}
+
+# Having an MX record breaks the wildcard CNAME, so we have to have a specific A record for each MX domain
+resource "cloudflare_dns_record" "concentral_net_convention_mx_a" {
   for_each = local.concentral_net_convention_mx_subdomains
 
   zone_id = cloudflare_zone.concentral_net.id
-  name    = each.value
-  type    = "CNAME"
-  content = "intercode.fly.dev"
+  name    = "${each.value}.concentral.net"
+  type    = "A"
+  content = "137.66.59.126"
   ttl     = 1
 }
 
-resource "cloudflare_dns_record" "concentral_net_forwardemail_verification" {
+resource "cloudflare_dns_record" "concentral_net_convention_subdomain_aaaa" {
+  for_each = local.concentral_net_convention_mx_subdomains
+
   zone_id = cloudflare_zone.concentral_net.id
-  name    = "@"
-  type    = "TXT"
-  content = "forward-email-site-verification=XhOr28dCAG"
-  ttl     = 3600
+  name    = "${each.value}.concentral.net"
+  type    = "AAAA"
+  content = "2a09:8280:1::4e:bee4"
+  ttl     = 1
 }

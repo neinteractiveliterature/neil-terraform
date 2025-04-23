@@ -1,6 +1,7 @@
 locals {
   extraconlarp_org_intercode_subdomains = toset([
-    "2021"
+    "2021",
+    "2022"
   ])
 }
 
@@ -49,18 +50,9 @@ module "extraconlarp_org_apex_redirect" {
   alternative_names             = ["www.extraconlarp.org"]
 }
 
-resource "cloudflare_dns_record" "extraconlarp_org_mx" {
-  zone_id  = cloudflare_zone.extraconlarp_org.id
-  name     = "extraconlarp.org"
-  type     = "MX"
-  content  = "inbound-smtp.us-east-1.amazonaws.com"
-  ttl      = 1
-  priority = 10
-}
-
 resource "cloudflare_dns_record" "extraconlarp_org_acme_challenge_cname" {
   zone_id = cloudflare_zone.extraconlarp_org.id
-  name    = "_acme-challenge"
+  name    = "_acme-challenge.extraconlarp.org"
   type    = "CNAME"
   content = "extraconlarp.org.j2o5oe.flydns.net"
   ttl     = 1
@@ -70,7 +62,7 @@ resource "cloudflare_dns_record" "extraconlarp_org_convention_subdomain_a" {
   for_each = local.extraconlarp_org_intercode_subdomains
 
   zone_id = cloudflare_zone.extraconlarp_org.id
-  name    = each.value
+  name    = "${each.value}.extraconlarp.org"
   type    = "A"
   content = "137.66.59.126"
   ttl     = 1
@@ -80,32 +72,27 @@ resource "cloudflare_dns_record" "extraconlarp_org_convention_subdomain_aaaa" {
   for_each = local.extraconlarp_org_intercode_subdomains
 
   zone_id = cloudflare_zone.extraconlarp_org.id
-  name    = each.value
+  name    = "${each.value}.extraconlarp.org"
   type    = "AAAA"
   content = "2a09:8280:1::4e:bee4"
   ttl     = 1
 }
 
-resource "cloudflare_dns_record" "extraconlarp_org_convention_subdomain_mx" {
-  for_each = local.extraconlarp_org_intercode_subdomains
+module "extraconlarp_org_convention_subdomain_forwardemail_receiving_domain" {
+  for_each = toset([for subdomain in local.extraconlarp_org_intercode_subdomains : "${subdomain}.extraconlarp.org"])
+  source   = "./modules/forwardemail_receiving_domain"
 
-  zone_id  = cloudflare_zone.extraconlarp_org.id
-  name     = each.value
-  type     = "MX"
-  content  = "inbound-smtp.us-east-1.amazonaws.com"
-  ttl      = 1
-  priority = 10
+  cloudflare_zone   = cloudflare_zone.extraconlarp_org
+  name              = each.value
+  verification_code = local.forwardemail_verification_records_by_domain[each.value]
 }
 
-resource "cloudflare_dns_record" "extraconlarp_org_convention_subdomain_events_mx" {
-  for_each = local.extraconlarp_org_intercode_subdomains
+module "extraconlarp_org_convention_subdomain_2021_events_forwardemail_receiving_domain" {
+  source = "./modules/forwardemail_receiving_domain"
 
-  zone_id  = cloudflare_zone.extraconlarp_org.id
-  name     = "events.${each.value}"
-  type     = "MX"
-  content  = "inbound-smtp.us-east-1.amazonaws.com"
-  ttl      = 1
-  priority = 10
+  cloudflare_zone   = cloudflare_zone.extraconlarp_org
+  name              = "events.2021.extraconlarp.org"
+  verification_code = local.forwardemail_verification_records_by_domain["events.2021.extraconlarp.org"]
 }
 
 resource "cloudflare_dns_record" "extraconlarp_org_spf_record" {
@@ -126,7 +113,7 @@ resource "cloudflare_dns_record" "extraconlarp_org_google_site_verification_reco
 
 resource "cloudflare_dns_record" "extraconlarp_org_wildcard_cname" {
   zone_id = cloudflare_zone.extraconlarp_org.id
-  name    = "*"
+  name    = "*.extraconlarp.org"
   type    = "CNAME"
   content = "intercode.fly.dev"
   ttl     = 1

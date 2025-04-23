@@ -477,7 +477,7 @@ resource "github_repository" "intercode" {
 
   pages {
     build_type = "legacy"
-    cname      = "${cloudflare_dns_record.interactiveliterature_org_intercode_cname.name}.${cloudflare_zone.interactiveliterature_org.name}"
+    cname      = cloudflare_dns_record.interactiveliterature_org_intercode_cname.name
 
     source {
       branch = "gh-pages"
