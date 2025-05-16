@@ -1,5 +1,6 @@
 locals {
-  interconlarp_org_forward_only_subdomains = toset([
+  interconlarp_org_forward_only_subdomains = toset([])
+  interconlarp_org_intercode_subdomains = toset([
     "d",
     "e",
     "f",
@@ -9,9 +10,7 @@ locals {
     "j",
     "k",
     "l",
-    "m"
-  ])
-  interconlarp_org_intercode_subdomains = toset([
+    "m",
     "n",
     "o",
     "p",
