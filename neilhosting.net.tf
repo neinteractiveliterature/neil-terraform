@@ -19,21 +19,18 @@ resource "cloudflare_zone" "neilhosting_net" {
 
 resource "cloudflare_zone_setting" "neilhosting_net_ssl" {
   zone_id    = cloudflare_zone.neilhosting_net.id
-  id         = "ssl"
   setting_id = "ssl"
   value      = "flexible"
 }
 
 resource "cloudflare_zone_setting" "neilhosting_net_always_use_https" {
   zone_id    = cloudflare_zone.neilhosting_net.id
-  id         = "always_use_https"
   setting_id = "always_use_https"
   value      = "on"
 }
 
 resource "cloudflare_zone_setting" "neilhosting_net_security_header" {
   zone_id    = cloudflare_zone.neilhosting_net.id
-  id         = "security_header"
   setting_id = "security_header"
   value = [{
     enabled            = true

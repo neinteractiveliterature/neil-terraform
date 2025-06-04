@@ -14,28 +14,24 @@ resource "cloudflare_zone" "extraconlarp_org" {
 
 resource "cloudflare_zone_setting" "extraconlarp_org_ssl" {
   zone_id    = cloudflare_zone.extraconlarp_org.id
-  id         = "ssl"
   setting_id = "ssl"
   value      = "flexible"
 }
 
 resource "cloudflare_zone_setting" "extraconlarp_org_min_tls_version" {
   zone_id    = cloudflare_zone.extraconlarp_org.id
-  id         = "min_tls_version"
   setting_id = "min_tls_version"
   value      = "1.2"
 }
 
 resource "cloudflare_zone_setting" "extraconlarp_org_always_use_https" {
   zone_id    = cloudflare_zone.extraconlarp_org.id
-  id         = "always_use_https"
   setting_id = "always_use_https"
   value      = "on"
 }
 
 resource "cloudflare_zone_setting" "extraconlarp_org_security_header" {
   zone_id    = cloudflare_zone.extraconlarp_org.id
-  id         = "security_header"
   setting_id = "security_header"
   value = [{
     enabled            = true
