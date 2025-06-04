@@ -208,7 +208,7 @@ module "interconlarp_org_forward_only_subdomain_forwardemail_receiving_domain" {
 module "interconlarp_org_convention_subdomain_events_forwardemail_receiving_domain" {
   for_each = setintersection(
     keys(local.forwardemail_verification_records_by_domain),
-    [for subdomain in local.interconlarp_org_intercode_subdomains : "${subdomain}.events.interconlarp.org"]
+    [for subdomain in local.interconlarp_org_intercode_subdomains : "events.${subdomain}.interconlarp.org"]
   )
   source = "./modules/forwardemail_receiving_domain"
 
