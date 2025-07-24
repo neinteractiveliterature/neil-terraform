@@ -60,6 +60,26 @@ resource "aws_iam_user_policy" "neil_wordpress" {
             "Effect": "Allow",
             "Action": "ses:SendRawEmail",
             "Resource": "*"
+        },
+        {
+          "Sid": "bucket",
+          "Effect": "Allow",
+          "Action": [
+            "s3:*"
+          ],
+          "Resource": [
+            "arn:aws:s3:::${aws_s3_bucket.interactiveliterature_org_wordpress_backups.bucket}"
+          ]
+        },
+        {
+          "Sid": "objects",
+          "Effect": "Allow",
+          "Action": [
+            "s3:*"
+          ],
+          "Resource": [
+            "arn:aws:s3:::${aws_s3_bucket.interactiveliterature_org_wordpress_backups.bucket}/*"
+          ]
         }
     ]
   }
@@ -68,4 +88,12 @@ resource "aws_iam_user_policy" "neil_wordpress" {
 
 resource "aws_iam_access_key" "neil_wordpress" {
   user = aws_iam_user.neil_wordpress.name
+}
+
+output "neil_wordpress_iam_creds" {
+  sensitive = true
+  value = {
+    aws_access_key_id     = aws_iam_access_key.neil_wordpress.id
+    aws_secret_access_key = sensitive(aws_iam_access_key.neil_wordpress.secret)
+  }
 }
