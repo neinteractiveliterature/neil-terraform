@@ -457,7 +457,8 @@ resource "aws_iam_role_policy" "www_interactiveliterature_org_deploy" {
           "lambda:GetFunction",
           "lambda:UpdateFunctionCode",
           "lambda:ListVersionsByFunction",
-          "lambda:GetFunctionCodeSigningConfig"
+          "lambda:GetFunctionCodeSigningConfig",
+          "lambda:InvokeFunction"
         ],
         "Resource" : [
           "*"
