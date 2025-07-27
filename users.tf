@@ -97,3 +97,8 @@ output "neil_wordpress_iam_creds" {
     aws_secret_access_key = sensitive(aws_iam_access_key.neil_wordpress.secret)
   }
 }
+
+output "neil_wordpress_smtp_url" {
+  sensitive = true
+  value     = "smtp://${aws_iam_access_key.neil_wordpress.id}:${aws_iam_access_key.neil_wordpress.ses_smtp_password_v4}@email-smtp.us-east-1.amazonaws.com"
+}

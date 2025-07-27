@@ -1,24 +1,3 @@
-resource "aws_s3_bucket" "gamewrap_interactiveliterature_org" {
-  bucket = "gamewrap.interactiveliterature.org"
-}
-
-resource "aws_s3_bucket_acl" "gamewrap_interactiveliterature_org" {
-  bucket = aws_s3_bucket.gamewrap_interactiveliterature_org.bucket
-  acl    = "public-read"
-}
-
-resource "aws_s3_bucket_website_configuration" "gamewrap_interactiveliterature_org" {
-  bucket = aws_s3_bucket.gamewrap_interactiveliterature_org.bucket
-
-  error_document {
-    key = "error.html"
-  }
-
-  index_document {
-    suffix = "index.html"
-  }
-}
-
 resource "github_repository" "game_wrap" {
   name                 = "game_wrap"
   description          = "The web site for Game Wrap"
@@ -57,29 +36,111 @@ resource "aws_iam_role_policy" "gamewrap_deploy" {
   policy = jsonencode({
     Version = "2012-10-17"
 
-    Statement = [{
-      Action = [
-        "s3:PutObject",
-        "s3:PutObjectAcl",
-        "s3:DeleteObject"
-      ]
-      Effect = "Allow"
-
-      Resource = "${aws_s3_bucket.gamewrap_interactiveliterature_org.arn}/*"
-    }]
+    Statement = [
+      {
+        "Sid" : "ManageBootstrapStateBucket",
+        "Effect" : "Allow",
+        "Action" : [
+          "s3:CreateBucket",
+          "s3:PutBucketVersioning",
+          "s3:PutBucketNotification",
+          "s3:DeleteObject",
+          "s3:GetObject",
+          "s3:ListBucket",
+          "s3:PutObject"
+        ],
+        "Resource" : [
+          "arn:aws:s3:::sst-state-*"
+        ]
+      },
+      {
+        "Sid" : "ManageBootstrapAssetBucket",
+        "Effect" : "Allow",
+        "Action" : [
+          "s3:CreateBucket",
+          "s3:PutBucketVersioning",
+          "s3:DeleteObject",
+          "s3:GetObject",
+          "s3:ListBucket",
+          "s3:PutObject"
+        ],
+        "Resource" : [
+          "arn:aws:s3:::sst-asset-*"
+        ]
+      },
+      {
+        "Sid" : "ManageBootstrapECRRepo",
+        "Effect" : "Allow",
+        "Action" : [
+          "ecr:CreateRepository",
+          "ecr:DescribeRepositories"
+        ],
+        "Resource" : [
+          "arn:aws:ecr:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:repository/sst-asset"
+        ]
+      },
+      {
+        "Sid" : "ManageBootstrapSSMParameter",
+        "Effect" : "Allow",
+        "Action" : [
+          "ssm:GetParameter",
+          "ssm:GetParameters",
+          "ssm:PutParameter"
+        ],
+        "Resource" : [
+          "arn:aws:ssm:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:parameter/sst/passphrase/*",
+          "arn:aws:ssm:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:parameter/sst/bootstrap"
+        ]
+      },
+      {
+        "Sid" : "ManageApplicationProductionBucket",
+        "Effect" : "Allow",
+        "Action" : [
+          "s3:CreateBucket",
+          "s3:PutBucketVersioning",
+          "s3:DeleteObject",
+          "s3:GetObject",
+          "s3:ListBucket",
+          "s3:PutObject",
+          "s3:GetObjectTagging",
+          "s3:PutObjectTagging"
+        ],
+        "Resource" : [
+          "arn:aws:s3:::game-wrap-production-*",
+          "arn:aws:s3:::sst-asset-*"
+        ]
+      },
+      {
+        "Sid" : "ManageLambdaFunctions",
+        "Effect" : "Allow",
+        "Action" : [
+          "lambda:GetFunction",
+          "lambda:UpdateFunctionCode",
+          "lambda:ListVersionsByFunction",
+          "lambda:GetFunctionCodeSigningConfig",
+          "lambda:InvokeFunction",
+          "lambda:UpdateFunctionConfiguration"
+        ],
+        "Resource" : [
+          "*"
+        ]
+      },
+      {
+        "Sid" : "ManageCloudfrontDistributions",
+        "Effect" : "Allow",
+        "Action" : [
+          "cloudfront:CreateInvalidation"
+        ],
+        "Resource" : [
+          "*"
+        ]
+      }
+    ]
   })
+  # })
 }
 
 output "gamewrap_github_oidc_role" {
   description = "Game Wrap deploy role ARN"
   value       = aws_iam_role.gamewrap_deploy.arn
-}
-
-resource "cloudflare_dns_record" "interactiveliterature_org_gamewrap_cname" {
-  zone_id = cloudflare_zone.interactiveliterature_org.id
-  name    = "gamewrap.interactiveliterature.org"
-  type    = "CNAME"
-  proxied = true
-  content = aws_s3_bucket_website_configuration.gamewrap_interactiveliterature_org.website_endpoint
-  ttl     = 1
 }
