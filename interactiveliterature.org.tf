@@ -235,14 +235,6 @@ module "interactiveliterature_org_convention_subdomain_events_forwardemail_recei
   verification_code = local.forwardemail_verification_records_by_domain[each.value]
 }
 
-resource "cloudflare_dns_record" "interactiveliterature_org_www_cname" {
-  zone_id = cloudflare_zone.interactiveliterature_org.id
-  name    = "www.interactiveliterature.org"
-  type    = "CNAME"
-  proxied = false
-  content = "www-interactiveliterature-org.fly.dev"
-  ttl     = 1
-}
 
 resource "cloudflare_dns_record" "interactiveliterature_org_old_cname" {
   zone_id = cloudflare_zone.interactiveliterature_org.id
