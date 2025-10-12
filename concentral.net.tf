@@ -21,7 +21,7 @@ locals {
     "summerlarpin.concentral.net"       = "summerlarpin2025.concentral.net"
     "summerlarping.concentral.net"      = "summerlarpin2025.concentral.net"
     "tapestries2025.concentral.net"     = "2025.tapestrieslarp.org"
-    "timebubble.concentral.net"         = "timebubble2025.concentral.net"
+    "timebubble.concentral.net"         = "timebubble2026.concentral.net"
     "virtualspacebubble.concentral.net" = "virtualspacebubble2023.concentral.net"
     "vsb.concentral.net"                = "virtualspacebubble2023.concentral.net"
     "vsb2020.concentral.net"            = "virtualspacebubble2020.concentral.net"
