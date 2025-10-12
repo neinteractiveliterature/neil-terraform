@@ -11,10 +11,15 @@ data "http" "forwardemail_domains" {
 
 locals {
   forwardemail_domains_decoded = [for page in data.http.forwardemail_domains : jsondecode(page.body)]
-  forwardemail_domains         = concat(local.forwardemail_domains_decoded...)
+  forwardemail_domains         = toset(concat(local.forwardemail_domains_decoded...))
+
+  forwardemail_verification_records_by_domain_with_possible_dupes = {
+    for domain in local.forwardemail_domains :
+    domain["name"] => domain["verification_record"]...
+  }
 
   forwardemail_verification_records_by_domain = {
-    for domain in local.forwardemail_domains :
-    domain["name"] => domain["verification_record"]
+    for domain, records in local.forwardemail_verification_records_by_domain_with_possible_dupes :
+    domain => records[0]
   }
 }
