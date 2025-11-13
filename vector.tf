@@ -6,6 +6,16 @@ variable "vector_heroku_source_password" {
   type = string
 }
 
+resource "aws_cloudwatch_log_group" "fly_apps" {
+  name = "fly_apps"
+
+  tags = {
+    Environment = "production"
+  }
+
+  retention_in_days = 30
+}
+
 resource "aws_iam_group" "vector" {
   name = "vector"
 }

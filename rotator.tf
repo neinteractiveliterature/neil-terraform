@@ -32,14 +32,3 @@ resource "aws_iam_user_group_membership" "rotator_production" {
 resource "aws_iam_access_key" "rotator_production" {
   user = aws_iam_user.rotator_production.name
 }
-
-resource "aws_cloudwatch_log_group" "rotator_production" {
-  name = "rotator_production"
-
-  tags = {
-    Environment = "production"
-    Application = "neil-rotator"
-  }
-
-  retention_in_days = 30
-}

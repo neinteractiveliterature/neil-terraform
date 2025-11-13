@@ -94,14 +94,3 @@ resource "aws_iam_user_group_membership" "listmonk_production" {
 resource "aws_iam_access_key" "listmonk_production" {
   user = aws_iam_user.listmonk_production.name
 }
-
-resource "aws_cloudwatch_log_group" "listmonk_production" {
-  name = "listmonk_production"
-
-  tags = {
-    Environment = "production"
-    Application = "neil-listmonk"
-  }
-
-  retention_in_days = 30
-}

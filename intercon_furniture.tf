@@ -65,14 +65,3 @@ locals {
 #   app_id   = heroku_app.intercon_furniture.uuid
 #   hostname = each.value
 # }
-
-resource "aws_cloudwatch_log_group" "intercon_furniture_production" {
-  name = "intercon_furniture_production"
-
-  tags = {
-    Environment = "production"
-    Application = "intercon-furniture"
-  }
-
-  retention_in_days = 30
-}

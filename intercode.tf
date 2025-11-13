@@ -93,7 +93,6 @@ locals {
 
 #   config_vars = {
 #     ASSETS_HOST                         = "assets.neilhosting.net"
-#     CLOUDWATCH_LOG_GROUP                = aws_cloudwatch_log_group.intercode2_production.name
 #     HEROKU_APP_NAME                     = "intercode"
 #     INTERCODE_CERTS_NO_WILDCARD_DOMAINS = "5pi-con.natbudin.com signups.greaterbostonlarpsociety.org thepitch.aegames.org"
 #     INTERCODE_HOST                      = "neilhosting.net"
@@ -314,16 +313,6 @@ module "assets_neilhosting_net_cloudfront" {
   compress                 = true
 }
 
-resource "aws_cloudwatch_log_group" "intercode2_production" {
-  name = "intercode2_production"
-
-  tags = {
-    Environment = "production"
-    Application = "intercode"
-  }
-
-  retention_in_days = 30
-}
 
 # IAM policy so that Intercode can access the stuff it needs to access in AWS
 resource "aws_iam_group" "intercode2_production" {
@@ -407,17 +396,6 @@ resource "aws_iam_group_policy" "intercode2_production" {
       "Effect": "Allow",
       "Action": "kms:Decrypt",
       "Resource": "arn:aws:kms:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:key/2570e363-9e0e-4a1a-b4de-41c2460786df"
-    },
-    {
-      "Sid": "CloudwatchLogsAccess",
-      "Effect": "Allow",
-      "Action": [
-        "logs:CreateLogStream",
-        "logs:DescribeLogStreams",
-        "logs:GetLogEvents",
-        "logs:PutLogEvents"
-      ],
-      "Resource": "${aws_cloudwatch_log_group.intercode2_production.arn}:*"
     },
     {
       "Sid": "CloudwatchSchedulerProvisioning",
