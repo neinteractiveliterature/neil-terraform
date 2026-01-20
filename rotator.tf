@@ -33,23 +33,36 @@ resource "aws_iam_access_key" "rotator_production" {
   user = aws_iam_user.rotator_production.name
 }
 
-resource "cloudflare_api_token" "rotator_deploy" {
+resource "cloudflare_account_token" "rotator_deploy" {
   name = "Rotator deploy key"
-  policies = [{
-    effect = "allow"
-    permission_groups = [
-      { id = module.cloudflare_permissions.permission_groups_by_name["DNS Read"].id },
-      { id = module.cloudflare_permissions.permission_groups_by_name["DNS Write"].id },
-    ]
-    resources = jsonencode({
-      "com.cloudflare.api.account.zone.${cloudflare_zone.interactiveliterature_org.id}" = "*"
-    })
-  }]
+  account_id = cloudflare_account.neil.id
+  policies = [
+    {
+      effect = "allow"
+      permission_groups = [
+        { id = module.cloudflare_permissions.permission_groups_by_name["DNS Read"].id },
+        { id = module.cloudflare_permissions.permission_groups_by_name["Zone Read"].id },
+      ]
+      resources = jsonencode({
+        "com.cloudflare.api.account.${cloudflare_account.neil.id}" = {
+          "com.cloudflare.api.account.zone.*" = "*"
+        }
+      })
+    },
+    {
+      effect = "allow"
+      permission_groups = [
+        { id = module.cloudflare_permissions.permission_groups_by_name["DNS Write"].id },
+      ]
+      resources = jsonencode({
+        "com.cloudflare.api.account.zone.${cloudflare_zone.interactiveliterature_org.id}" = "*"
+      })
+    }
+  ]
 }
 
 resource "github_repository" "rotator" {
   name                   = "rotator"
-  has_downloads          = true
   has_issues             = true
   has_projects           = true
   has_wiki               = false
@@ -60,7 +73,13 @@ resource "github_repository" "rotator" {
 resource "github_actions_secret" "rotator_cloudflare_api_token" {
   repository      = github_repository.rotator.name
   secret_name     = "CLOUDFLARE_API_TOKEN"
-  plaintext_value = cloudflare_api_token.rotator_deploy.id
+  plaintext_value = cloudflare_account_token.rotator_deploy.value
+}
+
+resource "github_actions_secret" "rotator_cloudflare_account_id" {
+  repository      = github_repository.rotator.name
+  secret_name     = "CLOUDFLARE_ACCOUNT_ID"
+  plaintext_value = cloudflare_account.neil.id
 }
 
 resource "github_actions_secret" "rotator_aws_oidc_role" {
@@ -167,8 +186,7 @@ resource "aws_iam_role_policy" "rotator_deploy" {
           "s3:PutObjectTagging"
         ],
         "Resource" : [
-          "arn:aws:s3:::ast-production-*",
-          "arn:aws:s3:::sst-asset-*"
+          "arn:aws:s3:::rotator-production-*",
         ]
       },
       {

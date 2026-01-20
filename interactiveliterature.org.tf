@@ -325,7 +325,6 @@ resource "cloudflare_dns_record" "interactiveliterature_org_vector_acme_challeng
 resource "github_repository" "www_interactiveliterature_org" {
   name                 = "www.interactiveliterature.org"
   description          = "The web site for NEIL"
-  has_downloads        = true
   has_issues           = true
   has_projects         = true
   has_wiki             = false

@@ -448,7 +448,6 @@ resource "github_repository" "intercode" {
   description = "The future of convention web applications"
 
   delete_branch_on_merge = true
-  has_downloads          = true
   has_issues             = true
   has_projects           = true
   has_wiki               = true

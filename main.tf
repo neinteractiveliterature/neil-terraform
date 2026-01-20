@@ -7,10 +7,6 @@ terraform {
       source  = "cloudflare/cloudflare"
       version = "~> 5.0"
     }
-    # heroku = {
-    #   source  = "heroku/heroku"
-    #   version = "~> 5.1"
-    # }
     rollbar = {
       source = "rollbar/rollbar"
     }
@@ -119,6 +115,11 @@ resource "aws_iam_policy" "neil-terraform-state-read" {
       },
     ]
   })
+}
+
+resource "cloudflare_account" "neil" {
+  name = "New England Interactive Literature"
+  type = "standard"
 }
 
 module "cloudflare_permissions" {
