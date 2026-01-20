@@ -41,9 +41,9 @@ resource "cloudflare_api_token" "rotator_deploy" {
       { id = module.cloudflare_permissions.permission_groups_by_name["DNS Read"].id },
       { id = module.cloudflare_permissions.permission_groups_by_name["DNS Write"].id },
     ]
-    resources = {
+    resources = jsonencode({
       "com.cloudflare.api.account.zone.${cloudflare_zone.interactiveliterature_org.id}" = "*"
-    }
+    })
   }]
 }
 

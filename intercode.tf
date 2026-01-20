@@ -189,7 +189,8 @@ resource "aws_sns_topic_subscription" "intercode_production_alarms_email_subscri
 
 # SQS queues used by Shoryuken for background processing
 resource "aws_sqs_queue" "intercode_production_dead_letter" {
-  name = "intercode_production_dead_letter"
+  name             = "intercode_production_dead_letter"
+  max_message_size = 1048576
 }
 
 resource "aws_sqs_queue" "intercode_production_default" {
@@ -197,7 +198,7 @@ resource "aws_sqs_queue" "intercode_production_default" {
   redrive_policy = jsonencode(
     {
       deadLetterTargetArn = aws_sqs_queue.intercode_production_dead_letter.arn
-      maxReceiveCount     = 3
+      maxReceiveCount     = 1
     }
   )
 }
@@ -207,7 +208,7 @@ resource "aws_sqs_queue" "intercode_production_mailers" {
   redrive_policy = jsonencode(
     {
       deadLetterTargetArn = aws_sqs_queue.intercode_production_dead_letter.arn
-      maxReceiveCount     = 3
+      maxReceiveCount     = 1
     }
   )
 }
@@ -217,7 +218,7 @@ resource "aws_sqs_queue" "intercode_production_ahoy" {
   redrive_policy = jsonencode(
     {
       deadLetterTargetArn = aws_sqs_queue.intercode_production_dead_letter.arn
-      maxReceiveCount     = 3
+      maxReceiveCount     = 1
     }
   )
 }
