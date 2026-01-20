@@ -121,6 +121,10 @@ resource "aws_iam_policy" "neil-terraform-state-read" {
   })
 }
 
+module "cloudflare_permissions" {
+  source = "./modules/cloudflare_permissions"
+}
+
 module "github-oidc" {
   source  = "terraform-module/github-oidc-provider/aws"
   version = "~> 1"

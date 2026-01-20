@@ -297,14 +297,6 @@ resource "cloudflare_dns_record" "interactiveliterature_org_litform_cname" {
   ttl     = 1
 }
 
-resource "cloudflare_dns_record" "interactiveliterature_org_rotator_cname" {
-  zone_id = cloudflare_zone.interactiveliterature_org.id
-  name    = "rotator.interactiveliterature.org"
-  type    = "CNAME"
-  content = "rotator.fly.dev"
-  ttl     = 1
-}
-
 resource "cloudflare_dns_record" "interactiveliterature_org_wildcard_cname" {
   zone_id = cloudflare_zone.interactiveliterature_org.id
   name    = "*.interactiveliterature.org"
