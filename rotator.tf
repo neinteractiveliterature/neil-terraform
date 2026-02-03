@@ -141,8 +141,10 @@ resource "aws_iam_role_policy" "rotator_deploy" {
           "s3:PutBucketVersioning",
           "s3:DeleteObject",
           "s3:GetObject",
+          "s3:GetObjectTagging",
           "s3:ListBucket",
-          "s3:PutObject"
+          "s3:PutObject",
+          "s3:PutObjectTagging",
         ],
         "Resource" : [
           "arn:aws:s3:::sst-asset-*"
