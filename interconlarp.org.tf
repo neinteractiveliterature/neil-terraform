@@ -22,7 +22,8 @@ locals {
     "v",
     "w",
     "x",
-    "x-demo"
+    "x-demo",
+    "y"
   ])
   interconlarp_org_redirect_subdomains = {
     "a.interconlarp.org"    = "A/",

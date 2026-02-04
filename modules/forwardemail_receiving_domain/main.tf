@@ -46,6 +46,6 @@ resource "cloudflare_dns_record" "verification_txt" {
   zone_id = var.cloudflare_zone.id
   name    = var.name
   type    = "TXT"
-  content = "forward-email-site-verification=${var.verification_code}"
+  content = "\"forward-email-site-verification=${var.verification_code}\""
   ttl     = 3600
 }
