@@ -399,7 +399,7 @@ resource "aws_iam_role_policy" "www_interactiveliterature_org_deploy" {
           "ecr:DescribeRepositories"
         ],
         "Resource" : [
-          "arn:aws:ecr:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:repository/sst-asset"
+          "arn:aws:ecr:${data.aws_region.current.region}:${data.aws_caller_identity.current.account_id}:repository/sst-asset"
         ]
       },
       {
@@ -411,8 +411,8 @@ resource "aws_iam_role_policy" "www_interactiveliterature_org_deploy" {
           "ssm:PutParameter"
         ],
         "Resource" : [
-          "arn:aws:ssm:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:parameter/sst/passphrase/*",
-          "arn:aws:ssm:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:parameter/sst/bootstrap"
+          "arn:aws:ssm:${data.aws_region.current.region}:${data.aws_caller_identity.current.account_id}:parameter/sst/passphrase/*",
+          "arn:aws:ssm:${data.aws_region.current.region}:${data.aws_caller_identity.current.account_id}:parameter/sst/bootstrap"
         ]
       },
       {

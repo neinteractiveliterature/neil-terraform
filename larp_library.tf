@@ -48,7 +48,7 @@ locals {
 
 #   sensitive_config_vars = {
 #     AWS_ACCESS_KEY_ID     = aws_iam_access_key.larp_library.id
-#     AWS_REGION            = data.aws_region.current.name
+#     AWS_REGION            = data.aws_region.current.region
 #     AWS_SECRET_ACCESS_KEY = aws_iam_access_key.larp_library.secret
 #     AWS_S3_BUCKET         = aws_s3_bucket.larp_library_production.bucket
 #     DATABASE_URL          = "postgres://larp_library_production:${var.larp_library_production_db_password}@${aws_db_instance.neil_production.endpoint}/larp_library_production?sslrootcert=rds-global-bundle.pem"

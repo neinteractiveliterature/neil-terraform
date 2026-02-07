@@ -25,7 +25,7 @@
 #     },
 #     { name = "AWS_REGION", value = "us-east-1" },
 #     { name = "AWS_ACCESS_KEY_ID", value = aws_iam_access_key.intercode2_production.id },
-#     { name = "AWS_REGION", value = data.aws_region.current.name },
+#     { name = "AWS_REGION", value = data.aws_region.current.region },
 #     { name = "AWS_SECRET_ACCESS_KEY", value = aws_iam_access_key.intercode2_production.secret },
 #     { name = "AWS_S3_BUCKET", value = aws_s3_bucket.intercode2_production.bucket }
 #   ]

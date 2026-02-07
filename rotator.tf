@@ -158,7 +158,7 @@ resource "aws_iam_role_policy" "rotator_deploy" {
           "ecr:DescribeRepositories"
         ],
         "Resource" : [
-          "arn:aws:ecr:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:repository/sst-asset"
+          "arn:aws:ecr:${data.aws_region.current.region}:${data.aws_caller_identity.current.account_id}:repository/sst-asset"
         ]
       },
       {
@@ -170,8 +170,8 @@ resource "aws_iam_role_policy" "rotator_deploy" {
           "ssm:PutParameter"
         ],
         "Resource" : [
-          "arn:aws:ssm:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:parameter/sst/passphrase/*",
-          "arn:aws:ssm:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:parameter/sst/bootstrap"
+          "arn:aws:ssm:${data.aws_region.current.region}:${data.aws_caller_identity.current.account_id}:parameter/sst/passphrase/*",
+          "arn:aws:ssm:${data.aws_region.current.region}:${data.aws_caller_identity.current.account_id}:parameter/sst/bootstrap"
         ]
       },
       {
@@ -200,10 +200,11 @@ resource "aws_iam_role_policy" "rotator_deploy" {
           "lambda:ListVersionsByFunction",
           "lambda:GetFunctionCodeSigningConfig",
           "lambda:InvokeFunction",
-          "lambda:UpdateFunctionConfiguration"
+          "lambda:UpdateFunctionConfiguration",
+          "lambda:AddPermission"
         ],
         "Resource" : [
-          "*"
+          "arn:aws:lambda:us-east-1:${data.aws_caller_identity.current.account_id}:function:rotator-production-*"
         ]
       },
       {
@@ -215,7 +216,20 @@ resource "aws_iam_role_policy" "rotator_deploy" {
         "Resource" : [
           "*"
         ]
-      }
+      },
+      {
+        "Sid" : "ManageCloudfrontFunctions",
+        "Effect" : "Allow",
+        "Action" : [
+          "cloudfront:DescribeFunction",
+          "cloudfront:GetFunction",
+          "cloudfront:UpdateFunction",
+          "cloudfront:PublishFunction"
+        ],
+        "Resource" : [
+          "arn:aws:cloudfront::${data.aws_caller_identity.current.account_id}:function/rotator-production-*"
+        ]
+      },
     ]
   })
 }

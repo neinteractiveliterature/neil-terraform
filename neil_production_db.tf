@@ -78,6 +78,10 @@ resource "aws_db_instance" "neil_production" {
   max_allocated_storage = 100
   iops                  = 3000
 
+  vpc_security_group_ids = [
+    resource.aws_vpc.main.default_security_group_id
+  ]
+
   enabled_cloudwatch_logs_exports = ["postgresql", "upgrade"]
   monitoring_role_arn             = aws_iam_role.rds_enhanced_monitoring.arn
   monitoring_interval             = 60

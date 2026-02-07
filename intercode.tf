@@ -114,7 +114,7 @@ locals {
 
 #   sensitive_config_vars = {
 #     AWS_ACCESS_KEY_ID              = aws_iam_access_key.intercode2_production.id
-#     AWS_REGION                     = data.aws_region.current.name
+#     AWS_REGION                     = data.aws_region.current.region
 #     AWS_SECRET_ACCESS_KEY          = aws_iam_access_key.intercode2_production.secret
 #     AWS_S3_BUCKET                  = aws_s3_bucket.intercode2_production.bucket
 #     CF_Account_ID                  = var.intercode_cloudflare_account_id
@@ -373,7 +373,7 @@ resource "aws_iam_group_policy" "intercode2_production" {
         "sqs:SendMessageBatch",
         "sqs:ListQueues"
       ],
-      "Resource": "arn:aws:sqs:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:intercode_production_*"
+      "Resource": "arn:aws:sqs:${data.aws_region.current.region}:${data.aws_caller_identity.current.account_id}:intercode_production_*"
     },
     {
       "Sid": "SesAccess",
@@ -396,7 +396,7 @@ resource "aws_iam_group_policy" "intercode2_production" {
       "Sid": "KmsAccess",
       "Effect": "Allow",
       "Action": "kms:Decrypt",
-      "Resource": "arn:aws:kms:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:key/2570e363-9e0e-4a1a-b4de-41c2460786df"
+      "Resource": "arn:aws:kms:${data.aws_region.current.region}:${data.aws_caller_identity.current.account_id}:key/2570e363-9e0e-4a1a-b4de-41c2460786df"
     },
     {
       "Sid": "CloudwatchSchedulerProvisioning",
@@ -407,8 +407,8 @@ resource "aws_iam_group_policy" "intercode2_production" {
         "sqs:SetQueueAttributes"
       ],
       "Resource": [
-        "arn:aws:sqs:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:intercode_production_cloudwatch_scheduler",
-        "arn:aws:sqs:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:intercode_production_cloudwatch_scheduler-failures"
+        "arn:aws:sqs:${data.aws_region.current.region}:${data.aws_caller_identity.current.account_id}:intercode_production_cloudwatch_scheduler",
+        "arn:aws:sqs:${data.aws_region.current.region}:${data.aws_caller_identity.current.account_id}:intercode_production_cloudwatch_scheduler-failures"
       ]
     },
     {

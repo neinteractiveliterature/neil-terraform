@@ -172,7 +172,7 @@ resource "aws_ses_receipt_rule" "store_and_notify" {
   s3_action {
     bucket_name = aws_s3_bucket.intercode_inbox.bucket
     position    = 1
-    kms_key_arn = "arn:aws:kms:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:alias/aws/ses"
+    kms_key_arn = "arn:aws:kms:${data.aws_region.current.region}:${data.aws_caller_identity.current.account_id}:alias/aws/ses"
     topic_arn   = aws_sns_topic.intercode_inbox_deliveries.arn
   }
 }
