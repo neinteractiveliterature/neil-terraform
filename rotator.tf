@@ -17,6 +17,34 @@ module "rotator_sst_github_deployment" {
   writable_cloudflare_zones = [cloudflare_zone.interactiveliterature_org]
 }
 
+resource "sentry_project" "rotator" {
+  organization = sentry_organization.neil.slug
+
+  teams = [sentry_team.neil.slug]
+  name = "Rotator"
+  slug = "rotator"
+
+  platform = "javascript-react-router"
+}
+
+resource "github_actions_secret" "rotator_sentry_org" {
+  repository      = github_repository.rotator.name
+  secret_name     = "SENTRY_ORG"
+  plaintext_value = sentry_organization.neil.slug
+}
+
+resource "github_actions_secret" "rotator_sentry_project" {
+  repository      = github_repository.rotator.name
+  secret_name     = "SENTRY_PROJECT"
+  plaintext_value = sentry_project.rotator.slug
+}
+
+resource "github_actions_secret" "rotator_sentry_auth_token" {
+  repository      = github_repository.rotator.name
+  secret_name     = "SENTRY_AUTH_TOKEN"
+  plaintext_value = var.sentry_auth_token
+}
+
 output "rotator_smtp_url" {
   sensitive = true
   value = module.rotator_sst_github_deployment.smtp_url

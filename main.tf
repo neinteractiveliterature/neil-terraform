@@ -13,11 +13,19 @@ terraform {
     github = {
       source = "integrations/github"
     }
+    sentry = {
+      source = "jianyuan/sentry"
+    }
   }
   required_version = ">= 1.1"
 }
 
 variable "rollbar_token" {
+  type      = string
+  sensitive = true
+}
+
+variable "sentry_auth_token" {
   type      = string
   sensitive = true
 }
@@ -64,6 +72,24 @@ variable "forwardemail_api_key" {
 
 provider "github" {
   owner = "neinteractiveliterature"
+}
+
+provider "sentry" {
+  token = var.sentry_auth_token
+}
+
+resource "sentry_organization" "neil" {
+  name = "NEIL"
+  slug = "neinteractiveliterature"
+
+  agree_terms = true
+}
+
+resource "sentry_team" "neil" {
+  organization = sentry_organization.neil.slug
+
+  name = "new-england-interactive-literature-team"
+  slug = "new-england-interactive-literature-team"
 }
 
 terraform {
