@@ -316,7 +316,7 @@ output "cloudflare_account_id" {
 
 output "smtp_url" {
   sensitive = true
-  value = "smtp://${aws_iam_access_key.production.id}:${aws_iam_access_key.production.ses_smtp_password_v4}@email-smtp.${data.aws_region.current.region}.amazonaws.com"
+  value = "smtp://${urlencode(aws_iam_access_key.production.id)}:${urlencode(aws_iam_access_key.production.ses_smtp_password_v4)}@email-smtp.${data.aws_region.current.region}.amazonaws.com"
 }
 
 output "aws_deploy_oidc_role" {
