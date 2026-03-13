@@ -256,7 +256,10 @@ resource "aws_iam_role_policy" "deploy" {
         "Effect": "Allow",
         "Action": [
           "cloudfront:CreateKeyValueStore",
-          "cloudfront:DescribeKeyValueStore"
+          "cloudfront:DescribeKeyValueStore",
+          "cloudfront-keyvaluestore:CreateKeyValueStore",
+          "cloudfront-keyvaluestore:DescribeKeyValueStore",
+          "cloudfront-keyvaluestore:UpdateKeys"
         ],
         "Resource": [
           "arn:aws:cloudfront::${data.aws_caller_identity.current.account_id}:key-value-store/*"
