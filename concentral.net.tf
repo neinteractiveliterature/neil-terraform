@@ -14,7 +14,7 @@ locals {
     "concentral.net"                    = "www.concentral.net"
     "dicebubble.concentral.net"         = "dicebubble2024.concentral.net"
     "dicebubble5.concentral.net"        = "dicebubble2016.concentral.net"
-    "maxicon.concentral.net"            = "maxicon2025.concentral.net"
+    "maxicon.concentral.net"            = "maxicon2026.concentral.net"
     "molw.concentral.net"               = "molw2017.concentral.net"
     "rpitheorycon.concentral.net"       = "rpitheorycon2020.concentral.net"
     "spacebubble.concentral.net"        = "virtualspacebubble2023.concentral.net"
