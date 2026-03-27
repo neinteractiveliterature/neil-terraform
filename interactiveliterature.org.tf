@@ -166,7 +166,7 @@ resource "aws_iam_group_policy" "interactiveliterature_org_s3" {
 module "interactiveliterature_org_apex_redirect" {
   for_each = local.interactiveliterature_org_redirects
 
-  source = "./modules/cloudflare_apex_redirect"
+  source = "github.com/neinteractiveliterature/neil-terraform-modules//cloudflare_apex_redirect?ref=v1.0.0"
 
   cloudflare_zone               = cloudflare_zone.interactiveliterature_org
   domain_name                   = each.key
@@ -176,7 +176,7 @@ module "interactiveliterature_org_apex_redirect" {
 }
 
 module "interactiveliterature_org_forwardemail_receiving_domain" {
-  source = "./modules/forwardemail_receiving_domain"
+  source = "github.com/neinteractiveliterature/neil-terraform-modules//forwardemail_receiving_domain?ref=v1.0.0"
 
   cloudflare_zone   = cloudflare_zone.interactiveliterature_org
   name              = "interactiveliterature.org"
@@ -212,7 +212,7 @@ resource "cloudflare_dns_record" "interactiveliterature_org_convention_subdomain
 }
 
 module "interactiveliterature_org_convention_subdomain_forwardemail_receiving_domain" {
-  source = "./modules/forwardemail_receiving_domain"
+  source = "github.com/neinteractiveliterature/neil-terraform-modules//forwardemail_receiving_domain?ref=v1.0.0"
   for_each = setintersection(
     keys(local.forwardemail_verification_records_by_domain),
     [for subdomain in local.interactiveliterature_org_intercode_subdomains : "${subdomain}.interactiveliterature.org"]
@@ -224,7 +224,7 @@ module "interactiveliterature_org_convention_subdomain_forwardemail_receiving_do
 }
 
 module "interactiveliterature_org_convention_subdomain_events_forwardemail_receiving_domain" {
-  source = "./modules/forwardemail_receiving_domain"
+  source = "github.com/neinteractiveliterature/neil-terraform-modules//forwardemail_receiving_domain?ref=v1.0.0"
   for_each = setintersection(
     keys(local.forwardemail_verification_records_by_domain),
     [for subdomain in local.interactiveliterature_org_intercode_subdomains : "${subdomain}.events.interactiveliterature.org"]
@@ -246,7 +246,7 @@ resource "cloudflare_dns_record" "interactiveliterature_org_old_cname" {
 }
 
 module "old_interactiveliterature_org_cloudfront" {
-  source = "./modules/cloudfront_with_acm"
+  source = "github.com/neinteractiveliterature/neil-terraform-modules//cloudfront_with_acm?ref=v1.0.0"
 
   domain_name              = "old.interactiveliterature.org"
   origin_id                = "interactiveliterature-org-s3"
@@ -332,7 +332,7 @@ resource "github_repository" "www_interactiveliterature_org" {
 }
 
 module "www_interactiveliterature_org_sst_github_deployment" {
-  source = "./modules/sst_github_deployment"
+  source = "github.com/neinteractiveliterature/neil-terraform-modules//sst_github_deployment?ref=v1.0.0"
 
   app_name = "neil-website"
   cloudflare_account_id = cloudflare_account.neil.id

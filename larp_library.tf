@@ -194,7 +194,7 @@ resource "cloudflare_zone" "larplibrary_org" {
 }
 
 module "larplibrary_org_apex_redirect" {
-  source = "./modules/cloudflare_apex_redirect"
+  source = "github.com/neinteractiveliterature/neil-terraform-modules//cloudflare_apex_redirect?ref=v1.0.0"
 
   cloudflare_zone               = cloudflare_zone.larplibrary_org
   domain_name                   = "larplibrary.org"
@@ -221,7 +221,7 @@ resource "cloudflare_dns_record" "larplibrary_org_www" {
 }
 
 module "larplibrary_org_forwardemail_receiving_domain" {
-  source = "./modules/forwardemail_receiving_domain"
+  source = "github.com/neinteractiveliterature/neil-terraform-modules//forwardemail_receiving_domain?ref=v1.0.0"
 
   cloudflare_zone   = cloudflare_zone.larplibrary_org
   name              = "larplibrary.org"
@@ -238,7 +238,7 @@ resource "cloudflare_dns_record" "assets_larplibrary_org" {
 
 
 module "assets_larplibrary_org_cloudfront" {
-  source = "./modules/cloudfront_with_acm"
+  source = "github.com/neinteractiveliterature/neil-terraform-modules//cloudfront_with_acm?ref=v1.0.0"
 
   domain_name              = "assets.larplibrary.org"
   origin_id                = "larplibrary"

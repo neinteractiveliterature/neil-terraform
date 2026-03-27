@@ -8,7 +8,7 @@ resource "github_repository" "game_wrap" {
 }
 
 module "gamewrap_sst_github_deployment" {
-  source = "./modules/sst_github_deployment"
+  source = "github.com/neinteractiveliterature/neil-terraform-modules//sst_github_deployment?ref=v1.0.0"
 
   app_name = "game-wrap"
   cloudflare_account_id = cloudflare_account.neil.id

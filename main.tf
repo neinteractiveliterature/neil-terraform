@@ -149,7 +149,7 @@ resource "cloudflare_account" "neil" {
 }
 
 module "cloudflare_permissions" {
-  source = "./modules/cloudflare_permissions"
+  source = "github.com/neinteractiveliterature/neil-terraform-modules//cloudflare_permissions?ref=v1.0.0"
 }
 
 module "github-oidc" {

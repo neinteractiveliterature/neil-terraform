@@ -41,7 +41,7 @@ resource "cloudflare_zone_setting" "neilhosting_net_security_header" {
 }
 
 module "neilhosting_net_apex_redirect" {
-  source = "./modules/cloudflare_apex_redirect"
+  source = "github.com/neinteractiveliterature/neil-terraform-modules//cloudflare_apex_redirect?ref=v1.0.0"
 
   cloudflare_zone               = cloudflare_zone.neilhosting_net
   domain_name                   = "neilhosting.net"
@@ -51,7 +51,7 @@ module "neilhosting_net_apex_redirect" {
 }
 
 module "neilhosting_net_forwardemail_receiving_domain" {
-  source = "./modules/forwardemail_receiving_domain"
+  source = "github.com/neinteractiveliterature/neil-terraform-modules//forwardemail_receiving_domain?ref=v1.0.0"
 
   cloudflare_zone   = cloudflare_zone.neilhosting_net
   name              = "neilhosting.net"
@@ -60,7 +60,7 @@ module "neilhosting_net_forwardemail_receiving_domain" {
 
 module "neilhosting_net_intercode_subdomain_forwardemail_receiving_domain" {
   for_each = toset([for subdomain in local.neilhosting_net_intercode_subdomains : "${subdomain}.neilhosting.net"])
-  source   = "./modules/forwardemail_receiving_domain"
+  source = "github.com/neinteractiveliterature/neil-terraform-modules//forwardemail_receiving_domain?ref=v1.0.0"
 
   cloudflare_zone   = cloudflare_zone.neilhosting_net
   name              = each.value
