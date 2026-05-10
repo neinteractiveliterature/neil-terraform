@@ -5,7 +5,7 @@ terraform {
     }
     cloudflare = {
       source  = "cloudflare/cloudflare"
-      version = "~> 5.0"
+      version = "5.19.0"
     }
     rollbar = {
       source = "rollbar/rollbar"
@@ -14,7 +14,8 @@ terraform {
       source = "integrations/github"
     }
     sentry = {
-      source = "jianyuan/sentry"
+      source  = "jianyuan/sentry"
+      version = "0.15.0-beta2"
     }
   }
   required_version = ">= 1.1"
@@ -146,6 +147,11 @@ resource "aws_iam_policy" "neil-terraform-state-read" {
 resource "cloudflare_account" "neil" {
   name = "New England Interactive Literature"
   type = "standard"
+
+  lifecycle {
+    # Provider bug: Update function doesn't pass account_id to the API (v5.19.1)
+    ignore_changes = all
+  }
 }
 
 module "cloudflare_permissions" {

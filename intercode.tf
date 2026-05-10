@@ -469,3 +469,79 @@ resource "github_actions_secret" "intercode_fly_api_token" {
   secret_name     = "FLY_API_TOKEN"
   plaintext_value = var.fly_gha_api_token
 }
+
+resource "sentry_project" "intercode" {
+  organization = sentry_organization.neil.slug
+
+  teams    = [sentry_team.neil.slug]
+  name     = "intercode"
+  slug     = "intercode"
+  platform = "ruby-rails"
+}
+
+data "sentry_organization_integration" "slack" {
+  organization = sentry_organization.neil.slug
+  provider_key = "slack"
+  name         = "NEIL" # update to match your Slack workspace name in Sentry
+}
+
+resource "sentry_metric_monitor" "intercode_response_time" {
+  organization = sentry_organization.neil.slug
+  project      = sentry_project.intercode.slug
+  name         = "p95(span.duration) above 1000ms over past 1 hour"
+
+  aggregate           = "p95(span.duration)"
+  dataset             = "events_analytics_platform"
+  event_types         = ["trace_item_span"]
+  time_window_seconds = 3600
+
+  issue_detection = {
+    type = "static"
+  }
+
+  condition_group = {
+    conditions = [
+      {
+        type             = "gt"
+        comparison       = 1000
+        condition_result = 75
+      },
+      {
+        type             = "gt"
+        comparison       = 500
+        condition_result = 50
+      },
+      {
+        type             = "lte"
+        comparison       = 500
+        condition_result = 0
+      }
+    ]
+  }
+}
+
+resource "sentry_alert" "intercode_response_time" {
+  organization      = sentry_organization.neil.slug
+  name              = "Intercode response time alert"
+  environment       = "production"
+  monitor_ids       = [sentry_metric_monitor.intercode_response_time.id]
+  frequency_minutes = 30
+
+  trigger_conditions = [
+    { first_seen_event = {} }
+  ]
+
+  action_filters = [
+    {
+      logic_type = "all"
+      actions = [
+        {
+          email = {
+            fallthrough_type = "ActiveMembers"
+            target_type = "issue_owners"
+          }
+        }
+      ]
+    }
+  ]
+}
