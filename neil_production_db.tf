@@ -95,6 +95,20 @@ resource "aws_db_instance" "neil_production" {
   }
 }
 
+data "aws_rds_reserved_instance_offering" "neil_production_1year" {
+  db_instance_class   = aws_db_instance.neil_production.instance_class
+  duration            = 31536000
+  multi_az            = false
+  offering_type       = "All Upfront"
+  product_description = "postgresql"
+}
+
+resource "aws_rds_reserved_instance" "neil_production_2026" {
+  offering_id = data.aws_rds_reserved_instance_offering.neil_production_1year.offering_id
+  reservation_id = "neil-production-2026"
+  instance_count = 1
+}
+
 resource "aws_cloudwatch_metric_alarm" "neil_production_low_disk_space" {
   alarm_name          = "NEIL Production DB low disk space"
   alarm_description   = "Free disk space on NEIL production database has fallen below 5GB."
