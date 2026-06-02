@@ -154,7 +154,7 @@ module "interconlarp_org_forwardemail_receiving_domain" {
 
   cloudflare_zone   = cloudflare_zone.interconlarp_org
   name              = "interconlarp.org"
-  verification_code = local.forwardemail_verification_records_by_domain["interconlarp.org"]
+  verification_code = module.forwardemail_receiving.verification_records_by_domain["interconlarp.org"]
 }
 
 resource "cloudflare_dns_record" "interconlarp_org_acme_challenge_cname" {
@@ -191,7 +191,7 @@ module "interconlarp_org_convention_subdomain_forwardemail_receiving_domain" {
 
   cloudflare_zone   = cloudflare_zone.interconlarp_org
   name              = each.value
-  verification_code = local.forwardemail_verification_records_by_domain[each.value]
+  verification_code = module.forwardemail_receiving.verification_records_by_domain[each.value]
 }
 
 module "interconlarp_org_forward_only_subdomain_forwardemail_receiving_domain" {
@@ -200,19 +200,19 @@ module "interconlarp_org_forward_only_subdomain_forwardemail_receiving_domain" {
 
   cloudflare_zone   = cloudflare_zone.interconlarp_org
   name              = each.value
-  verification_code = local.forwardemail_verification_records_by_domain[each.value]
+  verification_code = module.forwardemail_receiving.verification_records_by_domain[each.value]
 }
 
 module "interconlarp_org_convention_subdomain_events_forwardemail_receiving_domain" {
   for_each = setintersection(
-    keys(local.forwardemail_verification_records_by_domain),
+    keys(module.forwardemail_receiving.verification_records_by_domain),
     [for subdomain in local.interconlarp_org_intercode_subdomains : "events.${subdomain}.interconlarp.org"]
   )
   source = "github.com/neinteractiveliterature/neil-terraform-modules//forwardemail_receiving_domain?ref=v1.0.0"
 
   cloudflare_zone   = cloudflare_zone.interconlarp_org
   name              = each.value
-  verification_code = local.forwardemail_verification_records_by_domain[each.value]
+  verification_code = module.forwardemail_receiving.verification_records_by_domain[each.value]
 }
 
 resource "cloudflare_dns_record" "interconlarp_org_www_cname" {

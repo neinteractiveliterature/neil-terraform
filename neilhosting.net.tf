@@ -55,7 +55,7 @@ module "neilhosting_net_forwardemail_receiving_domain" {
 
   cloudflare_zone   = cloudflare_zone.neilhosting_net
   name              = "neilhosting.net"
-  verification_code = local.forwardemail_verification_records_by_domain["neilhosting.net"]
+  verification_code = module.forwardemail_receiving.verification_records_by_domain["neilhosting.net"]
 }
 
 module "neilhosting_net_intercode_subdomain_forwardemail_receiving_domain" {
@@ -64,7 +64,7 @@ module "neilhosting_net_intercode_subdomain_forwardemail_receiving_domain" {
 
   cloudflare_zone   = cloudflare_zone.neilhosting_net
   name              = each.value
-  verification_code = local.forwardemail_verification_records_by_domain[each.value]
+  verification_code = module.forwardemail_receiving.verification_records_by_domain[each.value]
 }
 
 resource "cloudflare_dns_record" "neilhosting_net_spf" {

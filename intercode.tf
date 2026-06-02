@@ -175,104 +175,86 @@ resource "rollbar_project_access_token" "intercode_post_server_item" {
   scopes     = ["post_server_item"]
 }
 
-resource "aws_sns_topic" "intercode_production_alarms" {
-  name = "intercode-production-alarms"
+module "intercode_aws_resources" {
+  source = "github.com/neinteractiveliterature/intercode//terraform/modules/intercode_aws_resources?ref=cloudfront-og-shell"
+
+  name                     = "intercode_production"
+  s3_bucket_name           = "intercode2-production"
+  alarm_email_destinations = local.intercode_production_alarm_email_destinations
 }
 
-resource "aws_sns_topic_subscription" "intercode_production_alarms_email_subscription" {
-  for_each = local.intercode_production_alarm_email_destinations
-
-  topic_arn = aws_sns_topic.intercode_production_alarms.arn
-  protocol  = "email"
-  endpoint  = each.value
+moved {
+  from = aws_sqs_queue.intercode_production_dead_letter
+  to   = module.intercode_aws_resources.aws_sqs_queue.dead_letter
 }
 
-# SQS queues used by Shoryuken for background processing
-resource "aws_sqs_queue" "intercode_production_dead_letter" {
-  name             = "intercode_production_dead_letter"
-  max_message_size = 1048576
+moved {
+  from = aws_sqs_queue.intercode_production_default
+  to   = module.intercode_aws_resources.aws_sqs_queue.default
 }
 
-resource "aws_sqs_queue" "intercode_production_default" {
-  name = "intercode_production_default"
-  redrive_policy = jsonencode(
-    {
-      deadLetterTargetArn = aws_sqs_queue.intercode_production_dead_letter.arn
-      maxReceiveCount     = 1
-    }
-  )
+moved {
+  from = aws_sqs_queue.intercode_production_mailers
+  to   = module.intercode_aws_resources.aws_sqs_queue.mailers
 }
 
-resource "aws_sqs_queue" "intercode_production_mailers" {
-  name = "intercode_production_mailers"
-  redrive_policy = jsonencode(
-    {
-      deadLetterTargetArn = aws_sqs_queue.intercode_production_dead_letter.arn
-      maxReceiveCount     = 1
-    }
-  )
+moved {
+  from = aws_sqs_queue.intercode_production_ahoy
+  to   = module.intercode_aws_resources.aws_sqs_queue.ahoy
 }
 
-resource "aws_sqs_queue" "intercode_production_ahoy" {
-  name = "intercode_production_ahoy"
-  redrive_policy = jsonencode(
-    {
-      deadLetterTargetArn = aws_sqs_queue.intercode_production_dead_letter.arn
-      maxReceiveCount     = 1
-    }
-  )
+moved {
+  from = aws_s3_bucket.intercode2_production
+  to   = module.intercode_aws_resources.aws_s3_bucket.uploads
 }
 
-resource "aws_cloudwatch_metric_alarm" "intercode_queue_backup" {
-  alarm_name          = "Intercode production queue backup"
-  alarm_description   = "Oldest message in Intercode production SQS queue is older than 5 minutes."
-  comparison_operator = "GreaterThanThreshold"
-  evaluation_periods  = 5
-  datapoints_to_alarm = 5
-  threshold           = 600
-
-  alarm_actions = [aws_sns_topic.intercode_production_alarms.arn]
-
-  metric_query {
-    id          = "q1"
-    label       = "Oldest message age in queue"
-    period      = 300
-    return_data = true
-    expression  = <<-EOT
-      SELECT MAX(ApproximateAgeOfOldestMessage)
-      FROM SCHEMA("AWS/SQS", QueueName)
-      WHERE QueueName != '${aws_sqs_queue.intercode_production_dead_letter.name}' AND QueueName != 'intercode_production_cloudwatch_scheduler-failures'
-    EOT
-  }
+moved {
+  from = aws_s3_bucket_acl.intercode2_production
+  to   = module.intercode_aws_resources.aws_s3_bucket_acl.uploads
 }
 
-# uploads.neilhosting.net, aka intercode2_production, is the Cloudfront-served S3 bucket we use
-# for uploaded CMS content and product images
-resource "aws_s3_bucket" "intercode2_production" {
-  bucket = "intercode2-production"
+moved {
+  from = aws_s3_bucket_cors_configuration.intercode2_production
+  to   = module.intercode_aws_resources.aws_s3_bucket_cors_configuration.uploads
 }
 
-resource "aws_s3_bucket_acl" "intercode2_production" {
-  bucket = aws_s3_bucket.intercode2_production.bucket
-  acl    = "private"
+# aws_sns_topic: name changes "intercode-production-alarms" → "intercode_production-alarms"
+# (ForceNew → recreated; alarm email subscribers will need to re-confirm)
+moved {
+  from = aws_sns_topic.intercode_production_alarms
+  to   = module.intercode_aws_resources.aws_sns_topic.alarms
 }
 
-resource "aws_s3_bucket_cors_configuration" "intercode2_production" {
-  bucket = aws_s3_bucket.intercode2_production.bucket
-
-  cors_rule {
-    allowed_headers = ["*"]
-    allowed_methods = ["GET", "PUT"]
-    allowed_origins = ["*"]
-    expose_headers = [
-      "Origin",
-      "Content-Type",
-      "Content-MD5",
-      "Content-Disposition"
-    ]
-    max_age_seconds = 3000
-  }
+# aws_cloudwatch_metric_alarm: alarm_name changes (ForceNew → recreated)
+moved {
+  from = aws_cloudwatch_metric_alarm.intercode_queue_backup
+  to   = module.intercode_aws_resources.aws_cloudwatch_metric_alarm.queue_backup
 }
+
+# IAM group/user/access key: names change from "intercode2-production" → "intercode_production"
+# (ForceNew → recreated; update app AWS credentials after applying)
+moved {
+  from = aws_iam_group.intercode2_production
+  to   = module.intercode_aws_resources.aws_iam_group.this
+}
+
+moved {
+  from = aws_iam_user.intercode2_production
+  to   = module.intercode_aws_resources.aws_iam_user.this
+}
+
+moved {
+  from = aws_iam_user_group_membership.intercode2_production
+  to   = module.intercode_aws_resources.aws_iam_user_group_membership.this
+}
+
+moved {
+  from = aws_iam_access_key.intercode2_production
+  to   = module.intercode_aws_resources.aws_iam_access_key.this
+}
+
+# aws_iam_group_policy.intercode2_production: replaced by two separate module policies
+# (intercode_aws_resources base policy + ses_email_receiving inbox policy)
 
 resource "cloudflare_dns_record" "uploads_neilhosting_net" {
   zone_id = cloudflare_zone.neilhosting_net.id
@@ -314,134 +296,6 @@ module "assets_neilhosting_net_cloudfront" {
   compress                 = true
 }
 
-
-# IAM policy so that Intercode can access the stuff it needs to access in AWS
-resource "aws_iam_group" "intercode2_production" {
-  name = "intercode2-production"
-}
-
-resource "aws_iam_group_policy" "intercode2_production" {
-  name  = "intercode2-production"
-  group = aws_iam_group.intercode2_production.name
-
-  policy = <<-EOF
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Sid": "BackupFolderAccess",
-      "Effect": "Allow",
-      "Action": [
-        "s3:GetObjectVersion",
-        "s3:DeleteObjectVersion",
-        "s3:DeleteObject",
-        "s3:GetObject",
-        "s3:GetObjectAcl",
-        "s3:PutObject",
-        "s3:PutObjectAcl",
-        "s3:RestoreObject"
-      ],
-      "Resource": [
-        "${aws_s3_bucket.intercode2_production.arn}/*",
-        "${aws_s3_bucket.intercode_inbox.arn}/*"
-      ]
-    },
-    {
-      "Sid": "BucketLevelAccess",
-      "Effect": "Allow",
-      "Action": [
-        "s3:GetBucketLocation",
-        "s3:ListAllMyBuckets",
-        "s3:ListBucket"
-      ],
-      "Resource": [
-        "arn:aws:s3:::*"
-      ]
-    },
-    {
-      "Sid": "ShoryukenAccess",
-      "Effect": "Allow",
-      "Action": [
-        "sqs:ChangeMessageVisibility",
-        "sqs:ChangeMessageVisibilityBatch",
-        "sqs:DeleteMessage",
-        "sqs:DeleteMessageBatch",
-        "sqs:GetQueueAttributes",
-        "sqs:GetQueueUrl",
-        "sqs:ReceiveMessage",
-        "sqs:SendMessage",
-        "sqs:SendMessageBatch",
-        "sqs:ListQueues"
-      ],
-      "Resource": "arn:aws:sqs:${data.aws_region.current.region}:${data.aws_caller_identity.current.account_id}:intercode_production_*"
-    },
-    {
-      "Sid": "SesAccess",
-      "Effect":"Allow",
-      "Action":[
-        "ses:SendRawEmail",
-        "ses:SendBounce"
-      ],
-      "Resource":"*"
-    },
-    {
-      "Sid": "SnsAccess",
-      "Effect":"Allow",
-      "Action":[
-        "sns:ConfirmSubscription"
-      ],
-      "Resource": "${aws_sns_topic.intercode_inbox_deliveries.arn}"
-    },
-    {
-      "Sid": "KmsAccess",
-      "Effect": "Allow",
-      "Action": "kms:Decrypt",
-      "Resource": "arn:aws:kms:${data.aws_region.current.region}:${data.aws_caller_identity.current.account_id}:key/2570e363-9e0e-4a1a-b4de-41c2460786df"
-    },
-    {
-      "Sid": "CloudwatchSchedulerProvisioning",
-      "Effect": "Allow",
-      "Action": [
-        "sqs:CreateQueue",
-        "sqs:GetQueueAttributes",
-        "sqs:SetQueueAttributes"
-      ],
-      "Resource": [
-        "arn:aws:sqs:${data.aws_region.current.region}:${data.aws_caller_identity.current.account_id}:intercode_production_cloudwatch_scheduler",
-        "arn:aws:sqs:${data.aws_region.current.region}:${data.aws_caller_identity.current.account_id}:intercode_production_cloudwatch_scheduler-failures"
-      ]
-    },
-    {
-      "Sid": "CloudwatchSchedulerAccess",
-      "Effect": "Allow",
-      "Action": [
-        "events:PutRule",
-        "events:PutTargets"
-      ],
-      "Resource": [
-        "*"
-      ]
-    }
-  ]
-}
-  EOF
-
-  # TODO: I can't figure out a good way to avoid hardcoding the key ID in KmsAccess, maybe figure
-  # it out later
-}
-
-resource "aws_iam_user" "intercode2_production" {
-  name = "intercode2-production"
-}
-
-resource "aws_iam_user_group_membership" "intercode2_production" {
-  user   = aws_iam_user.intercode2_production.name
-  groups = [aws_iam_group.intercode2_production.name]
-}
-
-resource "aws_iam_access_key" "intercode2_production" {
-  user = aws_iam_user.intercode2_production.name
-}
 
 resource "github_repository" "intercode" {
   name        = "intercode"
