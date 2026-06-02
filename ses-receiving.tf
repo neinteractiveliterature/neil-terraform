@@ -1,5 +1,5 @@
 module "intercode_ses_email_receiving" {
-  source = "github.com/neinteractiveliterature/intercode//terraform/modules/ses_email_receiving?ref=cloudfront-og-shell"
+  source = "github.com/neinteractiveliterature/intercode//terraform/modules/ses_email_receiving?ref=main&depth=1"
 
   name                      = "intercode"
   inbox_bucket_name         = "intercode-inbox"

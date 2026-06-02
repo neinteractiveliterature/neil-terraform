@@ -176,7 +176,7 @@ resource "rollbar_project_access_token" "intercode_post_server_item" {
 }
 
 module "intercode_aws_resources" {
-  source = "github.com/neinteractiveliterature/intercode//terraform/modules/intercode_aws_resources?ref=cloudfront-og-shell"
+  source = "github.com/neinteractiveliterature/intercode//terraform/modules/intercode_aws_resources?ref=main&depth=1"
 
   name                     = "intercode_production"
   s3_bucket_name           = "intercode2-production"
