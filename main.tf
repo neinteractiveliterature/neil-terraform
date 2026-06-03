@@ -40,6 +40,13 @@ provider "aws" {
   profile = var.aws_profile
 }
 
+# Explicit us-east-1 alias required by modules that deploy Lambda@Edge
+provider "aws" {
+  alias   = "us_east_1"
+  region  = "us-east-1"
+  profile = var.aws_profile
+}
+
 # provider "heroku" {
 # }
 

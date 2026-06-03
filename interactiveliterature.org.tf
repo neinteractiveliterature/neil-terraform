@@ -180,7 +180,7 @@ module "interactiveliterature_org_forwardemail_receiving_domain" {
 
   cloudflare_zone   = cloudflare_zone.interactiveliterature_org
   name              = "interactiveliterature.org"
-  verification_code = local.forwardemail_verification_records_by_domain["interactiveliterature.org"]
+  verification_code = module.forwardemail_receiving.verification_records_by_domain["interactiveliterature.org"]
 }
 
 resource "cloudflare_dns_record" "interactiveliterature_org_acme_challenge_cname" {
@@ -214,25 +214,25 @@ resource "cloudflare_dns_record" "interactiveliterature_org_convention_subdomain
 module "interactiveliterature_org_convention_subdomain_forwardemail_receiving_domain" {
   source = "github.com/neinteractiveliterature/neil-terraform-modules//forwardemail_receiving_domain?ref=v1.0.0"
   for_each = setintersection(
-    keys(local.forwardemail_verification_records_by_domain),
+    keys(module.forwardemail_receiving.verification_records_by_domain),
     [for subdomain in local.interactiveliterature_org_intercode_subdomains : "${subdomain}.interactiveliterature.org"]
   )
 
   cloudflare_zone   = cloudflare_zone.interactiveliterature_org
   name              = each.value
-  verification_code = local.forwardemail_verification_records_by_domain[each.value]
+  verification_code = module.forwardemail_receiving.verification_records_by_domain[each.value]
 }
 
 module "interactiveliterature_org_convention_subdomain_events_forwardemail_receiving_domain" {
   source = "github.com/neinteractiveliterature/neil-terraform-modules//forwardemail_receiving_domain?ref=v1.0.0"
   for_each = setintersection(
-    keys(local.forwardemail_verification_records_by_domain),
+    keys(module.forwardemail_receiving.verification_records_by_domain),
     [for subdomain in local.interactiveliterature_org_intercode_subdomains : "${subdomain}.events.interactiveliterature.org"]
   )
 
   cloudflare_zone   = each.value
   name              = "events.${each.value}"
-  verification_code = local.forwardemail_verification_records_by_domain[each.value]
+  verification_code = module.forwardemail_receiving.verification_records_by_domain[each.value]
 }
 
 

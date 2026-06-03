@@ -101,31 +101,31 @@ module "concentral_net_forwardemail_receiving_domain" {
 
   cloudflare_zone   = cloudflare_zone.concentral_net
   name              = "concentral.net"
-  verification_code = local.forwardemail_verification_records_by_domain["concentral.net"]
+  verification_code = module.forwardemail_receiving.verification_records_by_domain["concentral.net"]
 }
 
 module "concentral_net_convention_mx_forwardemail_receiving_domain" {
   for_each = setintersection(
-    keys(local.forwardemail_verification_records_by_domain),
+    keys(module.forwardemail_receiving.verification_records_by_domain),
     [for subdomain in local.concentral_net_convention_mx_subdomains : "${subdomain}.concentral.net"]
   )
   source = "github.com/neinteractiveliterature/neil-terraform-modules//forwardemail_receiving_domain?ref=v1.0.0"
 
   cloudflare_zone   = cloudflare_zone.concentral_net
   name              = each.value
-  verification_code = local.forwardemail_verification_records_by_domain[each.value]
+  verification_code = module.forwardemail_receiving.verification_records_by_domain[each.value]
 }
 
 module "concentral_net_convention_mx_events_forwardemail_receiving_domain" {
   for_each = setintersection(
-    keys(local.forwardemail_verification_records_by_domain),
+    keys(module.forwardemail_receiving.verification_records_by_domain),
     [for subdomain in local.concentral_net_convention_mx_subdomains : "events.${subdomain}.concentral.net"]
   )
   source = "github.com/neinteractiveliterature/neil-terraform-modules//forwardemail_receiving_domain?ref=v1.0.0"
 
   cloudflare_zone   = cloudflare_zone.concentral_net
   name              = each.value
-  verification_code = local.forwardemail_verification_records_by_domain[each.value]
+  verification_code = module.forwardemail_receiving.verification_records_by_domain[each.value]
 }
 
 # Having an MX record breaks the wildcard CNAME, so we have to have a specific A record for each MX domain

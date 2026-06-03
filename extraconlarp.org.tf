@@ -84,7 +84,7 @@ module "extraconlarp_org_convention_subdomain_forwardemail_receiving_domain" {
 
   cloudflare_zone   = cloudflare_zone.extraconlarp_org
   name              = each.value
-  verification_code = local.forwardemail_verification_records_by_domain[each.value]
+  verification_code = module.forwardemail_receiving.verification_records_by_domain[each.value]
 }
 
 module "extraconlarp_org_convention_subdomain_2021_events_forwardemail_receiving_domain" {
@@ -92,7 +92,7 @@ module "extraconlarp_org_convention_subdomain_2021_events_forwardemail_receiving
 
   cloudflare_zone   = cloudflare_zone.extraconlarp_org
   name              = "events.2021.extraconlarp.org"
-  verification_code = local.forwardemail_verification_records_by_domain["events.2021.extraconlarp.org"]
+  verification_code = module.forwardemail_receiving.verification_records_by_domain["events.2021.extraconlarp.org"]
 }
 
 resource "cloudflare_dns_record" "extraconlarp_org_spf_record" {

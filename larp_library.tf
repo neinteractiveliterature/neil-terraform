@@ -225,7 +225,7 @@ module "larplibrary_org_forwardemail_receiving_domain" {
 
   cloudflare_zone   = cloudflare_zone.larplibrary_org
   name              = "larplibrary.org"
-  verification_code = local.forwardemail_verification_records_by_domain["larplibrary.org"]
+  verification_code = module.forwardemail_receiving.verification_records_by_domain["larplibrary.org"]
 }
 
 resource "cloudflare_dns_record" "assets_larplibrary_org" {

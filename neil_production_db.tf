@@ -117,7 +117,7 @@ resource "aws_cloudwatch_metric_alarm" "neil_production_low_disk_space" {
   datapoints_to_alarm = 5
   threshold           = 5 * 1024 * 1024 * 1024
 
-  alarm_actions = [aws_sns_topic.intercode_production_alarms.arn]
+  alarm_actions = [module.intercode_aws_resources.alarm_sns_topic_arn]
 
   namespace   = "AWS/RDS"
   metric_name = "FreeStorageSpace"
@@ -133,7 +133,7 @@ resource "aws_cloudwatch_metric_alarm" "neil_production_high_read_latency" {
   datapoints_to_alarm = 2
   threshold           = 0.1
 
-  alarm_actions = [aws_sns_topic.intercode_production_alarms.arn]
+  alarm_actions = [module.intercode_aws_resources.alarm_sns_topic_arn]
 
   metric_query {
     id          = "q1"
