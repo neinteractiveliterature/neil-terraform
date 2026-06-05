@@ -15,7 +15,7 @@ terraform {
     }
     sentry = {
       source  = "jianyuan/sentry"
-      version = "0.15.0-beta2"
+      version = "0.15.0-beta3"
     }
   }
   required_version = ">= 1.1"
@@ -162,7 +162,7 @@ resource "cloudflare_account" "neil" {
 }
 
 module "cloudflare_permissions" {
-  source = "github.com/neinteractiveliterature/neil-terraform-modules//cloudflare_permissions?ref=v1.0.0"
+  source = "github.com/neinteractiveliterature/neil-terraform-modules//cloudflare_permissions?ref=main"
 }
 
 module "github-oidc" {

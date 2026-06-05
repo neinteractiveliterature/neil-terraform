@@ -38,7 +38,7 @@ resource "aws_ses_domain_dkim" "unmanaged_domain" {
 module "managed_ses_sending_domain" {
   for_each = local.managed_sending_domains
 
-  source = "github.com/neinteractiveliterature/neil-terraform-modules//ses_sending_domain?ref=v1.0.0"
+  source = "github.com/neinteractiveliterature/neil-terraform-modules//ses_sending_domain?ref=main"
   cloudflare_zone = each.value
 }
 

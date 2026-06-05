@@ -77,7 +77,7 @@ resource "cloudflare_zone_setting" "concentral_net_security_header" {
 module "concentral_net_apex_redirect" {
   for_each = local.concentral_net_redirects
 
-  source = "github.com/neinteractiveliterature/neil-terraform-modules//cloudflare_apex_redirect?ref=v1.0.0"
+  source = "github.com/neinteractiveliterature/neil-terraform-modules//cloudflare_apex_redirect?ref=main"
 
   cloudflare_zone               = cloudflare_zone.concentral_net
   domain_name                   = each.key
@@ -97,7 +97,7 @@ resource "cloudflare_dns_record" "concentral_net_cname" {
 }
 
 module "concentral_net_forwardemail_receiving_domain" {
-  source = "github.com/neinteractiveliterature/neil-terraform-modules//forwardemail_receiving_domain?ref=v1.0.0"
+  source = "github.com/neinteractiveliterature/neil-terraform-modules//forwardemail_receiving_domain?ref=main"
 
   cloudflare_zone   = cloudflare_zone.concentral_net
   name              = "concentral.net"
@@ -109,7 +109,7 @@ module "concentral_net_convention_mx_forwardemail_receiving_domain" {
     keys(module.forwardemail_receiving.verification_records_by_domain),
     [for subdomain in local.concentral_net_convention_mx_subdomains : "${subdomain}.concentral.net"]
   )
-  source = "github.com/neinteractiveliterature/neil-terraform-modules//forwardemail_receiving_domain?ref=v1.0.0"
+  source = "github.com/neinteractiveliterature/neil-terraform-modules//forwardemail_receiving_domain?ref=main"
 
   cloudflare_zone   = cloudflare_zone.concentral_net
   name              = each.value
@@ -121,7 +121,7 @@ module "concentral_net_convention_mx_events_forwardemail_receiving_domain" {
     keys(module.forwardemail_receiving.verification_records_by_domain),
     [for subdomain in local.concentral_net_convention_mx_subdomains : "events.${subdomain}.concentral.net"]
   )
-  source = "github.com/neinteractiveliterature/neil-terraform-modules//forwardemail_receiving_domain?ref=v1.0.0"
+  source = "github.com/neinteractiveliterature/neil-terraform-modules//forwardemail_receiving_domain?ref=main"
 
   cloudflare_zone   = cloudflare_zone.concentral_net
   name              = each.value

@@ -265,7 +265,7 @@ resource "cloudflare_dns_record" "uploads_neilhosting_net" {
 }
 
 module "uploads_neilhosting_net_cloudfront" {
-  source = "github.com/neinteractiveliterature/neil-terraform-modules//cloudfront_with_acm?ref=v1.0.0"
+  source = "github.com/neinteractiveliterature/neil-terraform-modules//cloudfront_with_acm?ref=main"
 
   domain_name              = "uploads.neilhosting.net"
   origin_id                = "intercode"
@@ -285,7 +285,7 @@ resource "cloudflare_dns_record" "assets_neilhosting_net" {
 }
 
 module "assets_neilhosting_net_cloudfront" {
-  source = "github.com/neinteractiveliterature/neil-terraform-modules//cloudfront_with_acm?ref=v1.0.0"
+  source = "github.com/neinteractiveliterature/neil-terraform-modules//cloudfront_with_acm?ref=main"
 
   domain_name              = "assets.neilhosting.net"
   origin_id                = "intercode"
