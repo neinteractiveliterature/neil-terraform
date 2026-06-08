@@ -44,7 +44,10 @@ resource "cloudflare_zone_setting" "extraconlarp_org_security_header" {
 module "extraconlarp_org_apex_redirect" {
   source = "github.com/neinteractiveliterature/neil-terraform-modules//cloudflare_apex_redirect?ref=main"
 
-  cloudflare_zone               = cloudflare_zone.extraconlarp_org
+  cloudflare_zone = {
+    id   = cloudflare_zone.extraconlarp_org.id
+    name = cloudflare_zone.extraconlarp_org.name
+  }
   redirect_destination_hostname = "2021.extraconlarp.org"
   redirect_destination_protocol = "https"
   alternative_names             = ["www.extraconlarp.org"]
@@ -82,7 +85,10 @@ module "extraconlarp_org_convention_subdomain_forwardemail_receiving_domain" {
   for_each = toset([for subdomain in local.extraconlarp_org_intercode_subdomains : "${subdomain}.extraconlarp.org"])
   source = "github.com/neinteractiveliterature/neil-terraform-modules//forwardemail_receiving_domain?ref=main"
 
-  cloudflare_zone   = cloudflare_zone.extraconlarp_org
+  cloudflare_zone = {
+    id   = cloudflare_zone.extraconlarp_org.id
+    name = cloudflare_zone.extraconlarp_org.name
+  }
   name              = each.value
   verification_code = module.forwardemail_receiving.verification_records_by_domain[each.value]
 }
@@ -90,7 +96,10 @@ module "extraconlarp_org_convention_subdomain_forwardemail_receiving_domain" {
 module "extraconlarp_org_convention_subdomain_2021_events_forwardemail_receiving_domain" {
   source = "github.com/neinteractiveliterature/neil-terraform-modules//forwardemail_receiving_domain?ref=main"
 
-  cloudflare_zone   = cloudflare_zone.extraconlarp_org
+  cloudflare_zone = {
+    id   = cloudflare_zone.extraconlarp_org.id
+    name = cloudflare_zone.extraconlarp_org.name
+  }
   name              = "events.2021.extraconlarp.org"
   verification_code = module.forwardemail_receiving.verification_records_by_domain["events.2021.extraconlarp.org"]
 }

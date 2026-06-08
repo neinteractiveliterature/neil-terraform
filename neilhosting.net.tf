@@ -43,7 +43,10 @@ resource "cloudflare_zone_setting" "neilhosting_net_security_header" {
 module "neilhosting_net_apex_redirect" {
   source = "github.com/neinteractiveliterature/neil-terraform-modules//cloudflare_apex_redirect?ref=main"
 
-  cloudflare_zone               = cloudflare_zone.neilhosting_net
+  cloudflare_zone = {
+    id   = cloudflare_zone.neilhosting_net.id
+    name = cloudflare_zone.neilhosting_net.name
+  }
   domain_name                   = "neilhosting.net"
   redirect_destination_hostname = "www.neilhosting.net"
   redirect_destination_protocol = "https"
@@ -53,7 +56,10 @@ module "neilhosting_net_apex_redirect" {
 module "neilhosting_net_forwardemail_receiving_domain" {
   source = "github.com/neinteractiveliterature/neil-terraform-modules//forwardemail_receiving_domain?ref=main"
 
-  cloudflare_zone   = cloudflare_zone.neilhosting_net
+  cloudflare_zone = {
+    id   = cloudflare_zone.neilhosting_net.id
+    name = cloudflare_zone.neilhosting_net.name
+  }
   name              = "neilhosting.net"
   verification_code = module.forwardemail_receiving.verification_records_by_domain["neilhosting.net"]
 }
@@ -62,7 +68,10 @@ module "neilhosting_net_intercode_subdomain_forwardemail_receiving_domain" {
   for_each = toset([for subdomain in local.neilhosting_net_intercode_subdomains : "${subdomain}.neilhosting.net"])
   source = "github.com/neinteractiveliterature/neil-terraform-modules//forwardemail_receiving_domain?ref=main"
 
-  cloudflare_zone   = cloudflare_zone.neilhosting_net
+  cloudflare_zone = {
+    id   = cloudflare_zone.neilhosting_net.id
+    name = cloudflare_zone.neilhosting_net.name
+  }
   name              = each.value
   verification_code = module.forwardemail_receiving.verification_records_by_domain[each.value]
 }

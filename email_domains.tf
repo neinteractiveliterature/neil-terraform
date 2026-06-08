@@ -9,12 +9,12 @@ locals {
   ])
 
   managed_sending_domain_zones = [
-    cloudflare_zone.concentral_net,
-    cloudflare_zone.extraconlarp_org,
-    cloudflare_zone.interactiveliterature_org,
-    cloudflare_zone.interconlarp_org,
-    cloudflare_zone.larplibrary_org,
-    cloudflare_zone.neilhosting_net
+    { id = cloudflare_zone.concentral_net.id, name = cloudflare_zone.concentral_net.name },
+    { id = cloudflare_zone.extraconlarp_org.id, name = cloudflare_zone.extraconlarp_org.name },
+    { id = cloudflare_zone.interactiveliterature_org.id, name = cloudflare_zone.interactiveliterature_org.name },
+    { id = cloudflare_zone.interconlarp_org.id, name = cloudflare_zone.interconlarp_org.name },
+    { id = cloudflare_zone.larplibrary_org.id, name = cloudflare_zone.larplibrary_org.name },
+    { id = cloudflare_zone.neilhosting_net.id, name = cloudflare_zone.neilhosting_net.name }
   ]
 
   managed_sending_domains = {

@@ -272,7 +272,10 @@ module "uploads_neilhosting_net_cloudfront" {
   origin_domain_name       = "www.neilhosting.net"
   origin_protocol_policy   = "https-only"
   add_security_headers_arn = aws_lambda_function.addSecurityHeaders.qualified_arn
-  cloudflare_zone          = cloudflare_zone.neilhosting_net
+  cloudflare_zone = {
+    id   = cloudflare_zone.neilhosting_net.id
+    name = cloudflare_zone.neilhosting_net.name
+  }
   compress                 = true
 }
 
@@ -292,7 +295,10 @@ module "assets_neilhosting_net_cloudfront" {
   origin_domain_name       = "www.neilhosting.net"
   origin_protocol_policy   = "https-only"
   add_security_headers_arn = aws_lambda_function.addSecurityHeaders.qualified_arn
-  cloudflare_zone          = cloudflare_zone.neilhosting_net
+  cloudflare_zone = {
+    id   = cloudflare_zone.neilhosting_net.id
+    name = cloudflare_zone.neilhosting_net.name
+  }
   compress                 = true
 }
 
@@ -305,8 +311,6 @@ resource "github_repository" "intercode" {
   has_issues             = true
   has_projects           = true
   has_wiki               = true
-  vulnerability_alerts   = true
-
   pages {
     build_type = "legacy"
     cname      = cloudflare_dns_record.interactiveliterature_org_intercode_cname.name
@@ -316,6 +320,10 @@ resource "github_repository" "intercode" {
       path   = "/"
     }
   }
+}
+
+resource "github_repository_vulnerability_alerts" "intercode" {
+  repository = github_repository.intercode.name
 }
 
 resource "github_actions_secret" "intercode_fly_api_token" {

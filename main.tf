@@ -153,7 +153,6 @@ resource "aws_iam_policy" "neil-terraform-state-read" {
 
 resource "cloudflare_account" "neil" {
   name = "New England Interactive Literature"
-  type = "standard"
 
   lifecycle {
     # Provider bug: Update function doesn't pass account_id to the API (v5.19.1)

@@ -168,7 +168,10 @@ module "interactiveliterature_org_apex_redirect" {
 
   source = "github.com/neinteractiveliterature/neil-terraform-modules//cloudflare_apex_redirect?ref=main"
 
-  cloudflare_zone               = cloudflare_zone.interactiveliterature_org
+  cloudflare_zone = {
+    id   = cloudflare_zone.interactiveliterature_org.id
+    name = cloudflare_zone.interactiveliterature_org.name
+  }
   domain_name                   = each.key
   redirect_destination_hostname = each.value
   redirect_destination_protocol = "https"
@@ -178,7 +181,10 @@ module "interactiveliterature_org_apex_redirect" {
 module "interactiveliterature_org_forwardemail_receiving_domain" {
   source = "github.com/neinteractiveliterature/neil-terraform-modules//forwardemail_receiving_domain?ref=main"
 
-  cloudflare_zone   = cloudflare_zone.interactiveliterature_org
+  cloudflare_zone = {
+    id   = cloudflare_zone.interactiveliterature_org.id
+    name = cloudflare_zone.interactiveliterature_org.name
+  }
   name              = "interactiveliterature.org"
   verification_code = module.forwardemail_receiving.verification_records_by_domain["interactiveliterature.org"]
 }
@@ -218,7 +224,10 @@ module "interactiveliterature_org_convention_subdomain_forwardemail_receiving_do
     [for subdomain in local.interactiveliterature_org_intercode_subdomains : "${subdomain}.interactiveliterature.org"]
   )
 
-  cloudflare_zone   = cloudflare_zone.interactiveliterature_org
+  cloudflare_zone = {
+    id   = cloudflare_zone.interactiveliterature_org.id
+    name = cloudflare_zone.interactiveliterature_org.name
+  }
   name              = each.value
   verification_code = module.forwardemail_receiving.verification_records_by_domain[each.value]
 }
@@ -253,7 +262,10 @@ module "old_interactiveliterature_org_cloudfront" {
   origin_domain_name       = aws_s3_bucket_website_configuration.www_interactiveliterature_org.website_endpoint
   origin_protocol_policy   = "http-only"
   add_security_headers_arn = aws_lambda_function.addSecurityHeaders.qualified_arn
-  cloudflare_zone          = cloudflare_zone.interactiveliterature_org
+  cloudflare_zone = {
+    id   = cloudflare_zone.interactiveliterature_org.id
+    name = cloudflare_zone.interactiveliterature_org.name
+  }
   compress                 = true
 }
 
@@ -328,7 +340,10 @@ resource "github_repository" "www_interactiveliterature_org" {
   has_issues           = true
   has_projects         = true
   has_wiki             = false
-  vulnerability_alerts = true
+}
+
+resource "github_repository_vulnerability_alerts" "www_interactiveliterature_org" {
+  repository = github_repository.www_interactiveliterature_org.name
 }
 
 module "www_interactiveliterature_org_sst_github_deployment" {
@@ -336,9 +351,12 @@ module "www_interactiveliterature_org_sst_github_deployment" {
 
   app_name = "neil-website"
   cloudflare_account_id = cloudflare_account.neil.id
-  github_repository = github_repository.www_interactiveliterature_org
+  github_repository = {
+    name      = github_repository.www_interactiveliterature_org.name
+    full_name = github_repository.www_interactiveliterature_org.full_name
+  }
   oidc_provider_arn = module.github-oidc.oidc_provider_arn
-  writable_cloudflare_zones = [cloudflare_zone.interactiveliterature_org]
+  writable_cloudflare_zones = [{ id = cloudflare_zone.interactiveliterature_org.id, name = cloudflare_zone.interactiveliterature_org.name }]
 }
 
 output "www_interactiveliterature_org_smtp_url" {
