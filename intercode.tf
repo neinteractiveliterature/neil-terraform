@@ -41,10 +41,6 @@ variable "intercode_production_db_password" {
   type = string
 }
 
-variable "intercode_heroku_api_token" {
-  type = string
-}
-
 variable "intercode_openid_connect_signing_key" {
   type = string
 }
