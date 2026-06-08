@@ -112,10 +112,7 @@ module "interconlarp_org_cloudfront" {
 
   domain_name              = "interconlarp.org"
   alternative_names        = ["www.interconlarp.org"]
-  cloudflare_zone = {
-    id   = cloudflare_zone.interconlarp_org.id
-    name = cloudflare_zone.interconlarp_org.name
-  }
+  zone_id = cloudflare_zone.interconlarp_org.id
   origin_id                = "S3-interconlarp.org"
   origin_domain_name       = aws_s3_bucket_website_configuration.interconlarp_org.website_endpoint
   add_security_headers_arn = aws_lambda_function.addSecurityHeaders.qualified_arn
@@ -136,10 +133,7 @@ module "interconlarp_org_redirect_subdomain" {
 
   source = "github.com/neinteractiveliterature/neil-terraform-modules//cloudflare_apex_redirect?ref=main"
 
-  cloudflare_zone = {
-    id   = cloudflare_zone.interconlarp_org.id
-    name = cloudflare_zone.interconlarp_org.name
-  }
+  zone_id = cloudflare_zone.interconlarp_org.id
   domain_name                   = each.key
   redirect_destination_hostname = "www.interactiveliterature.org"
   redirect_destination_path     = each.value
@@ -158,10 +152,7 @@ resource "cloudflare_dns_record" "interconlarp_org_apex_alias" {
 module "interconlarp_org_forwardemail_receiving_domain" {
   source = "github.com/neinteractiveliterature/neil-terraform-modules//forwardemail_receiving_domain?ref=main"
 
-  cloudflare_zone = {
-    id   = cloudflare_zone.interconlarp_org.id
-    name = cloudflare_zone.interconlarp_org.name
-  }
+  zone_id = cloudflare_zone.interconlarp_org.id
   name              = "interconlarp.org"
   verification_code = module.forwardemail_receiving.verification_records_by_domain["interconlarp.org"]
 }
@@ -198,10 +189,7 @@ module "interconlarp_org_convention_subdomain_forwardemail_receiving_domain" {
   for_each = toset([for subdomain in local.interconlarp_org_intercode_subdomains : "${subdomain}.interconlarp.org"])
   source = "github.com/neinteractiveliterature/neil-terraform-modules//forwardemail_receiving_domain?ref=main"
 
-  cloudflare_zone = {
-    id   = cloudflare_zone.interconlarp_org.id
-    name = cloudflare_zone.interconlarp_org.name
-  }
+  zone_id = cloudflare_zone.interconlarp_org.id
   name              = each.value
   verification_code = module.forwardemail_receiving.verification_records_by_domain[each.value]
 }
@@ -210,10 +198,7 @@ module "interconlarp_org_forward_only_subdomain_forwardemail_receiving_domain" {
   for_each = toset([for subdomain in local.interconlarp_org_forward_only_subdomains : "${subdomain}.interconlarp.org"])
   source = "github.com/neinteractiveliterature/neil-terraform-modules//forwardemail_receiving_domain?ref=main"
 
-  cloudflare_zone = {
-    id   = cloudflare_zone.interconlarp_org.id
-    name = cloudflare_zone.interconlarp_org.name
-  }
+  zone_id = cloudflare_zone.interconlarp_org.id
   name              = each.value
   verification_code = module.forwardemail_receiving.verification_records_by_domain[each.value]
 }
@@ -225,10 +210,7 @@ module "interconlarp_org_convention_subdomain_events_forwardemail_receiving_doma
   )
   source = "github.com/neinteractiveliterature/neil-terraform-modules//forwardemail_receiving_domain?ref=main"
 
-  cloudflare_zone = {
-    id   = cloudflare_zone.interconlarp_org.id
-    name = cloudflare_zone.interconlarp_org.name
-  }
+  zone_id = cloudflare_zone.interconlarp_org.id
   name              = each.value
   verification_code = module.forwardemail_receiving.verification_records_by_domain[each.value]
 }
@@ -329,10 +311,7 @@ module "i_interconlarp_org_cloudfront" {
 module "i_interconlarp_org_forwardemail_receiving_domain" {
   source = "github.com/neinteractiveliterature/neil-terraform-modules//forwardemail_receiving_domain?ref=main"
 
-  cloudflare_zone = {
-    id   = cloudflare_zone.interconlarp_org.id
-    name = cloudflare_zone.interconlarp_org.name
-  }
+  zone_id = cloudflare_zone.interconlarp_org.id
   name              = "i.interconlarp.org"
   verification_code = module.forwardemail_receiving.verification_records_by_domain["i.interconlarp.org"]
 }

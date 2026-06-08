@@ -8,18 +8,13 @@ locals {
     "tapestrieslarp.org"
   ])
 
-  managed_sending_domain_zones = [
-    { id = cloudflare_zone.concentral_net.id, name = cloudflare_zone.concentral_net.name },
-    { id = cloudflare_zone.extraconlarp_org.id, name = cloudflare_zone.extraconlarp_org.name },
-    { id = cloudflare_zone.interactiveliterature_org.id, name = cloudflare_zone.interactiveliterature_org.name },
-    { id = cloudflare_zone.interconlarp_org.id, name = cloudflare_zone.interconlarp_org.name },
-    { id = cloudflare_zone.larplibrary_org.id, name = cloudflare_zone.larplibrary_org.name },
-    { id = cloudflare_zone.neilhosting_net.id, name = cloudflare_zone.neilhosting_net.name }
-  ]
-
   managed_sending_domains = {
-    for zone in local.managed_sending_domain_zones :
-    trimsuffix(zone.name, ".") => zone
+    "concentral.net"            = cloudflare_zone.concentral_net.id
+    "extraconlarp.org"          = cloudflare_zone.extraconlarp_org.id
+    "interactiveliterature.org" = cloudflare_zone.interactiveliterature_org.id
+    "interconlarp.org"          = cloudflare_zone.interconlarp_org.id
+    "larplibrary.org"           = cloudflare_zone.larplibrary_org.id
+    "neilhosting.net"           = cloudflare_zone.neilhosting_net.id
   }
 }
 
@@ -39,7 +34,7 @@ module "managed_ses_sending_domain" {
   for_each = local.managed_sending_domains
 
   source = "github.com/neinteractiveliterature/neil-terraform-modules//ses_sending_domain?ref=main"
-  cloudflare_zone = each.value
+  zone_id = each.value
 }
 
 moved {

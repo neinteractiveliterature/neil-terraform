@@ -79,10 +79,7 @@ module "concentral_net_apex_redirect" {
 
   source = "github.com/neinteractiveliterature/neil-terraform-modules//cloudflare_apex_redirect?ref=main"
 
-  cloudflare_zone = {
-    id   = cloudflare_zone.concentral_net.id
-    name = cloudflare_zone.concentral_net.name
-  }
+  zone_id = cloudflare_zone.concentral_net.id
   domain_name                   = each.key
   redirect_destination_hostname = each.value
   redirect_destination_protocol = "https"
@@ -102,10 +99,7 @@ resource "cloudflare_dns_record" "concentral_net_cname" {
 module "concentral_net_forwardemail_receiving_domain" {
   source = "github.com/neinteractiveliterature/neil-terraform-modules//forwardemail_receiving_domain?ref=main"
 
-  cloudflare_zone = {
-    id   = cloudflare_zone.concentral_net.id
-    name = cloudflare_zone.concentral_net.name
-  }
+  zone_id = cloudflare_zone.concentral_net.id
   name              = "concentral.net"
   verification_code = module.forwardemail_receiving.verification_records_by_domain["concentral.net"]
 }
@@ -117,10 +111,7 @@ module "concentral_net_convention_mx_forwardemail_receiving_domain" {
   )
   source = "github.com/neinteractiveliterature/neil-terraform-modules//forwardemail_receiving_domain?ref=main"
 
-  cloudflare_zone = {
-    id   = cloudflare_zone.concentral_net.id
-    name = cloudflare_zone.concentral_net.name
-  }
+  zone_id = cloudflare_zone.concentral_net.id
   name              = each.value
   verification_code = module.forwardemail_receiving.verification_records_by_domain[each.value]
 }
@@ -132,10 +123,7 @@ module "concentral_net_convention_mx_events_forwardemail_receiving_domain" {
   )
   source = "github.com/neinteractiveliterature/neil-terraform-modules//forwardemail_receiving_domain?ref=main"
 
-  cloudflare_zone = {
-    id   = cloudflare_zone.concentral_net.id
-    name = cloudflare_zone.concentral_net.name
-  }
+  zone_id = cloudflare_zone.concentral_net.id
   name              = each.value
   verification_code = module.forwardemail_receiving.verification_records_by_domain[each.value]
 }

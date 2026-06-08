@@ -20,7 +20,7 @@ module "rotator_sst_github_deployment" {
     full_name = github_repository.rotator.full_name
   }
   oidc_provider_arn = module.github-oidc.oidc_provider_arn
-  writable_cloudflare_zones = [{ id = cloudflare_zone.interactiveliterature_org.id, name = cloudflare_zone.interactiveliterature_org.name }]
+  writable_cloudflare_zones = [cloudflare_zone.interactiveliterature_org.id]
 }
 
 resource "sentry_project" "rotator" {

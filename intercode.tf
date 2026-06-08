@@ -272,10 +272,7 @@ module "uploads_neilhosting_net_cloudfront" {
   origin_domain_name       = "www.neilhosting.net"
   origin_protocol_policy   = "https-only"
   add_security_headers_arn = aws_lambda_function.addSecurityHeaders.qualified_arn
-  cloudflare_zone = {
-    id   = cloudflare_zone.neilhosting_net.id
-    name = cloudflare_zone.neilhosting_net.name
-  }
+  zone_id = cloudflare_zone.neilhosting_net.id
   compress                 = true
 }
 
@@ -295,10 +292,7 @@ module "assets_neilhosting_net_cloudfront" {
   origin_domain_name       = "www.neilhosting.net"
   origin_protocol_policy   = "https-only"
   add_security_headers_arn = aws_lambda_function.addSecurityHeaders.qualified_arn
-  cloudflare_zone = {
-    id   = cloudflare_zone.neilhosting_net.id
-    name = cloudflare_zone.neilhosting_net.name
-  }
+  zone_id = cloudflare_zone.neilhosting_net.id
   compress                 = true
 }
 

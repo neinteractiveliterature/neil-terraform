@@ -196,10 +196,7 @@ resource "cloudflare_zone" "larplibrary_org" {
 module "larplibrary_org_apex_redirect" {
   source = "github.com/neinteractiveliterature/neil-terraform-modules//cloudflare_apex_redirect?ref=main"
 
-  cloudflare_zone = {
-    id   = cloudflare_zone.larplibrary_org.id
-    name = cloudflare_zone.larplibrary_org.name
-  }
+  zone_id = cloudflare_zone.larplibrary_org.id
   domain_name                   = "larplibrary.org"
   redirect_destination_hostname = "www.larplibrary.org"
   redirect_destination_path     = "/"
@@ -226,10 +223,7 @@ resource "cloudflare_dns_record" "larplibrary_org_www" {
 module "larplibrary_org_forwardemail_receiving_domain" {
   source = "github.com/neinteractiveliterature/neil-terraform-modules//forwardemail_receiving_domain?ref=main"
 
-  cloudflare_zone = {
-    id   = cloudflare_zone.larplibrary_org.id
-    name = cloudflare_zone.larplibrary_org.name
-  }
+  zone_id = cloudflare_zone.larplibrary_org.id
   name              = "larplibrary.org"
   verification_code = module.forwardemail_receiving.verification_records_by_domain["larplibrary.org"]
 }
@@ -251,10 +245,7 @@ module "assets_larplibrary_org_cloudfront" {
   origin_domain_name       = "www.larplibrary.org"
   origin_protocol_policy   = "https-only"
   add_security_headers_arn = aws_lambda_function.addSecurityHeaders.qualified_arn
-  cloudflare_zone = {
-    id   = cloudflare_zone.larplibrary_org.id
-    name = cloudflare_zone.larplibrary_org.name
-  }
+  zone_id = cloudflare_zone.larplibrary_org.id
   compress                 = true
 }
 
