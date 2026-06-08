@@ -7,6 +7,11 @@ variable "intercode_sentry_release_token" {
   sensitive = true
 }
 
+variable "intercode_fly_api_token" {
+  type      = string
+  sensitive = true
+}
+
 variable "intercode_cloudflare_token" {
   type = string
 }
@@ -189,6 +194,23 @@ module "intercode_aws_resources" {
   database_url               = "postgres://intercode_production:${var.intercode_production_db_password}@${aws_db_instance.neil_production.endpoint}/intercode_production?sslrootcert=rds-global-bundle.pem"
   secret_key_base            = var.intercode_secret_key_base
   openid_connect_signing_key = var.intercode_openid_connect_signing_key
+  fly_api_token              = var.intercode_fly_api_token
+
+  stripe = {
+    secret_key              = var.intercode_stripe_secret_key
+    publishable_key         = var.intercode_stripe_publishable_key
+    connect_endpoint_secret = var.intercode_stripe_connect_endpoint_secret
+  }
+
+  recaptcha = {
+    secret_key = var.intercode_recaptcha_secret_key
+    site_key   = var.intercode_recaptcha_site_key
+  }
+
+  twilio = {
+    account_sid = var.intercode_twilio_account_sid
+    auth_token  = var.intercode_twilio_auth_token
+  }
 }
 
 module "intercode_sentry" {
