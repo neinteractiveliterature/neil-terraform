@@ -305,6 +305,10 @@ resource "github_repository" "intercode" {
   has_issues             = true
   has_projects           = true
   has_wiki               = true
+
+  lifecycle {
+    ignore_changes = [pages]
+  }
 }
 
 resource "github_repository_pages" "intercode" {
