@@ -68,7 +68,7 @@ resource "aws_db_instance" "neil_production" {
   instance_class        = "db.t4g.small"
   identifier            = "neil-production"
   engine                = "postgres"
-  engine_version        = "17.4"
+  engine_version        = "17.9"
   username              = "neiladmin"
   password              = var.rds_neiladmin_password
   parameter_group_name  = "production-pg17"

@@ -2,6 +2,7 @@
 
 # Do not check secrets into git
 /secrets.auto.tfvars
+/backend.hcl
 
 # Do not store the generated plan
 /tfplan
