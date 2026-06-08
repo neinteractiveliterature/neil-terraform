@@ -232,11 +232,14 @@ module "intercode_aws_resources" {
   twilio = {
     account_sid = var.intercode_twilio_account_sid
     auth_token  = var.intercode_twilio_auth_token
+    sms_number  = "+14156345010"
   }
 
-  assets_host          = "assets.neilhosting.net"
-  uploads_host         = "https://uploads.neilhosting.net"
-  cloudwatch_log_group = "intercode2_production"
+  assets_host                         = "assets.neilhosting.net"
+  uploads_host                        = "https://uploads.neilhosting.net"
+  cloudwatch_log_group                = "intercode2_production"
+  intercode_host                      = "www.neilhosting.net"
+  intercode_certs_no_wildcard_domains = "5pi-con.natbudin.com signups.greaterbostonlarpsociety.org thepitch.aegames.org"
 
   autoscale = {
     min_instances = 2
@@ -253,10 +256,12 @@ module "intercode_aws_resources" {
 module "intercode_sentry" {
   source = "github.com/neinteractiveliterature/intercode//terraform/modules/sentry?ref=main&depth=1"
 
-  ssm_name      = "intercode_production"
-  organization  = sentry_organization.neil.slug
-  project       = sentry_project.intercode.slug
-  release_token = var.intercode_sentry_release_token
+  ssm_name             = "intercode_production"
+  organization         = sentry_organization.neil.slug
+  project              = sentry_project.intercode.slug
+  release_token        = var.intercode_sentry_release_token
+  traces_sample_rate   = "1.0"
+  profiles_sample_rate = "1.0"
 }
 
 moved {
