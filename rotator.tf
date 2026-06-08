@@ -36,19 +36,19 @@ resource "sentry_project" "rotator" {
 resource "github_actions_secret" "rotator_sentry_org" {
   repository      = github_repository.rotator.name
   secret_name     = "SENTRY_ORG"
-  plaintext_value = sentry_organization.neil.slug
+  value = sentry_organization.neil.slug
 }
 
 resource "github_actions_secret" "rotator_sentry_project" {
   repository      = github_repository.rotator.name
   secret_name     = "SENTRY_PROJECT"
-  plaintext_value = sentry_project.rotator.slug
+  value = sentry_project.rotator.slug
 }
 
 resource "github_actions_secret" "rotator_sentry_auth_token" {
   repository      = github_repository.rotator.name
   secret_name     = "SENTRY_AUTH_TOKEN"
-  plaintext_value = var.sentry_auth_token
+  value = var.sentry_auth_token
 }
 
 output "rotator_smtp_url" {

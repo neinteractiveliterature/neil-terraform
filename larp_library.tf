@@ -274,5 +274,5 @@ resource "github_repository_vulnerability_alerts" "larp_library" {
 resource "github_actions_secret" "larp_library_fly_api_token" {
   repository      = github_repository.larp_library.id
   secret_name     = "FLY_API_TOKEN"
-  plaintext_value = var.fly_gha_api_token
+  value = var.fly_gha_api_token
 }

@@ -305,14 +305,16 @@ resource "github_repository" "intercode" {
   has_issues             = true
   has_projects           = true
   has_wiki               = true
-  pages {
-    build_type = "legacy"
-    cname      = cloudflare_dns_record.interactiveliterature_org_intercode_cname.name
+}
 
-    source {
-      branch = "gh-pages"
-      path   = "/"
-    }
+resource "github_repository_pages" "intercode" {
+  repository = github_repository.intercode.name
+  build_type = "legacy"
+  cname      = cloudflare_dns_record.interactiveliterature_org_intercode_cname.name
+
+  source {
+    branch = "gh-pages"
+    path   = "/"
   }
 }
 
@@ -323,7 +325,7 @@ resource "github_repository_vulnerability_alerts" "intercode" {
 resource "github_actions_secret" "intercode_fly_api_token" {
   repository      = github_repository.intercode.id
   secret_name     = "FLY_API_TOKEN"
-  plaintext_value = var.fly_gha_api_token
+  value = var.fly_gha_api_token
 }
 
 resource "sentry_project" "intercode" {
