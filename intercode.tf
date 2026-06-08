@@ -178,9 +178,12 @@ resource "rollbar_project_access_token" "intercode_post_server_item" {
 module "intercode_aws_resources" {
   source = "github.com/neinteractiveliterature/intercode//terraform/modules/intercode_aws_resources?ref=main&depth=1"
 
-  name                     = "intercode_production"
-  s3_bucket_name           = "intercode2-production"
-  alarm_email_destinations = local.intercode_production_alarm_email_destinations
+  name                       = "intercode_production"
+  s3_bucket_name             = "intercode2-production"
+  alarm_email_destinations   = local.intercode_production_alarm_email_destinations
+  database_url               = "postgres://intercode_production:${var.intercode_production_db_password}@${aws_db_instance.neil_production.endpoint}/intercode_production?sslrootcert=rds-global-bundle.pem"
+  secret_key_base            = var.intercode_secret_key_base
+  openid_connect_signing_key = var.intercode_openid_connect_signing_key
 }
 
 moved {
