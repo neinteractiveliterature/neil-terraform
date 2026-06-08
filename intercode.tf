@@ -234,6 +234,10 @@ module "intercode_aws_resources" {
     auth_token  = var.intercode_twilio_auth_token
   }
 
+  assets_host          = "assets.neilhosting.net"
+  uploads_host         = "https://uploads.neilhosting.net"
+  cloudwatch_log_group = "intercode2_production"
+
   autoscale = {
     min_instances = 2
     max_instances = 10
