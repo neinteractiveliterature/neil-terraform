@@ -2,6 +2,11 @@ variable "intercode_cloudflare_account_id" {
   type = string
 }
 
+variable "intercode_sentry_release_token" {
+  type      = string
+  sensitive = true
+}
+
 variable "intercode_cloudflare_token" {
   type = string
 }
@@ -184,6 +189,15 @@ module "intercode_aws_resources" {
   database_url               = "postgres://intercode_production:${var.intercode_production_db_password}@${aws_db_instance.neil_production.endpoint}/intercode_production?sslrootcert=rds-global-bundle.pem"
   secret_key_base            = var.intercode_secret_key_base
   openid_connect_signing_key = var.intercode_openid_connect_signing_key
+}
+
+module "intercode_sentry" {
+  source = "github.com/neinteractiveliterature/intercode//terraform/modules/sentry?ref=main&depth=1"
+
+  ssm_name      = "intercode_production"
+  organization  = sentry_organization.neil.slug
+  project       = sentry_project.intercode.slug
+  release_token = var.intercode_sentry_release_token
 }
 
 moved {
