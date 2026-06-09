@@ -17,6 +17,9 @@ terraform {
       source  = "jianyuan/sentry"
       version = "0.15.0-beta3"
     }
+    null = {
+      source = "hashicorp/null"
+    }
   }
   required_version = ">= 1.6"
 }

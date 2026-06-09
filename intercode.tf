@@ -105,85 +105,6 @@ locals {
   ])
 }
 
-# # The Heroku app itself
-# resource "heroku_app" "intercode" {
-#   name   = "intercode"
-#   region = "us"
-#   stack  = "container"
-
-#   organization {
-#     name = "neinteractiveliterature"
-#   }
-
-#   # we do our own cert management shenanigans using scheduled jobs
-#   acm = false
-
-#   config_vars = {
-#     ASSETS_HOST                         = "assets.neilhosting.net"
-#     HEROKU_APP_NAME                     = "intercode"
-#     INTERCODE_CERTS_NO_WILDCARD_DOMAINS = "5pi-con.natbudin.com signups.greaterbostonlarpsociety.org thepitch.aegames.org"
-#     INTERCODE_HOST                      = "neilhosting.net"
-#     JSON_LOGGING                        = "1"
-#     MALLOC_ARENA_MAX                    = 2
-#     RACK_ENV                            = "production"
-#     RAILS_ENV                           = "production"
-#     RAILS_GROUPS                        = "skylight"
-#     RAILS_LOG_TO_STDOUT                 = "enabled"
-#     RAILS_MAX_THREADS                   = "3"
-#     RAILS_SERVE_STATIC_FILES            = "enabled"
-#     ROLLBAR_CLIENT_ACCESS_TOKEN         = rollbar_project_access_token.intercode_post_client_item.access_token
-#     ROLLBAR_PUBLIC_PATH                 = "//neilhosting.net/packs"
-#     RUBY_YJIT_ENABLE                    = "1"
-#     TWILIO_SMS_NUMBER                   = "+14156345010"
-#     UPLOADS_HOST                        = "https://uploads.neilhosting.net"
-#     WEB_CONCURRENCY                     = "0"
-#   }
-
-#   sensitive_config_vars = {
-#     AWS_ACCESS_KEY_ID              = aws_iam_access_key.intercode2_production.id
-#     AWS_REGION                     = data.aws_region.current.region
-#     AWS_SECRET_ACCESS_KEY          = aws_iam_access_key.intercode2_production.secret
-#     AWS_S3_BUCKET                  = aws_s3_bucket.intercode2_production.bucket
-#     CF_Account_ID                  = var.intercode_cloudflare_account_id
-#     CF_Token                       = var.intercode_cloudflare_token
-#     DATABASE_URL                   = "postgres://intercode_production:${var.intercode_production_db_password}@${aws_db_instance.neil_production.endpoint}/intercode_production?sslrootcert=rds-global-bundle.pem"
-#     HEROKU_API_TOKEN               = var.intercode_heroku_api_token
-#     OPENID_CONNECT_SIGNING_KEY     = var.intercode_openid_connect_signing_key
-#     RECAPTCHA_SECRET_KEY           = var.intercode_recaptcha_secret_key
-#     RECAPTCHA_SITE_KEY             = var.intercode_recaptcha_site_key
-#     ROLLBAR_ACCESS_TOKEN           = rollbar_project_access_token.intercode_post_server_item.access_token
-#     SECRET_KEY_BASE                = var.intercode_secret_key_base
-#     STRIPE_CONNECT_ENDPOINT_SECRET = var.intercode_stripe_connect_endpoint_secret
-#     STRIPE_PUBLISHABLE_KEY         = var.intercode_stripe_publishable_key
-#     STRIPE_SECRET_KEY              = var.intercode_stripe_secret_key
-#     TWILIO_ACCOUNT_SID             = var.intercode_twilio_account_sid
-#     TWILIO_AUTH_TOKEN              = var.intercode_twilio_auth_token
-#   }
-# }
-
-# resource "heroku_drain" "intercode_vector" {
-#   app_id = heroku_app.intercode.id
-#   url    = "https://${var.vector_heroku_source_username}:${var.vector_heroku_source_password}@vector.interactiveliterature.org/events?application=intercode"
-# }
-
-# resource "heroku_domain" "intercode" {
-#   for_each = local.intercode_domains
-
-#   app_id          = heroku_app.intercode.uuid
-#   hostname        = each.value
-#   sni_endpoint_id = "8b295f16-5ffb-4a02-831c-eac6a080a342"
-# }
-
-# resource "heroku_addon" "intercode_memcachedcloud" {
-#   app_id = heroku_app.intercode.uuid
-#   plan   = "memcachedcloud:30"
-# }
-
-# resource "heroku_addon" "intercode_papertrail" {
-#   app_id = heroku_app.intercode.uuid
-#   plan   = "papertrail:choklad"
-# }
-
 resource "rollbar_project" "intercode" {
   name = "intercode"
 }
@@ -213,6 +134,7 @@ module "intercode_aws_resources" {
   openid_connect_signing_key    = var.intercode_openid_connect_signing_key
   email_forwarders_api_token    = var.intercode_email_forwarders_api_token
   fly_api_token                 = var.intercode_fly_api_token
+  default_currency              = "USD"
 
   stripe = {
     secret_key              = var.intercode_stripe_secret_key
@@ -258,6 +180,18 @@ module "intercode_sentry" {
   release_token        = var.intercode_sentry_release_token
   traces_sample_rate   = "1.0"
   profiles_sample_rate = "1.0"
+}
+
+resource "null_resource" "intercode_fly_redeploy" {
+  triggers = {
+    aws_resources_version   = module.intercode_aws_resources.ssm_parameters_version
+    sentry_version          = module.intercode_sentry.ssm_parameters_version
+    forwardemail_version    = module.forwardemail_receiving.ssm_parameters_version
+  }
+
+  provisioner "local-exec" {
+    command = "flyctl deploy --app intercode --remote-only"
+  }
 }
 
 moved {
