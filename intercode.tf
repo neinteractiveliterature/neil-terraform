@@ -100,8 +100,7 @@ locals {
   ])
 
   intercode_production_alarm_email_destinations = toset([
-    "natbudin@gmail.com",
-    "david@rigitech.com"
+    "natbudin@gmail.com"
   ])
 }
 
