@@ -156,7 +156,6 @@ module "intercode_aws_resources" {
   uploads_host                        = "https://uploads.neilhosting.net"
   cloudwatch_log_group                = "intercode2_production"
   intercode_host                      = "www.neilhosting.net"
-  intercode_certs_no_wildcard_domains = "5pi-con.natbudin.com signups.greaterbostonlarpsociety.org thepitch.aegames.org"
 
   autoscale = {
     min_instances = 2
