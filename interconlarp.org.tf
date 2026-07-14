@@ -89,7 +89,7 @@ resource "aws_s3_bucket_website_configuration" "interconlarp_org" {
           KeyPrefixEquals = "policy"
         }
         Redirect = {
-          HostName         = "x.interconlarp.org"
+          HostName         = "y.interconlarp.org"
           HttpRedirectCode = "302"
           Protocol         = "https"
           ReplaceKeyWith   = "pages/rules"
@@ -97,7 +97,7 @@ resource "aws_s3_bucket_website_configuration" "interconlarp_org" {
       },
       {
         Redirect = {
-          HostName         = "x.interconlarp.org"
+          HostName         = "y.interconlarp.org"
           HttpRedirectCode = "302"
           Protocol         = "https"
           ReplaceKeyWith   = ""
@@ -120,7 +120,7 @@ module "interconlarp_org_cloudfront" {
 
 resource "null_resource" "interconlarp_org_cloudfront_invalidate" {
   provisioner "local-exec" {
-    command = "aws cloudfront create-invalidation --distribution-id ${module.interconlarp_org_cloudfront.cloudfront_distribution.id} --paths '/*'"
+    command = "aws cloudfront create-invalidation --profile ${var.aws_profile} --distribution-id ${module.interconlarp_org_cloudfront.cloudfront_distribution.id} --paths '/*'"
   }
 
   triggers = {

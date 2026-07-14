@@ -1,12 +1,12 @@
 locals {
   intercon_cc_redirects = {
     "covid-precheck" = {
-      HostName       = "w.interconlarp.org"
+      HostName       = "y.interconlarp.org"
       Protocol       = "https"
       ReplaceKeyWith = "pages/covid-precheck"
     },
     "new-proposal" = {
-      HostName       = "x.interconlarp.org"
+      HostName       = "y.interconlarp.org"
       Protocol       = "https"
       ReplaceKeyWith = "pages/new-proposal"
     }
