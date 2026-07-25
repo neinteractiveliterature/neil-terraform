@@ -15,7 +15,7 @@ terraform {
     }
     sentry = {
       source  = "jianyuan/sentry"
-      version = "0.15.0-beta3"
+      version = "0.15.4"
     }
     null = {
       source = "hashicorp/null"
