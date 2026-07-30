@@ -122,7 +122,6 @@ module "intercode_aws_resources" {
   s3_bucket_name             = "intercode2-production"
   alarm_email_destinations   = local.intercode_production_alarm_email_destinations
   database_url                  = terraform_data.intercode_production_database_url.output
-  email_forwarders_api_token    = local.secrets["intercode_email_forwarders_api_token"]
   fly_api_token                 = local.secrets["intercode_fly_api_token"]
   default_currency              = "USD"
 
