@@ -152,12 +152,6 @@ module "intercode_aws_resources" {
     min_instances = 2
     max_instances = 10
   }
-
-  secrets = {
-    MEMCACHEDCLOUD_SERVERS  = local.secrets["intercode_memcachedcloud_servers"]
-    MEMCACHEDCLOUD_USERNAME = local.secrets["intercode_memcachedcloud_username"]
-    MEMCACHEDCLOUD_PASSWORD = local.secrets["intercode_memcachedcloud_password"]
-  }
 }
 
 # Lets the app's existing AWS identity (the IAM user/group above) generate
