@@ -1,11 +1,3 @@
-variable "vector_heroku_source_username" {
-  type = string
-}
-
-variable "vector_heroku_source_password" {
-  type = string
-}
-
 resource "aws_cloudwatch_log_group" "fly_apps" {
   name = "fly_apps"
 
