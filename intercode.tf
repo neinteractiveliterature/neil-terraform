@@ -37,23 +37,11 @@ variable "intercode_cloudflare_token" {
   type = string
 }
 
-variable "intercode_production_db_password" {
-  type = string
-}
-
-variable "intercode_openid_connect_signing_key" {
-  type = string
-}
-
 variable "intercode_recaptcha_secret_key" {
   type = string
 }
 
 variable "intercode_recaptcha_site_key" {
-  type = string
-}
-
-variable "intercode_secret_key_base" {
   type = string
 }
 
@@ -122,15 +110,63 @@ resource "rollbar_project_access_token" "intercode_post_server_item" {
   scopes     = ["post_server_item"]
 }
 
+resource "random_password" "intercode_production_db" {
+  length  = 32
+  special = false
+}
+
+import {
+  to = postgresql_role.intercode_production
+  id = "intercode_production"
+}
+
+resource "postgresql_role" "intercode_production" {
+  name     = "intercode_production"
+  login    = true
+  password = random_password.intercode_production_db.result
+
+  # This role predates Terraform management; only take over login/password
+  # here and leave every other already-set attribute (connection_limit,
+  # roles, superuser, etc.) exactly as it is so import can't reset something
+  # unexpected on the live production role.
+  lifecycle {
+    ignore_changes = [
+      superuser,
+      create_database,
+      create_role,
+      replication,
+      bypass_row_level_security,
+      inherit,
+      connection_limit,
+      search_path,
+      valid_until,
+      statement_timeout,
+      roles,
+      skip_reassign_owned,
+      skip_drop_role,
+    ]
+  }
+}
+
+# NOT YET: granting rds_iam makes AWS require an IAM auth token for this role
+# and immediately rejects its password (confirmed via AWS docs — this is not
+# gradual/coexisting, it happens the moment the grant lands, same as it did
+# for neiladmin). Only add this once the app itself generates IAM auth
+# tokens for DATABASE_URL instead of using a stored password, or the app
+# breaks the instant this applies.
+#
+# resource "postgresql_grant_role" "intercode_production_rds_iam" {
+#   role       = postgresql_role.intercode_production.name
+#   grant_role = "rds_iam"
+# }
+
 module "intercode_aws_resources" {
   source = "github.com/neinteractiveliterature/intercode//terraform/modules/intercode_aws_resources?ref=main&depth=1"
 
   name                       = "intercode_production"
   s3_bucket_name             = "intercode2-production"
   alarm_email_destinations   = local.intercode_production_alarm_email_destinations
-  database_url                  = "postgres://intercode_production:${var.intercode_production_db_password}@${aws_db_instance.neil_production.endpoint}/intercode_production?sslrootcert=rds-global-bundle.pem"
-  secret_key_base               = var.intercode_secret_key_base
-  openid_connect_signing_key    = var.intercode_openid_connect_signing_key
+  database_url                  = "postgres://${postgresql_role.intercode_production.name}:${random_password.intercode_production_db.result}@${aws_db_instance.neil_production.endpoint}/intercode_production?sslrootcert=rds-global-bundle.pem"
   email_forwarders_api_token    = var.intercode_email_forwarders_api_token
   fly_api_token                 = var.intercode_fly_api_token
   default_currency              = "USD"

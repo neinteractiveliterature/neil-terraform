@@ -82,10 +82,11 @@ resource "aws_db_instance" "neil_production" {
     resource.aws_vpc.main.default_security_group_id
   ]
 
-  enabled_cloudwatch_logs_exports = ["postgresql", "upgrade"]
-  monitoring_role_arn             = aws_iam_role.rds_enhanced_monitoring.arn
-  monitoring_interval             = 60
-  performance_insights_enabled    = true
+  enabled_cloudwatch_logs_exports     = ["postgresql", "upgrade"]
+  monitoring_role_arn                 = aws_iam_role.rds_enhanced_monitoring.arn
+  monitoring_interval                 = 60
+  performance_insights_enabled        = true
+  iam_database_authentication_enabled = true
 
   copy_tags_to_snapshot = true
   skip_final_snapshot   = true
@@ -104,9 +105,17 @@ data "aws_rds_reserved_instance_offering" "neil_production_1year" {
 }
 
 resource "aws_rds_reserved_instance" "neil_production_2026" {
-  offering_id = data.aws_rds_reserved_instance_offering.neil_production_1year.offering_id
+  offering_id    = data.aws_rds_reserved_instance_offering.neil_production_1year.offering_id
   reservation_id = "neil-production-2026"
   instance_count = 1
+
+  # AWS regenerates a fresh, ephemeral offering_id from the catalog on every
+  # data source read, even for the same product. Once purchased, the
+  # reservation itself can't be modified, so ignore drift here to avoid
+  # tofu wanting to destroy and rebuy an already-paid-for reservation.
+  lifecycle {
+    ignore_changes = [offering_id]
+  }
 }
 
 resource "aws_cloudwatch_metric_alarm" "neil_production_low_disk_space" {

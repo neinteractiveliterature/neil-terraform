@@ -20,6 +20,10 @@ terraform {
     null = {
       source = "hashicorp/null"
     }
+    postgresql = {
+      source  = "cyrilgdn/postgresql"
+      version = "1.27.0"
+    }
   }
   required_version = ">= 1.6"
 }
@@ -48,6 +52,17 @@ provider "aws" {
   alias   = "us_east_1"
   region  = "us-east-1"
   profile = var.aws_profile
+}
+
+provider "postgresql" {
+  host                = aws_db_instance.neil_production.address
+  port                = aws_db_instance.neil_production.port
+  username            = "neiladmin"
+  sslmode             = "require"
+  superuser           = false
+  aws_rds_iam_auth    = true
+  aws_rds_iam_profile = var.aws_profile
+  aws_rds_iam_region  = "us-east-1"
 }
 
 # provider "heroku" {
