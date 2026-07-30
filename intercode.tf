@@ -1,18 +1,3 @@
-variable "intercode_cloudflare_account_id" {
-  type = string
-}
-
-variable "intercode_sentry_release_token" {
-  type      = string
-  sensitive = true
-}
-
-variable "intercode_email_forwarders_api_token" {
-  type      = string
-  sensitive = true
-  default   = null
-}
-
 variable "intercode_memcachedcloud_servers" {
   type      = string
   sensitive = true
@@ -26,39 +11,6 @@ variable "intercode_memcachedcloud_username" {
 variable "intercode_memcachedcloud_password" {
   type      = string
   sensitive = true
-}
-
-variable "intercode_fly_api_token" {
-  type      = string
-  sensitive = true
-}
-
-variable "intercode_cloudflare_token" {
-  type = string
-}
-
-variable "intercode_recaptcha_secret_key" {
-  type = string
-}
-
-variable "intercode_recaptcha_site_key" {
-  type = string
-}
-
-variable "intercode_stripe_publishable_key" {
-  type = string
-}
-
-variable "intercode_stripe_secret_key" {
-  type = string
-}
-
-variable "intercode_twilio_account_sid" {
-  type = string
-}
-
-variable "intercode_twilio_auth_token" {
-  type = string
 }
 
 locals {
@@ -185,24 +137,24 @@ module "intercode_aws_resources" {
   s3_bucket_name             = "intercode2-production"
   alarm_email_destinations   = local.intercode_production_alarm_email_destinations
   database_url                  = terraform_data.intercode_production_database_url.output
-  email_forwarders_api_token    = var.intercode_email_forwarders_api_token
-  fly_api_token                 = var.intercode_fly_api_token
+  email_forwarders_api_token    = local.secrets["intercode_email_forwarders_api_token"]
+  fly_api_token                 = local.secrets["intercode_fly_api_token"]
   default_currency              = "USD"
 
   stripe = {
-    secret_key              = var.intercode_stripe_secret_key
-    publishable_key         = var.intercode_stripe_publishable_key
+    secret_key              = local.secrets["intercode_stripe_secret_key"]
+    publishable_key         = local.secrets["intercode_stripe_publishable_key"]
     connect_endpoint_secret = stripe_webhook_endpoint.intercode_connect.secret
   }
 
   recaptcha = {
-    secret_key = var.intercode_recaptcha_secret_key
-    site_key   = var.intercode_recaptcha_site_key
+    secret_key = local.secrets["intercode_recaptcha_secret_key"]
+    site_key   = local.secrets["intercode_recaptcha_site_key"]
   }
 
   twilio = {
-    account_sid = var.intercode_twilio_account_sid
-    auth_token  = var.intercode_twilio_auth_token
+    account_sid = local.secrets["intercode_twilio_account_sid"]
+    auth_token  = local.secrets["intercode_twilio_auth_token"]
     sms_number  = "+14156345010"
   }
 
@@ -250,7 +202,7 @@ module "intercode_sentry" {
   ssm_name             = "intercode_production"
   organization         = sentry_organization.neil.slug
   project              = sentry_project.intercode.slug
-  release_token        = var.intercode_sentry_release_token
+  release_token        = local.secrets["intercode_sentry_release_token"]
   traces_sample_rate   = "1.0"
   profiles_sample_rate = "1.0"
 }

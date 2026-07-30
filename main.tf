@@ -60,7 +60,7 @@ provider "postgresql" {
 }
 
 provider "stripe" {
-  api_key = var.intercode_stripe_secret_key
+  api_key = local.secrets["intercode_stripe_secret_key"]
 }
 
 # provider "heroku" {
