@@ -60,7 +60,12 @@ provider "postgresql" {
 }
 
 provider "stripe" {
-  api_key = local.secrets["intercode_stripe_secret_key"]
+  # Deliberately NOT intercode_stripe_secret_key: that key is now a
+  # restricted key scoped to what the running app needs (PaymentIntents,
+  # Charges, Refunds, Accounts, Account Links, Apple Pay Domains — all
+  # connected-account operations) and has no Webhook Endpoints permission,
+  # which is all this provider needs to manage stripe_webhook_endpoint.
+  api_key = local.secrets["neil_terraform_stripe_secret_key"]
 }
 
 # provider "heroku" {
