@@ -65,10 +65,6 @@ variable "intercode_twilio_auth_token" {
   type = string
 }
 
-variable "rds_neiladmin_password" {
-  type = string
-}
-
 locals {
   intercode_domains = toset([
     "*.beconlarp.com",

@@ -70,7 +70,6 @@ resource "aws_db_instance" "neil_production" {
   engine                = "postgres"
   engine_version        = "17.9"
   username              = "neiladmin"
-  password              = var.rds_neiladmin_password
   parameter_group_name  = "production-pg17"
   deletion_protection   = true
   publicly_accessible   = true
@@ -93,6 +92,15 @@ resource "aws_db_instance" "neil_production" {
 
   tags = {
     "workload-type" = "other"
+  }
+
+  # neiladmin now has rds_iam granted and can only authenticate with an IAM
+  # auth token, so the stored password is unusable and no longer managed
+  # here. Leave whatever's already set on the live instance untouched rather
+  # than have tofu try to null it out (which AWS may reject outright, since
+  # RDS doesn't accept an empty master password).
+  lifecycle {
+    ignore_changes = [password]
   }
 }
 
