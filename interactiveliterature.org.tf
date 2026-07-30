@@ -11,6 +11,7 @@ locals {
     "nelco2018",
     "nelco2019",
     "nelco2020",
+    "nelco-2026",
     "wbc2021",
     "wbc-2023",
     "wbc-2024",
@@ -168,7 +169,7 @@ module "interactiveliterature_org_apex_redirect" {
 
   source = "github.com/neinteractiveliterature/neil-terraform-modules//cloudflare_apex_redirect?ref=main"
 
-  zone_id = cloudflare_zone.interactiveliterature_org.id
+  zone_id                       = cloudflare_zone.interactiveliterature_org.id
   domain_name                   = each.key
   redirect_destination_hostname = each.value
   redirect_destination_protocol = "https"
@@ -178,7 +179,7 @@ module "interactiveliterature_org_apex_redirect" {
 module "interactiveliterature_org_forwardemail_receiving_domain" {
   source = "github.com/neinteractiveliterature/neil-terraform-modules//forwardemail_receiving_domain?ref=main"
 
-  zone_id = cloudflare_zone.interactiveliterature_org.id
+  zone_id           = cloudflare_zone.interactiveliterature_org.id
   name              = "interactiveliterature.org"
   verification_code = module.forwardemail_receiving.verification_records_by_domain["interactiveliterature.org"]
 }
@@ -218,7 +219,7 @@ module "interactiveliterature_org_convention_subdomain_forwardemail_receiving_do
     [for subdomain in local.interactiveliterature_org_intercode_subdomains : "${subdomain}.interactiveliterature.org"]
   )
 
-  zone_id = cloudflare_zone.interactiveliterature_org.id
+  zone_id           = cloudflare_zone.interactiveliterature_org.id
   name              = each.value
   verification_code = module.forwardemail_receiving.verification_records_by_domain[each.value]
 }
@@ -230,8 +231,8 @@ module "interactiveliterature_org_convention_subdomain_events_forwardemail_recei
     [for subdomain in local.interactiveliterature_org_intercode_subdomains : "${subdomain}.events.interactiveliterature.org"]
   )
 
-  zone_id = cloudflare_zone.interactiveliterature_org.id
-  name    = "events.${each.value}"
+  zone_id           = cloudflare_zone.interactiveliterature_org.id
+  name              = "events.${each.value}"
   verification_code = module.forwardemail_receiving.verification_records_by_domain[each.value]
 }
 
@@ -253,7 +254,7 @@ module "old_interactiveliterature_org_cloudfront" {
   origin_domain_name       = aws_s3_bucket_website_configuration.www_interactiveliterature_org.website_endpoint
   origin_protocol_policy   = "http-only"
   add_security_headers_arn = aws_lambda_function.addSecurityHeaders.qualified_arn
-  zone_id = cloudflare_zone.interactiveliterature_org.id
+  zone_id                  = cloudflare_zone.interactiveliterature_org.id
   compress                 = true
 }
 
@@ -323,11 +324,11 @@ resource "cloudflare_dns_record" "interactiveliterature_org_vector_acme_challeng
 }
 
 resource "github_repository" "www_interactiveliterature_org" {
-  name                 = "www.interactiveliterature.org"
-  description          = "The web site for NEIL"
-  has_issues           = true
-  has_projects         = true
-  has_wiki             = false
+  name         = "www.interactiveliterature.org"
+  description  = "The web site for NEIL"
+  has_issues   = true
+  has_projects = true
+  has_wiki     = false
 }
 
 resource "github_repository_vulnerability_alerts" "www_interactiveliterature_org" {
@@ -337,17 +338,17 @@ resource "github_repository_vulnerability_alerts" "www_interactiveliterature_org
 module "www_interactiveliterature_org_sst_github_deployment" {
   source = "github.com/neinteractiveliterature/neil-terraform-modules//sst_github_deployment?ref=main"
 
-  app_name = "neil-website"
+  app_name              = "neil-website"
   cloudflare_account_id = cloudflare_account.neil.id
   github_repository = {
     name      = github_repository.www_interactiveliterature_org.name
     full_name = github_repository.www_interactiveliterature_org.full_name
   }
-  oidc_provider_arn = module.github-oidc.oidc_provider_arn
+  oidc_provider_arn         = module.github-oidc.oidc_provider_arn
   writable_cloudflare_zones = [cloudflare_zone.interactiveliterature_org.id]
 }
 
 output "www_interactiveliterature_org_smtp_url" {
   sensitive = true
-  value = module.www_interactiveliterature_org_sst_github_deployment.smtp_url
+  value     = module.www_interactiveliterature_org_sst_github_deployment.smtp_url
 }
