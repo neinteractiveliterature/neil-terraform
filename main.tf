@@ -24,6 +24,10 @@ terraform {
       source  = "cyrilgdn/postgresql"
       version = "1.27.0"
     }
+    stripe = {
+      source  = "stripe/stripe"
+      version = "0.2.3"
+    }
   }
   required_version = ">= 1.6"
 }
@@ -63,6 +67,10 @@ provider "postgresql" {
   aws_rds_iam_auth    = true
   aws_rds_iam_profile = var.aws_profile
   aws_rds_iam_region  = "us-east-1"
+}
+
+provider "stripe" {
+  api_key = var.intercode_stripe_secret_key
 }
 
 # provider "heroku" {
@@ -130,6 +138,22 @@ terraform {
 
 data "aws_caller_identity" "current" {}
 data "aws_region" "current" {}
+
+# Replaces secrets.auto.tfvars: each secret currently passed in as a plain
+# tfvar lives here instead, as a SecureString under /neil-terraform/<name>.
+# aws_profile itself can't move here — it's what authenticates this very
+# provider, so it has to stay a plain variable.
+data "aws_ssm_parameters_by_path" "neil_terraform_secrets" {
+  path      = "/neil-terraform"
+  recursive = true
+}
+
+locals {
+  secrets = zipmap(
+    [for name in data.aws_ssm_parameters_by_path.neil_terraform_secrets.names : trimprefix(name, "/neil-terraform/")],
+    data.aws_ssm_parameters_by_path.neil_terraform_secrets.values
+  )
+}
 
 resource "aws_s3_bucket" "neil-terraform-state" {
   bucket = "neil-terraform-state"

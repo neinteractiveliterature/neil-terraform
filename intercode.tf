@@ -45,10 +45,6 @@ variable "intercode_recaptcha_site_key" {
   type = string
 }
 
-variable "intercode_stripe_connect_endpoint_secret" {
-  type = string
-}
-
 variable "intercode_stripe_publishable_key" {
   type = string
 }
@@ -144,17 +140,43 @@ resource "postgresql_role" "intercode_production" {
   }
 }
 
-# NOT YET: granting rds_iam makes AWS require an IAM auth token for this role
-# and immediately rejects its password (confirmed via AWS docs — this is not
-# gradual/coexisting, it happens the moment the grant lands, same as it did
-# for neiladmin). Only add this once the app itself generates IAM auth
-# tokens for DATABASE_URL instead of using a stored password, or the app
-# breaks the instant this applies.
-#
-# resource "postgresql_grant_role" "intercode_production_rds_iam" {
-#   role       = postgresql_role.intercode_production.name
-#   grant_role = "rds_iam"
-# }
+# Grants rds_iam to intercode_production, which makes AWS require an IAM
+# auth token for this role and immediately rejects its password (confirmed
+# via AWS docs — not gradual/coexisting, same as it was for neiladmin). Only
+# safe now that the app (pg-aws_rds_iam, deployed) generates its own tokens
+# instead of using a stored password for DATABASE_URL.
+resource "postgresql_grant_role" "intercode_production_rds_iam" {
+  role       = postgresql_role.intercode_production.name
+  grant_role = "rds_iam"
+}
+
+# Wraps the connection string in terraform_data so we can force it to wait
+# on the rds_iam grant above via depends_on — database_url itself doesn't
+# reference the grant's attributes, so without this, nothing would stop the
+# new token-based URL from reaching SSM before the grant that makes tokens
+# actually valid has landed.
+resource "terraform_data" "intercode_production_database_url" {
+  input = "postgres://${postgresql_role.intercode_production.name}@${aws_db_instance.neil_production.endpoint}/intercode_production?sslrootcert=rds-global-bundle.pem&aws_rds_iam_auth_token_generator=default"
+
+  depends_on = [postgresql_grant_role.intercode_production_rds_iam]
+}
+
+# Replaces the old Connect webhook endpoint (whose secret was a plain
+# tfvar) with one Terraform can generate and rotate itself: creating a new
+# stripe_webhook_endpoint gets a fresh secret directly from Stripe, and the
+# old endpoint (whatever's currently configured for this URL/events in the
+# Stripe dashboard) can be deleted by hand once this one's confirmed working
+# — Stripe's API has no in-place secret rotation, only new-endpoint-new-secret.
+resource "stripe_webhook_endpoint" "intercode_connect" {
+  url = "https://www.neilhosting.net/stripe_webhook/connect"
+  enabled_events = [
+    "account.application.authorized",
+    "account.application.deauthorized",
+    "account.updated",
+  ]
+  connect     = true
+  description = "intercode_production Connect webhook (Terraform-managed)"
+}
 
 module "intercode_aws_resources" {
   source = "github.com/neinteractiveliterature/intercode//terraform/modules/intercode_aws_resources?ref=main&depth=1"
@@ -162,7 +184,7 @@ module "intercode_aws_resources" {
   name                       = "intercode_production"
   s3_bucket_name             = "intercode2-production"
   alarm_email_destinations   = local.intercode_production_alarm_email_destinations
-  database_url                  = "postgres://${postgresql_role.intercode_production.name}:${random_password.intercode_production_db.result}@${aws_db_instance.neil_production.endpoint}/intercode_production?sslrootcert=rds-global-bundle.pem"
+  database_url                  = terraform_data.intercode_production_database_url.output
   email_forwarders_api_token    = var.intercode_email_forwarders_api_token
   fly_api_token                 = var.intercode_fly_api_token
   default_currency              = "USD"
@@ -170,7 +192,7 @@ module "intercode_aws_resources" {
   stripe = {
     secret_key              = var.intercode_stripe_secret_key
     publishable_key         = var.intercode_stripe_publishable_key
-    connect_endpoint_secret = var.intercode_stripe_connect_endpoint_secret
+    connect_endpoint_secret = stripe_webhook_endpoint.intercode_connect.secret
   }
 
   recaptcha = {
@@ -199,6 +221,27 @@ module "intercode_aws_resources" {
     MEMCACHEDCLOUD_USERNAME = var.intercode_memcachedcloud_username
     MEMCACHEDCLOUD_PASSWORD = var.intercode_memcachedcloud_password
   }
+}
+
+# Lets the app's existing AWS identity (the IAM user/group above) generate
+# RDS IAM auth tokens for intercode_production once pg-aws_rds_iam is wired
+# up app-side. Purely additive/permissions-granting on its own — safe ahead
+# of actually switching database_url over, unlike the rds_iam grant itself.
+resource "aws_iam_group_policy" "intercode_production_rds_iam_auth" {
+  name  = "rds-iam-auth"
+  group = module.intercode_aws_resources.iam_group_name
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid      = "RdsIamAuthConnect"
+        Effect   = "Allow"
+        Action   = "rds-db:connect"
+        Resource = "arn:aws:rds-db:${data.aws_region.current.region}:${data.aws_caller_identity.current.account_id}:dbuser:${aws_db_instance.neil_production.resource_id}/intercode_production"
+      }
+    ]
+  })
 }
 
 module "intercode_sentry" {
