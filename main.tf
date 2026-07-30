@@ -32,16 +32,6 @@ terraform {
   required_version = ">= 1.6"
 }
 
-variable "rollbar_token" {
-  type      = string
-  sensitive = true
-}
-
-variable "sentry_auth_token" {
-  type      = string
-  sensitive = true
-}
-
 variable "aws_profile" {
   type = string
 }
@@ -77,31 +67,12 @@ provider "stripe" {
 # }
 
 provider "rollbar" {
-  api_key = var.rollbar_token
-}
-
-variable "cloudflare_email" {
-  type = string
-}
-
-variable "cloudflare_api_key" {
-  type      = string
-  sensitive = true
+  api_key = local.secrets["rollbar_token"]
 }
 
 provider "cloudflare" {
-  email   = var.cloudflare_email
-  api_key = var.cloudflare_api_key
-}
-
-variable "fly_gha_api_token" {
-  type      = string
-  sensitive = true
-}
-
-variable "forwardemail_api_key" {
-  type      = string
-  sensitive = true
+  email   = local.secrets["cloudflare_email"]
+  api_key = local.secrets["cloudflare_api_key"]
 }
 
 provider "github" {
@@ -109,7 +80,7 @@ provider "github" {
 }
 
 provider "sentry" {
-  token = var.sentry_auth_token
+  token = local.secrets["sentry_auth_token"]
 }
 
 resource "sentry_organization" "neil" {

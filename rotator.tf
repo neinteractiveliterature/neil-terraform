@@ -48,7 +48,7 @@ resource "github_actions_secret" "rotator_sentry_project" {
 resource "github_actions_secret" "rotator_sentry_auth_token" {
   repository      = github_repository.rotator.name
   secret_name     = "SENTRY_AUTH_TOKEN"
-  value = var.sentry_auth_token
+  value = local.secrets["sentry_auth_token"]
 }
 
 output "rotator_smtp_url" {

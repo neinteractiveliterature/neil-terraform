@@ -413,7 +413,7 @@ resource "github_repository_vulnerability_alerts" "intercode" {
 resource "github_actions_secret" "intercode_fly_api_token" {
   repository      = github_repository.intercode.id
   secret_name     = "FLY_API_TOKEN"
-  value = var.fly_gha_api_token
+  value = local.secrets["fly_gha_api_token"]
 }
 
 resource "sentry_project" "intercode" {
