@@ -36,6 +36,29 @@ variable "aws_profile" {
   type = string
 }
 
+# Personal credentials tied to an individual's own account (unscoped Cloudflare
+# Global API Key, personal Sentry/Rollbar tokens) stay in secrets.auto.tfvars
+# rather than SSM, so they aren't broadly readable by every AWS admin.
+
+variable "rollbar_token" {
+  type      = string
+  sensitive = true
+}
+
+variable "sentry_auth_token" {
+  type      = string
+  sensitive = true
+}
+
+variable "cloudflare_email" {
+  type = string
+}
+
+variable "cloudflare_api_key" {
+  type      = string
+  sensitive = true
+}
+
 provider "aws" {
   region  = "us-east-1"
   profile = var.aws_profile
@@ -72,12 +95,12 @@ provider "stripe" {
 # }
 
 provider "rollbar" {
-  api_key = local.secrets["rollbar_token"]
+  api_key = var.rollbar_token
 }
 
 provider "cloudflare" {
-  email   = local.secrets["cloudflare_email"]
-  api_key = local.secrets["cloudflare_api_key"]
+  email   = var.cloudflare_email
+  api_key = var.cloudflare_api_key
 }
 
 provider "github" {
@@ -85,7 +108,7 @@ provider "github" {
 }
 
 provider "sentry" {
-  token = local.secrets["sentry_auth_token"]
+  token = var.sentry_auth_token
 }
 
 resource "sentry_organization" "neil" {

@@ -13,13 +13,13 @@ resource "github_repository_vulnerability_alerts" "rotator" {
 module "rotator_sst_github_deployment" {
   source = "github.com/neinteractiveliterature/neil-terraform-modules//sst_github_deployment?ref=main"
 
-  app_name = "rotator"
+  app_name              = "rotator"
   cloudflare_account_id = cloudflare_account.neil.id
   github_repository = {
     name      = github_repository.rotator.name
     full_name = github_repository.rotator.full_name
   }
-  oidc_provider_arn = module.github-oidc.oidc_provider_arn
+  oidc_provider_arn         = module.github-oidc.oidc_provider_arn
   writable_cloudflare_zones = [cloudflare_zone.interactiveliterature_org.id]
 }
 
@@ -27,31 +27,31 @@ resource "sentry_project" "rotator" {
   organization = sentry_organization.neil.slug
 
   teams = [sentry_team.neil.slug]
-  name = "Rotator"
-  slug = "rotator"
+  name  = "Rotator"
+  slug  = "rotator"
 
   platform = "javascript-react-router"
 }
 
 resource "github_actions_secret" "rotator_sentry_org" {
-  repository      = github_repository.rotator.name
-  secret_name     = "SENTRY_ORG"
-  value = sentry_organization.neil.slug
+  repository  = github_repository.rotator.name
+  secret_name = "SENTRY_ORG"
+  value       = sentry_organization.neil.slug
 }
 
 resource "github_actions_secret" "rotator_sentry_project" {
-  repository      = github_repository.rotator.name
-  secret_name     = "SENTRY_PROJECT"
-  value = sentry_project.rotator.slug
+  repository  = github_repository.rotator.name
+  secret_name = "SENTRY_PROJECT"
+  value       = sentry_project.rotator.slug
 }
 
 resource "github_actions_secret" "rotator_sentry_auth_token" {
-  repository      = github_repository.rotator.name
-  secret_name     = "SENTRY_AUTH_TOKEN"
-  value = local.secrets["sentry_auth_token"]
+  repository  = github_repository.rotator.name
+  secret_name = "SENTRY_AUTH_TOKEN"
+  value       = var.sentry_auth_token
 }
 
 output "rotator_smtp_url" {
   sensitive = true
-  value = module.rotator_sst_github_deployment.smtp_url
+  value     = module.rotator_sst_github_deployment.smtp_url
 }
