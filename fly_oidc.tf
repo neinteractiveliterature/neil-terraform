@@ -58,17 +58,9 @@ output "intercode_chamber_role_arn" {
   value       = aws_iam_role.intercode_chamber.arn
 }
 
-# Keeps CHAMBER_AWS_ROLE_ARN in sync with the role's ARN so entrypoint.sh's
-# existing OIDC code path (see intercode#11852) can pick it up — staged only
-# (not applied immediately) since null_resource.intercode_fly_redeploy is what
-# actually triggers a deploy, and it depends on this so the secret is staged
-# before that deploy runs.
-resource "null_resource" "intercode_chamber_role_arn_secret" {
-  triggers = {
-    role_arn = aws_iam_role.intercode_chamber.arn
-  }
-
-  provisioner "local-exec" {
-    command = "flyctl secrets set --app intercode --stage CHAMBER_AWS_ROLE_ARN=${aws_iam_role.intercode_chamber.arn}"
-  }
-}
+# CHAMBER_AWS_ROLE_ARN (entrypoint.sh's OIDC code path, see intercode#11852)
+# is a manual one-time step, not managed here: a null_resource/local-exec
+# can't verify Fly's actual secret state or react if it drifts, so it would
+# just be a different flavor of the same silent-desync problem this is
+# fixing. Set it by hand:
+#   flyctl secrets set --app intercode --stage CHAMBER_AWS_ROLE_ARN=$(tofu output -raw intercode_chamber_role_arn)
