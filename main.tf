@@ -7,9 +7,6 @@ terraform {
       source  = "cloudflare/cloudflare"
       version = "5.19.0"
     }
-    rollbar = {
-      source = "rollbar/rollbar"
-    }
     github = {
       source = "integrations/github"
     }
@@ -37,13 +34,8 @@ variable "aws_profile" {
 }
 
 # Personal credentials tied to an individual's own account (unscoped Cloudflare
-# Global API Key, personal Sentry/Rollbar tokens) stay in secrets.auto.tfvars
-# rather than SSM, so they aren't broadly readable by every AWS admin.
-
-variable "rollbar_token" {
-  type      = string
-  sensitive = true
-}
+# Global API Key, personal Sentry token) stay in secrets.auto.tfvars rather
+# than SSM, so they aren't broadly readable by every AWS admin.
 
 variable "sentry_auth_token" {
   type      = string
@@ -93,10 +85,6 @@ provider "stripe" {
 
 # provider "heroku" {
 # }
-
-provider "rollbar" {
-  api_key = var.rollbar_token
-}
 
 provider "cloudflare" {
   email   = var.cloudflare_email

@@ -7,24 +7,6 @@ locals {
   larp_library_cors_allowed_origins = [for domain in local.larp_library_domains : "https://${domain}"]
 }
 
-resource "rollbar_project" "larp_library" {
-  name = "LarpLibrary"
-}
-
-resource "rollbar_project_access_token" "larp_library_post_client_item" {
-  project_id = rollbar_project.larp_library.id
-  name       = "post_client_item"
-  depends_on = [rollbar_project.larp_library]
-  scopes     = ["post_client_item"]
-}
-
-resource "rollbar_project_access_token" "larp_library_post_server_item" {
-  project_id = rollbar_project.larp_library.id
-  name       = "post_server_item"
-  depends_on = [rollbar_project.larp_library]
-  scopes     = ["post_server_item"]
-}
-
 resource "aws_s3_bucket" "larp_library_production" {
   bucket = "larp-library-production"
 }
@@ -132,7 +114,7 @@ resource "cloudflare_zone" "larplibrary_org" {
 module "larplibrary_org_apex_redirect" {
   source = "github.com/neinteractiveliterature/neil-terraform-modules//cloudflare_apex_redirect?ref=main"
 
-  zone_id = cloudflare_zone.larplibrary_org.id
+  zone_id                       = cloudflare_zone.larplibrary_org.id
   domain_name                   = "larplibrary.org"
   redirect_destination_hostname = "www.larplibrary.org"
   redirect_destination_path     = "/"
@@ -159,7 +141,7 @@ resource "cloudflare_dns_record" "larplibrary_org_www" {
 module "larplibrary_org_forwardemail_receiving_domain" {
   source = "github.com/neinteractiveliterature/neil-terraform-modules//forwardemail_receiving_domain?ref=main"
 
-  zone_id = cloudflare_zone.larplibrary_org.id
+  zone_id           = cloudflare_zone.larplibrary_org.id
   name              = "larplibrary.org"
   verification_code = module.forwardemail_receiving.verification_records_by_domain["larplibrary.org"]
 }
@@ -181,7 +163,7 @@ module "assets_larplibrary_org_cloudfront" {
   origin_domain_name       = "www.larplibrary.org"
   origin_protocol_policy   = "https-only"
   add_security_headers_arn = aws_lambda_function.addSecurityHeaders.qualified_arn
-  zone_id = cloudflare_zone.larplibrary_org.id
+  zone_id                  = cloudflare_zone.larplibrary_org.id
   compress                 = true
 }
 
@@ -208,7 +190,7 @@ resource "github_repository_vulnerability_alerts" "larp_library" {
 }
 
 resource "github_actions_secret" "larp_library_fly_api_token" {
-  repository      = github_repository.larp_library.id
-  secret_name     = "FLY_API_TOKEN"
-  value = local.secrets["fly_gha_api_token"]
+  repository  = github_repository.larp_library.id
+  secret_name = "FLY_API_TOKEN"
+  value       = local.secrets["larp_library_fly_api_token"]
 }

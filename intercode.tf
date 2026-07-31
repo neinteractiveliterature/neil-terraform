@@ -21,24 +21,6 @@ locals {
   ])
 }
 
-resource "rollbar_project" "intercode" {
-  name = "intercode"
-}
-
-resource "rollbar_project_access_token" "intercode_post_client_item" {
-  project_id = rollbar_project.intercode.id
-  name       = "post_client_item"
-  depends_on = [rollbar_project.intercode]
-  scopes     = ["post_client_item"]
-}
-
-resource "rollbar_project_access_token" "intercode_post_server_item" {
-  project_id = rollbar_project.intercode.id
-  name       = "post_server_item"
-  depends_on = [rollbar_project.intercode]
-  scopes     = ["post_server_item"]
-}
-
 resource "random_password" "intercode_production_db" {
   length  = 32
   special = false
@@ -118,12 +100,12 @@ resource "stripe_webhook_endpoint" "intercode_connect" {
 module "intercode_aws_resources" {
   source = "github.com/neinteractiveliterature/intercode//terraform/modules/intercode_aws_resources?ref=main&depth=1"
 
-  name                       = "intercode_production"
-  s3_bucket_name             = "intercode2-production"
-  alarm_email_destinations   = local.intercode_production_alarm_email_destinations
-  database_url                  = terraform_data.intercode_production_database_url.output
-  fly_api_token                 = local.secrets["intercode_fly_api_token"]
-  default_currency              = "USD"
+  name                     = "intercode_production"
+  s3_bucket_name           = "intercode2-production"
+  alarm_email_destinations = local.intercode_production_alarm_email_destinations
+  database_url             = terraform_data.intercode_production_database_url.output
+  fly_api_token            = local.secrets["intercode_fly_api_token"]
+  default_currency         = "USD"
 
   stripe = {
     secret_key              = local.secrets["intercode_stripe_secret_key"]
@@ -142,10 +124,10 @@ module "intercode_aws_resources" {
     sms_number  = "+14156345010"
   }
 
-  assets_host                         = "assets.neilhosting.net"
-  uploads_host                        = "https://uploads.neilhosting.net"
-  cloudwatch_log_group                = "intercode2_production"
-  intercode_host                      = "www.neilhosting.net"
+  assets_host          = "assets.neilhosting.net"
+  uploads_host         = "https://uploads.neilhosting.net"
+  cloudwatch_log_group = "intercode2_production"
+  intercode_host       = "www.neilhosting.net"
 
   autoscale = {
     min_instances = 2
@@ -286,7 +268,7 @@ module "uploads_neilhosting_net_cloudfront" {
   origin_domain_name       = "www.neilhosting.net"
   origin_protocol_policy   = "https-only"
   add_security_headers_arn = aws_lambda_function.addSecurityHeaders.qualified_arn
-  zone_id = cloudflare_zone.neilhosting_net.id
+  zone_id                  = cloudflare_zone.neilhosting_net.id
   compress                 = true
 }
 
@@ -306,7 +288,7 @@ module "assets_neilhosting_net_cloudfront" {
   origin_domain_name       = "www.neilhosting.net"
   origin_protocol_policy   = "https-only"
   add_security_headers_arn = aws_lambda_function.addSecurityHeaders.qualified_arn
-  zone_id = cloudflare_zone.neilhosting_net.id
+  zone_id                  = cloudflare_zone.neilhosting_net.id
   compress                 = true
 }
 
@@ -341,9 +323,9 @@ resource "github_repository_vulnerability_alerts" "intercode" {
 }
 
 resource "github_actions_secret" "intercode_fly_api_token" {
-  repository      = github_repository.intercode.id
-  secret_name     = "FLY_API_TOKEN"
-  value = local.secrets["fly_gha_api_token"]
+  repository  = github_repository.intercode.id
+  secret_name = "FLY_API_TOKEN"
+  value       = local.secrets["intercode_fly_api_token"]
 }
 
 resource "sentry_project" "intercode" {
