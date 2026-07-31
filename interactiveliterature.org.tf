@@ -110,60 +110,6 @@ resource "aws_s3_bucket_website_configuration" "www_interactiveliterature_org" {
 
 }
 
-resource "aws_iam_group" "interactiveliterature_org_admin" {
-  name = "interactiveliterature.org-admin"
-}
-
-resource "aws_iam_group_policy_attachment" "interactiveliterature_org_admin_change_password" {
-  group      = aws_iam_group.interactiveliterature_org_admin.name
-  policy_arn = "arn:aws:iam::aws:policy/IAMUserChangePassword"
-}
-
-resource "aws_iam_group_policy" "interactiveliterature_org_s3" {
-  name  = "interactiveliterature.org-s3"
-  group = aws_iam_group.interactiveliterature_org_admin.name
-
-  policy = <<-EOF
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Sid": "BucketLevelAccess",
-      "Effect": "Allow",
-      "Action": [
-        "s3:GetBucketLocation",
-        "s3:ListAllMyBuckets",
-        "s3:ListBucket"
-      ],
-      "Resource": [
-        "arn:aws:s3:::*"
-      ]
-    },
-    {
-      "Sid": "bucket",
-      "Effect": "Allow",
-      "Action": [
-        "s3:*"
-      ],
-      "Resource": [
-        "arn:aws:s3:::${aws_s3_bucket.www_interactiveliterature_org.bucket}"
-      ]
-    },
-    {
-      "Sid": "objects",
-      "Effect": "Allow",
-      "Action": [
-        "s3:*"
-      ],
-      "Resource": [
-        "arn:aws:s3:::${aws_s3_bucket.www_interactiveliterature_org.bucket}/*"
-      ]
-    }
-  ]
-}
-  EOF
-}
-
 module "interactiveliterature_org_apex_redirect" {
   for_each = local.interactiveliterature_org_redirects
 
