@@ -187,10 +187,15 @@ module "intercode_sentry" {
 
 resource "null_resource" "intercode_fly_redeploy" {
   triggers = {
-    aws_resources_version   = module.intercode_aws_resources.ssm_parameters_version
-    sentry_version          = module.intercode_sentry.ssm_parameters_version
-    forwardemail_version    = module.forwardemail_receiving.ssm_parameters_version
+    aws_resources_version = module.intercode_aws_resources.ssm_parameters_version
+    sentry_version        = module.intercode_sentry.ssm_parameters_version
+    forwardemail_version  = module.forwardemail_receiving.ssm_parameters_version
+    chamber_role_arn      = aws_iam_role.intercode_chamber.arn
   }
+
+  # Ensures CHAMBER_AWS_ROLE_ARN is staged as a Fly secret before this deploy
+  # picks it up.
+  depends_on = [null_resource.intercode_chamber_role_arn_secret]
 
   provisioner "local-exec" {
     command = "flyctl deploy --app intercode --remote-only"
