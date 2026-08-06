@@ -32,6 +32,7 @@ locals {
   concentral_net_convention_mx_subdomains = toset([
     "alarpfestival-2024",
     "alarpfestival-2025",
+    "alarpfestival-2027",
     "cyberol2020",
     "hrsfanssummerparty-2020",
     "hrsfanssummerparty-2021",
