@@ -21,6 +21,7 @@ provider "registry.opentofu.org/cloudflare/cloudflare" {
     "zh:99c7b510b100a605b0c80e0c3665d99c2381b0834f52ad6ca767e161c2ffa416",
     "zh:c523d747a2d8457bc2d2cc00967c419ef38a5ebebd12d5091cf18322b7201f04",
     "zh:f520e37f4d875b6fee95cffb74cf5fe9efc3cd54fe6bb4b815da5cee87e517e8",
+    "zh:f809ab383cca0a5f83072981c64208cbd7fa67e986a86ee02dd2c82333221e32",
   ]
 }
 
@@ -328,6 +329,7 @@ provider "registry.opentofu.org/jianyuan/sentry" {
     "h1:Z0jLlWnUarl9PM/w1yHCqNgkWnkoSEU/oUqzh/G/duk=",
     "h1:eSjK7CVubStNTZjIb8HoDS3kdqtfupmgFzWMiI9IXS0=",
     "h1:x72syk/or0V2fo8ml+rjqhSP1UlfL+hHinRcapxgw+w=",
+    "zh:0dde99e7b343fa01f8eefc378171fb8621bedb20f59157d6cc8e3d46c738105f",
     "zh:31e6103b6d15d1e156e319dce499a817b4464793d98a112da9121959c8f60c4e",
     "zh:48a1e14511dc49c86142adf008002960d4bc34fb0aa1fa8c3c5ccd793d624edf",
     "zh:63c8c547cabcb851d705d207cd3aa55617e15d1d7693ee3d9f547340e9fbff26",
@@ -365,6 +367,7 @@ provider "registry.opentofu.org/stripe/stripe" {
     "zh:52d5c3ed9801079093c542beacc63e677340f652b625cdede79335c05b925f8e",
     "zh:65fae6b97c4d1af945e72b1d6f6647dd09ea266be275b8df8398a1057a3e50dd",
     "zh:8b466597238b657936d751fec0f863b6f5d14578998c2fbdfc37b61fc8658fe9",
+    "zh:8bc8f61e496e96c81c46e1aa59bf2155b6acc80db1ea462f2ddd665748fcda7f",
     "zh:99feccc69c4536934100f7581c2c6b0be6993b6cd605abde71dd4deddf212f3a",
     "zh:a4d2baa430989e1c14785359063b85a0d958b4549ec8d5807d318a9d9f195107",
     "zh:aa22b26f22a9fbdd2072e0daa92bfb6b6e1e3b77482bdbeea3f032702a85b81c",
