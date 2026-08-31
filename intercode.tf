@@ -20,11 +20,12 @@ locals {
     "natbudin@gmail.com"
   ])
 
-  # Turnstile has no wildcard syntax, but adding a domain automatically
-  # covers all of its subdomains -- so stripping the "*." prefixes here is
-  # enough. Some redundancy survives (e.g. both "concentral.net" and
-  # "demo.concentral.net" end up in the list), which is harmless.
-  intercode_turnstile_domains = distinct([for domain in local.intercode_domains : trimprefix(domain, "*.")])
+  # Auth (sign-up included) now happens on a single OIDC issuer host
+  # regardless of which convention domain the user started on -- other
+  # domains never actually render the Turnstile widget, so they don't need
+  # to be here. (A Turnstile widget can only have 10 domains anyway; the
+  # full intercode_domains list has more than that.)
+  intercode_turnstile_domains = toset(["neilhosting.net", "www.neilhosting.net"])
 }
 
 resource "cloudflare_turnstile_widget" "intercode" {
