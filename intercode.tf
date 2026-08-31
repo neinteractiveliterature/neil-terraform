@@ -19,6 +19,19 @@ locals {
   intercode_production_alarm_email_destinations = toset([
     "natbudin@gmail.com"
   ])
+
+  # Turnstile has no wildcard syntax, but adding a domain automatically
+  # covers all of its subdomains -- so stripping the "*." prefixes here is
+  # enough. Some redundancy survives (e.g. both "concentral.net" and
+  # "demo.concentral.net" end up in the list), which is harmless.
+  intercode_turnstile_domains = distinct([for domain in local.intercode_domains : trimprefix(domain, "*.")])
+}
+
+resource "cloudflare_turnstile_widget" "intercode" {
+  account_id = cloudflare_account.neil.id
+  name       = "intercode_production"
+  domains    = local.intercode_turnstile_domains
+  mode       = "managed"
 }
 
 resource "random_password" "intercode_production_db" {
@@ -113,9 +126,9 @@ module "intercode_aws_resources" {
     connect_endpoint_secret = stripe_webhook_endpoint.intercode_connect.secret
   }
 
-  recaptcha = {
-    secret_key = local.secrets["intercode_recaptcha_secret_key"]
-    site_key   = local.secrets["intercode_recaptcha_site_key"]
+  turnstile = {
+    secret_key = cloudflare_turnstile_widget.intercode.secret
+    site_key   = cloudflare_turnstile_widget.intercode.sitekey
   }
 
   twilio = {
