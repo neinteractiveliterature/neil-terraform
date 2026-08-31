@@ -19,6 +19,20 @@ locals {
   intercode_production_alarm_email_destinations = toset([
     "natbudin@gmail.com"
   ])
+
+  # Auth (sign-up included) now happens on a single OIDC issuer host
+  # regardless of which convention domain the user started on -- other
+  # domains never actually render the Turnstile widget, so they don't need
+  # to be here. (A Turnstile widget can only have 10 domains anyway; the
+  # full intercode_domains list has more than that.)
+  intercode_turnstile_domains = toset(["neilhosting.net", "www.neilhosting.net"])
+}
+
+resource "cloudflare_turnstile_widget" "intercode" {
+  account_id = cloudflare_account.neil.id
+  name       = "intercode_production"
+  domains    = local.intercode_turnstile_domains
+  mode       = "managed"
 }
 
 resource "random_password" "intercode_production_db" {
@@ -113,9 +127,9 @@ module "intercode_aws_resources" {
     connect_endpoint_secret = stripe_webhook_endpoint.intercode_connect.secret
   }
 
-  recaptcha = {
-    secret_key = local.secrets["intercode_recaptcha_secret_key"]
-    site_key   = local.secrets["intercode_recaptcha_site_key"]
+  turnstile = {
+    secret_key = cloudflare_turnstile_widget.intercode.secret
+    site_key   = cloudflare_turnstile_widget.intercode.sitekey
   }
 
   twilio = {
