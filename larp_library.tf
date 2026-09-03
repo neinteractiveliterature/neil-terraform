@@ -194,3 +194,26 @@ resource "github_actions_secret" "larp_library_fly_api_token" {
   secret_name = "FLY_API_TOKEN"
   value       = local.secrets["larp_library_fly_api_token"]
 }
+
+resource "sentry_project" "larp_library" {
+  organization = sentry_organization.neil.slug
+
+  teams    = [sentry_team.neil.slug]
+  name     = "Larp Library"
+  slug     = "larp-library"
+  platform = "ruby-rails"
+}
+
+data "sentry_all_keys" "larp_library" {
+  organization = sentry_organization.neil.slug
+  project      = sentry_project.larp_library.slug
+}
+
+# larp_library has no chamber/SSM setup (unlike intercode) — it reads plain
+# Fly env vars. SENTRY_DSN/SENTRY_ORGANIZATION_ID/SENTRY_PROJECT_SLUGS are
+# not secret and belong in fly.toml [env]. SENTRY_RELEASE_TOKEN is secret and
+# is not managed here (no fly provider — see fly_oidc.tf for why automating
+# flyctl secrets is avoided); set it by hand after apply:
+#   flyctl secrets set --app larp-library \
+#     SENTRY_RELEASE_TOKEN=$(tofu output -raw larp_library_sentry_release_token)
+
