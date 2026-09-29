@@ -89,7 +89,7 @@ resource "postgresql_grant_role" "intercode_production_rds_iam" {
 # new token-based URL from reaching SSM before the grant that makes tokens
 # actually valid has landed.
 resource "terraform_data" "intercode_production_database_url" {
-  input = "postgres://${postgresql_role.intercode_production.name}@${aws_db_instance.neil_production.endpoint}/intercode_production?sslrootcert=rds-global-bundle.pem&aws_rds_iam_auth_token_generator=default"
+  input = "postgres://${postgresql_role.intercode_production.name}@${aws_db_instance.neil_production.endpoint}/${postgresql_database.production["intercode_production"].name}?sslrootcert=rds-global-bundle.pem&aws_rds_iam_auth_token_generator=default"
 
   depends_on = [postgresql_grant_role.intercode_production_rds_iam]
 }
@@ -164,7 +164,7 @@ resource "aws_iam_group_policy" "intercode_production_rds_iam_auth" {
         Sid      = "RdsIamAuthConnect"
         Effect   = "Allow"
         Action   = "rds-db:connect"
-        Resource = "arn:aws:rds-db:${data.aws_region.current.region}:${data.aws_caller_identity.current.account_id}:dbuser:${aws_db_instance.neil_production.resource_id}/intercode_production"
+        Resource = "arn:aws:rds-db:${data.aws_region.current.region}:${data.aws_caller_identity.current.account_id}:dbuser:${aws_db_instance.neil_production.resource_id}/${postgresql_role.intercode_production.name}"
       }
     ]
   })
