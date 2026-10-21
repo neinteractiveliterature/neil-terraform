@@ -298,3 +298,51 @@ output "www_interactiveliterature_org_smtp_url" {
   sensitive = true
   value     = module.www_interactiveliterature_org_sst_github_deployment.smtp_url
 }
+
+# The website's database role. It predates Terraform management (only its
+# database is imported in databases.tf), so import it and take over just the
+# password, like intercode_production does. The password is also an SST secret
+# on the website (DATABASE_URL); Terraform cannot write that, so after changing
+# it here set the secret from the output below and redeploy the site.
+resource "random_password" "www_interactiveliterature_org_production_db" {
+  length  = 32
+  special = false
+}
+
+import {
+  to = postgresql_role.www_interactiveliterature_org_production
+  id = "www_interactiveliterature_org_production"
+}
+
+resource "postgresql_role" "www_interactiveliterature_org_production" {
+  name     = "www_interactiveliterature_org_production"
+  login    = true
+  password = random_password.www_interactiveliterature_org_production_db.result
+
+  # Only take over login/password; leave every other already-set attribute
+  # exactly as it is so import can't reset something on the live role.
+  lifecycle {
+    ignore_changes = [
+      superuser,
+      create_database,
+      create_role,
+      replication,
+      bypass_row_level_security,
+      inherit,
+      connection_limit,
+      search_path,
+      valid_until,
+      statement_timeout,
+      roles,
+      skip_reassign_owned,
+      skip_drop_role,
+    ]
+  }
+}
+
+# The value for the website's DATABASE_URL SST secret, in the format the app
+# expects (the RDS CA bundle ships with the migrator in drizzle/).
+output "www_interactiveliterature_org_production_database_url" {
+  sensitive = true
+  value     = "postgres://${postgresql_role.www_interactiveliterature_org_production.name}:${random_password.www_interactiveliterature_org_production_db.result}@${aws_db_instance.neil_production.endpoint}/${postgresql_database.production["www_interactiveliterature_org_production"].name}?sslrootcert=drizzle/rds-global-bundle.pem"
+}
