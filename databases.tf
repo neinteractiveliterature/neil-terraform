@@ -20,27 +20,34 @@ locals {
   # template0/template1/rdsadmin are RDS-managed, so left alone.
   production_admin_databases = toset(["postgres"])
 
-  # Databases whose app role also needs CREATE on the database itself. Their
-  # drizzle migrators run CREATE SCHEMA IF NOT EXISTS "drizzle" on every deploy,
-  # which failed with "permission denied for database" once the role had only
-  # CONNECT. The grant below is authoritative, so listing only CONNECT removes
-  # any other database privilege the role had.
+  # Databases whose app role also needs CREATE on the database itself: the two
+  # whose drizzle migrators run CREATE SCHEMA IF NOT EXISTS "drizzle" on every
+  # deploy (which failed with "permission denied for database" once the role had
+  # only CONNECT), and tapestries_furniture_production, whose role owns its
+  # database and so had CREATE before the grants below took it away.
   production_databases_with_create = toset([
     "rotator_production",
+    "tapestries_furniture_production",
     "www_interactiveliterature_org_production",
   ])
 
-  # Every (database, role) pair that needs an explicit CONNECT grant once
-  # PUBLIC's is revoked — each app's own role, plus neiladmin for admin work.
-  # cantrip_production is handled in cantrip.tf.
+  # Every (database, role) pair that needs explicit grants once PUBLIC's are
+  # revoked — each app's own role, plus neiladmin for admin work. App roles get
+  # CONNECT and TEMPORARY, the two privileges PUBLIC used to give them (listmonk
+  # failed refreshing its materialized views without TEMPORARY), and CREATE too
+  # where listed above. The grant is authoritative, so anything not listed here
+  # is removed from the role. cantrip_production is handled in cantrip.tf.
   production_database_connect_grants = {
     for pair in setproduct(local.production_databases, ["self", "neiladmin"]) :
     "${pair[0]}/${pair[1]}" => {
       database = pair[0]
       role     = pair[1] == "self" ? pair[0] : pair[1]
       privileges = (
-        pair[1] == "self" && contains(local.production_databases_with_create, pair[0])
-        ? ["CONNECT", "CREATE"]
+        pair[1] == "self"
+        ? concat(
+          ["CONNECT", "TEMPORARY"],
+          contains(local.production_databases_with_create, pair[0]) ? ["CREATE"] : [],
+        )
         : ["CONNECT"]
       )
     }
