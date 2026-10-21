@@ -255,14 +255,6 @@ resource "cloudflare_dns_record" "interconlarp_org_furniture_cname" {
   ttl     = 1
 }
 
-resource "cloudflare_dns_record" "interconlarp_org_security_forwarder_cname" {
-  zone_id = cloudflare_zone.interconlarp_org.id
-  name    = "security-forwarder.interconlarp.org"
-  type    = "CNAME"
-  content = "intercon-security-forwarder.fly.dev"
-  ttl     = 1
-}
-
 # ---------------------------------------------------------------------------
 # i.interconlarp.org — served via cloudfront_intercode (OG shell + SPA shell)
 # ---------------------------------------------------------------------------
