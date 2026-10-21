@@ -20,6 +20,16 @@ locals {
   # template0/template1/rdsadmin are RDS-managed, so left alone.
   production_admin_databases = toset(["postgres"])
 
+  # Databases whose app role also needs CREATE on the database itself. Their
+  # drizzle migrators run CREATE SCHEMA IF NOT EXISTS "drizzle" on every deploy,
+  # which failed with "permission denied for database" once the role had only
+  # CONNECT. The grant below is authoritative, so listing only CONNECT removes
+  # any other database privilege the role had.
+  production_databases_with_create = toset([
+    "rotator_production",
+    "www_interactiveliterature_org_production",
+  ])
+
   # Every (database, role) pair that needs an explicit CONNECT grant once
   # PUBLIC's is revoked — each app's own role, plus neiladmin for admin work.
   # cantrip_production is handled in cantrip.tf.
@@ -28,6 +38,11 @@ locals {
     "${pair[0]}/${pair[1]}" => {
       database = pair[0]
       role     = pair[1] == "self" ? pair[0] : pair[1]
+      privileges = (
+        pair[1] == "self" && contains(local.production_databases_with_create, pair[0])
+        ? ["CONNECT", "CREATE"]
+        : ["CONNECT"]
+      )
     }
   }
 }
@@ -88,5 +103,5 @@ resource "postgresql_grant" "production_connect" {
   database    = postgresql_database.production[each.value.database].name
   role        = each.value.role
   object_type = "database"
-  privileges  = ["CONNECT"]
+  privileges  = each.value.privileges
 }
