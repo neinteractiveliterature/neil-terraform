@@ -33,13 +33,21 @@ resource "postgresql_grant" "cantrip_production_public_revoke" {
   depends_on = [postgresql_grant.cantrip_production_connect]
 }
 
+# The app's own role also gets CREATE (new schemas, and trusted extensions) and
+# TEMPORARY (temporary tables). PUBLIC used to supply TEMPORARY and the role
+# owns the database, so these are what it would have by default; they are
+# listed because the grant is authoritative and removes anything not named.
+# neiladmin only needs CONNECT.
 resource "postgresql_grant" "cantrip_production_connect" {
-  for_each = toset([postgresql_role.cantrip_production.name, "neiladmin"])
+  for_each = {
+    (postgresql_role.cantrip_production.name) = ["CONNECT", "CREATE", "TEMPORARY"]
+    neiladmin                                 = ["CONNECT"]
+  }
 
   database    = postgresql_database.cantrip_production.name
   role        = each.key
   object_type = "database"
-  privileges  = ["CONNECT"]
+  privileges  = each.value
 }
 
 # Password-authenticated connection string for the app. RDS forces SSL
