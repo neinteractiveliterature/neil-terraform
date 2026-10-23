@@ -147,6 +147,13 @@ module "intercode_aws_resources" {
     min_instances = 2
     max_instances = 10
   }
+
+  # Read-only Fly org token (`fly tokens create readonly <org>`), seeded out of band at
+  # /neil-terraform/intercode_fly_metrics_token. Lets the autoscaler watch the web machines' CPU burst balance.
+  fly_metrics = {
+    token    = local.secrets["intercode_fly_metrics_token"]
+    org_slug = local.fly_org_slug
+  }
 }
 
 # Lets the app's existing AWS identity (the IAM user/group above) generate
