@@ -111,6 +111,13 @@ resource "stripe_webhook_endpoint" "intercode_connect" {
   description = "intercode_production Connect webhook (Terraform-managed)"
 }
 
+# Keys Devise's token digests (password resets, confirmations). Until this was set the app used a default key that's
+# checked in to its repository. Changing it invalidates any outstanding reset or confirmation links.
+resource "random_password" "intercode_devise_secret_key" {
+  length  = 128
+  special = false
+}
+
 module "intercode_aws_resources" {
   source = "github.com/neinteractiveliterature/intercode//terraform/modules/intercode_aws_resources?ref=main&depth=1"
 
@@ -120,6 +127,8 @@ module "intercode_aws_resources" {
   database_url             = terraform_data.intercode_production_database_url.output
   fly_api_token            = local.secrets["intercode_fly_api_token"]
   default_currency         = "USD"
+  devise_secret_key        = random_password.intercode_devise_secret_key.result
+  ses_configuration_set    = module.intercode_ses_email_receiving.configuration_set_name
 
   stripe = {
     secret_key              = local.secrets["intercode_stripe_secret_key"]
