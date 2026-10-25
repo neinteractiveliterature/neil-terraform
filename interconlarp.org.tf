@@ -285,8 +285,22 @@ resource "aws_acm_certificate_validation" "i_interconlarp_org" {
   validation_record_fqdns = [for dvo in aws_acm_certificate.i_interconlarp_org.domain_validation_options : trimsuffix(dvo.resource_record_name, ".")]
 }
 
+# Access logs and a 5xx alarm shared by every cloudfront_intercode distribution
+module "cloudfront_intercode_logging" {
+  # TODO: switch ref back to main once intercode#12216 is merged
+  source = "github.com/neinteractiveliterature/intercode//terraform/modules/cloudfront_intercode_logging?ref=cloudfront-access-logs-and-alarm&depth=1"
+
+  providers = {
+    aws.us_east_1 = aws.us_east_1
+  }
+
+  name          = "intercode-cloudfront"
+  alarm_actions = [module.intercode_aws_resources.alarm_sns_topic_arn]
+}
+
 module "i_interconlarp_org_cloudfront" {
-  source = "github.com/neinteractiveliterature/intercode//terraform/modules/cloudfront_intercode?ref=main&depth=1"
+  # TODO: switch ref back to main once intercode#12216 is merged
+  source = "github.com/neinteractiveliterature/intercode//terraform/modules/cloudfront_intercode?ref=cloudfront-access-logs-and-alarm&depth=1"
 
   providers = {
     aws           = aws
@@ -298,6 +312,8 @@ module "i_interconlarp_org_cloudfront" {
   assets_origin_domain = "assets.neilhosting.net"
   aliases              = ["i.interconlarp.org"]
   acm_certificate_arn  = aws_acm_certificate_validation.i_interconlarp_org.certificate_arn
+
+  access_log_delivery_destination_arn = module.cloudfront_intercode_logging.delivery_destination_arn
 }
 
 module "i_interconlarp_org_forwardemail_receiving_domain" {
