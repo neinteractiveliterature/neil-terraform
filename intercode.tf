@@ -201,76 +201,6 @@ resource "null_resource" "intercode_fly_redeploy" {
   }
 }
 
-moved {
-  from = aws_sqs_queue.intercode_production_dead_letter
-  to   = module.intercode_aws_resources.aws_sqs_queue.dead_letter
-}
-
-moved {
-  from = aws_sqs_queue.intercode_production_default
-  to   = module.intercode_aws_resources.aws_sqs_queue.default
-}
-
-moved {
-  from = aws_sqs_queue.intercode_production_mailers
-  to   = module.intercode_aws_resources.aws_sqs_queue.mailers
-}
-
-moved {
-  from = aws_sqs_queue.intercode_production_ahoy
-  to   = module.intercode_aws_resources.aws_sqs_queue.ahoy
-}
-
-moved {
-  from = aws_s3_bucket.intercode2_production
-  to   = module.intercode_aws_resources.aws_s3_bucket.uploads
-}
-
-moved {
-  from = aws_s3_bucket_acl.intercode2_production
-  to   = module.intercode_aws_resources.aws_s3_bucket_acl.uploads
-}
-
-moved {
-  from = aws_s3_bucket_cors_configuration.intercode2_production
-  to   = module.intercode_aws_resources.aws_s3_bucket_cors_configuration.uploads
-}
-
-# aws_sns_topic: name changes "intercode-production-alarms" → "intercode_production-alarms"
-# (ForceNew → recreated; alarm email subscribers will need to re-confirm)
-moved {
-  from = aws_sns_topic.intercode_production_alarms
-  to   = module.intercode_aws_resources.aws_sns_topic.alarms
-}
-
-# aws_cloudwatch_metric_alarm: alarm_name changes (ForceNew → recreated)
-moved {
-  from = aws_cloudwatch_metric_alarm.intercode_queue_backup
-  to   = module.intercode_aws_resources.aws_cloudwatch_metric_alarm.queue_backup
-}
-
-# IAM group/user/access key: names change from "intercode2-production" → "intercode_production"
-# (ForceNew → recreated; update app AWS credentials after applying)
-moved {
-  from = aws_iam_group.intercode2_production
-  to   = module.intercode_aws_resources.aws_iam_group.this
-}
-
-moved {
-  from = aws_iam_user.intercode2_production
-  to   = module.intercode_aws_resources.aws_iam_user.this
-}
-
-moved {
-  from = aws_iam_user_group_membership.intercode2_production
-  to   = module.intercode_aws_resources.aws_iam_user_group_membership.this
-}
-
-moved {
-  from = aws_iam_access_key.intercode2_production
-  to   = module.intercode_aws_resources.aws_iam_access_key.this
-}
-
 # aws_iam_group_policy.intercode2_production: replaced by two separate module policies
 # (intercode_aws_resources base policy + ses_email_receiving inbox policy)
 
@@ -313,7 +243,6 @@ module "assets_neilhosting_net_cloudfront" {
   zone_id                  = cloudflare_zone.neilhosting_net.id
   compress                 = true
 }
-
 
 resource "github_repository" "intercode" {
   name        = "intercode"
@@ -364,4 +293,3 @@ data "sentry_organization_integration" "slack" {
   provider_key = "slack"
   name         = "NEIL" # update to match your Slack workspace name in Sentry
 }
-

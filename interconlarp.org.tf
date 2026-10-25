@@ -260,7 +260,6 @@ resource "cloudflare_dns_record" "interconlarp_org_furniture_cname" {
   ttl     = 1
 }
 
-
 # ---------------------------------------------------------------------------
 # Convention subdomains served via cloudfront_intercode (OG shell + SPA shell)
 # ---------------------------------------------------------------------------
@@ -345,78 +344,4 @@ resource "cloudflare_dns_record" "interconlarp_org_cloudfront_cname" {
   type    = "CNAME"
   content = module.interconlarp_org_cloudfront_intercode[each.value].distribution_domain_name
   ttl     = 1
-}
-
-# Move the per-letter resources into the for_each groups above. Once these have been applied, they and the older
-# moved blocks below can be deleted.
-
-moved {
-  from = aws_acm_certificate.i_interconlarp_org
-  to   = aws_acm_certificate.interconlarp_org_cloudfront["i"]
-}
-
-moved {
-  from = cloudflare_dns_record.i_interconlarp_org_acm_validation["i.interconlarp.org"]
-  to   = cloudflare_dns_record.interconlarp_org_cloudfront_acm_validation["i.interconlarp.org"]
-}
-
-moved {
-  from = aws_acm_certificate_validation.i_interconlarp_org
-  to   = aws_acm_certificate_validation.interconlarp_org_cloudfront["i"]
-}
-
-moved {
-  from = module.i_interconlarp_org_cloudfront
-  to   = module.interconlarp_org_cloudfront_intercode["i"]
-}
-
-moved {
-  from = module.i_interconlarp_org_forwardemail_receiving_domain
-  to   = module.interconlarp_org_cloudfront_forwardemail_receiving_domain["i"]
-}
-
-moved {
-  from = cloudflare_dns_record.i_interconlarp_org_cname
-  to   = cloudflare_dns_record.interconlarp_org_cloudfront_cname["i"]
-}
-
-moved {
-  from = aws_acm_certificate.p_interconlarp_org
-  to   = aws_acm_certificate.interconlarp_org_cloudfront["p"]
-}
-
-moved {
-  from = cloudflare_dns_record.p_interconlarp_org_acm_validation["p.interconlarp.org"]
-  to   = cloudflare_dns_record.interconlarp_org_cloudfront_acm_validation["p.interconlarp.org"]
-}
-
-moved {
-  from = aws_acm_certificate_validation.p_interconlarp_org
-  to   = aws_acm_certificate_validation.interconlarp_org_cloudfront["p"]
-}
-
-moved {
-  from = module.p_interconlarp_org_cloudfront
-  to   = module.interconlarp_org_cloudfront_intercode["p"]
-}
-
-moved {
-  from = module.p_interconlarp_org_forwardemail_receiving_domain
-  to   = module.interconlarp_org_cloudfront_forwardemail_receiving_domain["p"]
-}
-
-moved {
-  from = cloudflare_dns_record.p_interconlarp_org_cname
-  to   = cloudflare_dns_record.interconlarp_org_cloudfront_cname["p"]
-}
-
-# Older moves: the forwardemail modules used to be part of the Fly-served subdomain group.
-moved {
-  from = module.interconlarp_org_convention_subdomain_forwardemail_receiving_domain["i.interconlarp.org"]
-  to   = module.i_interconlarp_org_forwardemail_receiving_domain
-}
-
-moved {
-  from = module.interconlarp_org_convention_subdomain_forwardemail_receiving_domain["p.interconlarp.org"]
-  to   = module.p_interconlarp_org_forwardemail_receiving_domain
 }
