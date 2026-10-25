@@ -13,7 +13,7 @@ locals {
     "m",
     "n",
     "o",
-    "p",
+    # "p" is served via its own cloudfront_intercode distribution
     "q",
     "r",
     "s",
@@ -333,5 +333,74 @@ resource "cloudflare_dns_record" "i_interconlarp_org_cname" {
   name    = "i.interconlarp.org"
   type    = "CNAME"
   content = module.i_interconlarp_org_cloudfront.distribution_domain_name
+  ttl     = 1
+}
+
+# ---------------------------------------------------------------------------
+# p.interconlarp.org — served via cloudfront_intercode (OG shell + SPA shell)
+# ---------------------------------------------------------------------------
+
+resource "aws_acm_certificate" "p_interconlarp_org" {
+  domain_name       = "p.interconlarp.org"
+  validation_method = "DNS"
+}
+
+resource "cloudflare_dns_record" "p_interconlarp_org_acm_validation" {
+  for_each = {
+    for dvo in aws_acm_certificate.p_interconlarp_org.domain_validation_options : dvo.domain_name => {
+      name  = trimsuffix(dvo.resource_record_name, ".")
+      type  = dvo.resource_record_type
+      value = trimsuffix(dvo.resource_record_value, ".")
+    }
+  }
+
+  zone_id = cloudflare_zone.interconlarp_org.id
+  name    = each.value.name
+  type    = each.value.type
+  content = each.value.value
+  ttl     = 60
+}
+
+resource "aws_acm_certificate_validation" "p_interconlarp_org" {
+  certificate_arn         = aws_acm_certificate.p_interconlarp_org.arn
+  validation_record_fqdns = [for dvo in aws_acm_certificate.p_interconlarp_org.domain_validation_options : trimsuffix(dvo.resource_record_name, ".")]
+}
+
+module "p_interconlarp_org_cloudfront" {
+  source = "github.com/neinteractiveliterature/intercode//terraform/modules/cloudfront_intercode?ref=main&depth=1"
+
+  providers = {
+    aws           = aws
+    aws.us_east_1 = aws.us_east_1
+  }
+
+  name                 = "p-interconlarp-org"
+  rails_origin_domain  = "www.neilhosting.net"
+  assets_origin_domain = "assets.neilhosting.net"
+  aliases              = ["p.interconlarp.org"]
+  acm_certificate_arn  = aws_acm_certificate_validation.p_interconlarp_org.certificate_arn
+
+  access_logs_enabled                 = true
+  access_log_delivery_destination_arn = module.cloudfront_intercode_logging.delivery_destination_arn
+}
+
+module "p_interconlarp_org_forwardemail_receiving_domain" {
+  source = "github.com/neinteractiveliterature/neil-terraform-modules//forwardemail_receiving_domain?ref=main"
+
+  zone_id           = cloudflare_zone.interconlarp_org.id
+  name              = "p.interconlarp.org"
+  verification_code = module.forwardemail_receiving.verification_records_by_domain["p.interconlarp.org"]
+}
+
+moved {
+  from = module.interconlarp_org_convention_subdomain_forwardemail_receiving_domain["p.interconlarp.org"]
+  to   = module.p_interconlarp_org_forwardemail_receiving_domain
+}
+
+resource "cloudflare_dns_record" "p_interconlarp_org_cname" {
+  zone_id = cloudflare_zone.interconlarp_org.id
+  name    = "p.interconlarp.org"
+  type    = "CNAME"
+  content = module.p_interconlarp_org_cloudfront.distribution_domain_name
   ttl     = 1
 }
