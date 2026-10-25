@@ -313,6 +313,7 @@ module "i_interconlarp_org_cloudfront" {
   aliases              = ["i.interconlarp.org"]
   acm_certificate_arn  = aws_acm_certificate_validation.i_interconlarp_org.certificate_arn
 
+  access_logs_enabled                 = true
   access_log_delivery_destination_arn = module.cloudfront_intercode_logging.delivery_destination_arn
 }
 
