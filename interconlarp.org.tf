@@ -207,10 +207,11 @@ module "interconlarp_org_forward_only_subdomain_forwardemail_receiving_domain" {
   verification_code = module.forwardemail_receiving.verification_records_by_domain[each.value]
 }
 
+# Covers CloudFront-served conventions too: their events.<subdomain> mail domains stay in this group.
 module "interconlarp_org_convention_subdomain_events_forwardemail_receiving_domain" {
   for_each = setintersection(
     keys(module.forwardemail_receiving.verification_records_by_domain),
-    [for subdomain in local.interconlarp_org_intercode_subdomains : "events.${subdomain}.interconlarp.org"]
+    [for subdomain in setunion(local.interconlarp_org_intercode_subdomains, local.interconlarp_org_cloudfront_subdomains) : "events.${subdomain}.interconlarp.org"]
   )
   source = "github.com/neinteractiveliterature/neil-terraform-modules//forwardemail_receiving_domain?ref=main"
 
