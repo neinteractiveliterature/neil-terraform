@@ -16,8 +16,21 @@ module "intercode_assets_bucket" {
   github_oidc_provider_arn = module.github-oidc.oidc_provider_arn
 }
 
-# Set these as the ASSETS_BUCKET and ASSETS_UPLOAD_ROLE_ARN variables on the intercode GitHub repository to turn on the
-# release workflow's upload to the bucket.
+# These two repository variables turn on the release workflow's upload to the bucket (its assets-bucket-release job is
+# skipped while ASSETS_BUCKET is unset), so applying them starts uploads with the next intercode release. Delete
+# ASSETS_BUCKET to turn the uploads off.
+resource "github_actions_variable" "intercode_assets_bucket" {
+  repository    = github_repository.intercode.name
+  variable_name = "ASSETS_BUCKET"
+  value         = module.intercode_assets_bucket.bucket_name
+}
+
+resource "github_actions_variable" "intercode_assets_upload_role_arn" {
+  repository    = github_repository.intercode.name
+  variable_name = "ASSETS_UPLOAD_ROLE_ARN"
+  value         = module.intercode_assets_bucket.release_upload_role_arn
+}
+
 output "intercode_assets_bucket_name" {
   description = "Value for the intercode repository's ASSETS_BUCKET variable."
   value       = module.intercode_assets_bucket.bucket_name
