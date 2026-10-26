@@ -14,6 +14,13 @@ module "intercode_assets_bucket" {
   # Reuse the account's existing GitHub Actions OIDC provider (it can only have one).
   github_repository        = "neinteractiveliterature/intercode"
   github_oidc_provider_arn = module.github-oidc.oidc_provider_arn
+
+  # Release tags (what the release workflow runs on), and main, so that the "Upload assets to bucket" workflow can be
+  # run by hand to upload an already-built commit. Giving a value here replaces the module's default of tags only.
+  github_oidc_subjects = [
+    "repo:neinteractiveliterature/intercode:ref:refs/tags/*",
+    "repo:neinteractiveliterature/intercode:ref:refs/heads/main",
+  ]
 }
 
 # These two repository variables turn on the release workflow's upload to the bucket (its assets-bucket-release job is
