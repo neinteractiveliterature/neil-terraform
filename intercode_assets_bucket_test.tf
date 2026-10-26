@@ -41,6 +41,11 @@ resource "aws_cloudfront_distribution" "intercode_assets_test" {
   price_class     = "PriceClass_100"
   comment         = "TEMPORARY: test of the Intercode assets bucket as a CloudFront origin"
 
+  # CloudFront can list the bucket (it has s3:ListBucket so that a missing file is a 404 rather than a 403), and a
+  # request for the bucket root is a listing. With a root object that doesn't exist, "/" is a 404 instead. The real
+  # assets distribution needs this too (cloudfront_with_acm's default_root_object).
+  default_root_object = "index.html"
+
   origin {
     origin_id                = "assets-bucket"
     domain_name              = module.intercode_assets_bucket.bucket_regional_domain_name
