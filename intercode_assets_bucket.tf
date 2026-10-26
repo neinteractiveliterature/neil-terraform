@@ -11,8 +11,12 @@ module "intercode_assets_bucket" {
   bucket_name    = "intercode2-production-assets"
   retention_days = 30
 
-  # The temporary test distribution (intercode_assets_bucket_test.tf); the real one replaces it at cutover.
-  cloudfront_distribution_arns = [aws_cloudfront_distribution.intercode_assets_test.arn]
+  # The temporary test distribution (intercode_assets_bucket_test.tf) and the real assets distribution. The real one is
+  # listed before its origin is repointed at the bucket, so that it can already read the bucket when that happens.
+  cloudfront_distribution_arns = [
+    aws_cloudfront_distribution.intercode_assets_test.arn,
+    module.assets_neilhosting_net_cloudfront.cloudfront_distribution.arn,
+  ]
 
   # Reuse the account's existing GitHub Actions OIDC provider (it can only have one).
   github_repository        = "neinteractiveliterature/intercode"
