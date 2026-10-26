@@ -235,10 +235,21 @@ resource "cloudflare_dns_record" "assets_neilhosting_net" {
 module "assets_neilhosting_net_cloudfront" {
   source = "github.com/neinteractiveliterature/neil-terraform-modules//cloudfront_with_acm?ref=main"
 
-  domain_name              = "assets.neilhosting.net"
-  origin_id                = "intercode"
-  origin_domain_name       = "www.neilhosting.net"
-  origin_protocol_policy   = "https-only"
+  domain_name = "assets.neilhosting.net"
+  origin_id   = "intercode"
+
+  # Served from the assets bucket (intercode_assets_bucket.tf), which keeps previous releases' files, rather than from
+  # Rails on Fly (origin_domain_name = "www.neilhosting.net", origin_protocol_policy = "https-only"). To roll back, restore
+  # those two and remove the next four lines (default_root_object stays harmless).
+  origin_domain_name         = module.intercode_assets_bucket.bucket_regional_domain_name
+  origin_access_control_id   = module.intercode_assets_bucket.origin_access_control_id
+  origin_request_policy_id   = "88a5eaf4-2fd4-4709-b370-b4c650ea3fcf" # Managed-CORS-S3Origin
+  response_headers_policy_id = aws_cloudfront_response_headers_policy.intercode_assets_cors.id
+
+  # CloudFront can list the bucket (so that a missing file is a 404, not a 403), and a request for the bucket root is a
+  # listing. A root object that doesn't exist makes "/" a 404 instead.
+  default_root_object = "index.html"
+
   add_security_headers_arn = aws_lambda_function.addSecurityHeaders.qualified_arn
   zone_id                  = cloudflare_zone.neilhosting_net.id
   compress                 = true
