@@ -1,0 +1,46 @@
+import cf from 'cloudfront';
+
+// CloudFront Function, viewer-request, JavaScript runtime 2.0. SPIKE copy of the router for the S3-backed shell.
+//
+// The default behavior's origin is the shell bucket (static index.html and /assets/*). This runs before the cache
+// lookup, so the rewritten URI and query string are what key the cache: a crawler's /og-shell?path=... response can
+// never be served to a browser, or the reverse.
+
+var CRAWLER_UA_RE =
+  /Googlebot|bingbot|DuckDuckBot|YandexBot|Baiduspider|facebookexternalhit|Twitterbot|LinkedInBot|WhatsApp|Discordbot|Slackbot|Applebot|Embedly|Pinterest/i;
+
+var RAILS_PATH_RE =
+  /^\/(users|oauth|oauth_session|authenticity_tokens|client_configuration|graphql|graphiql|email_forwarders|sns_notifications|stripe_webhook|stripe_account|healthz|sitemap\.xml|reports|calendars|csv_exports|user_con_profiles|rails|uploads|cdn-spa-shell|og-shell)(\/|$)/;
+
+// Spike only: the test distribution has no convention domain of its own, so Rails is told which convention to use.
+var RAILS_HOST_OVERRIDE = '${rails_host_header}';
+
+function toRails(request) {
+  var host = RAILS_HOST_OVERRIDE || (request.headers.host ? request.headers.host.value : '');
+  cf.selectRequestOriginById('rails', host ? { hostHeader: host } : {});
+}
+
+function handler(event) {
+  var request = event.request;
+  var uri = request.uri;
+
+  if (RAILS_PATH_RE.test(uri)) {
+    toRails(request);
+    return request;
+  }
+
+  if (uri.indexOf('/assets/') === 0) {
+    return request;
+  }
+
+  var ua = request.headers['user-agent'] ? request.headers['user-agent'].value : '';
+  if (CRAWLER_UA_RE.test(ua)) {
+    toRails(request);
+    request.querystring = { path: { value: encodeURIComponent(uri) } };
+    request.uri = '/og-shell';
+  } else {
+    request.querystring = {};
+    request.uri = '/index.html';
+  }
+  return request;
+}
