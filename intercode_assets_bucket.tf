@@ -1,22 +1,17 @@
 # Keeps previous Intercode releases' built assets available after each deploy (neinteractiveliterature/intercode#12232).
 # Each release uploads its assets here and marks the files it dropped as obsolete; they expire 30 days later.
 #
-# Nothing serves from this bucket yet: assets.neilhosting.net (module.assets_neilhosting_net_cloudfront) still has
-# Rails on Fly as its origin. To cut over, upload a release first, then change that origin to this bucket (using
-# bucket_regional_domain_name and origin_access_control_id) and add the distribution's ARN to
-# cloudfront_distribution_arns below, so it can read the bucket.
+# assets.neilhosting.net (module.assets_neilhosting_net_cloudfront) is served from this bucket, through the bucket's
+# origin access control. Its distribution has to be listed in cloudfront_distribution_arns below, so that it can read
+# the bucket, and needs a root object that doesn't exist (otherwise "/" is a listing of the bucket) and the CORS
+# response headers policy at the end of this file.
 module "intercode_assets_bucket" {
   source = "github.com/neinteractiveliterature/intercode//terraform/modules/assets_bucket_intercode?ref=main&depth=1"
 
   bucket_name    = "intercode2-production-assets"
   retention_days = 30
 
-  # The temporary test distribution (intercode_assets_bucket_test.tf) and the real assets distribution. The real one is
-  # listed before its origin is repointed at the bucket, so that it can already read the bucket when that happens.
-  cloudfront_distribution_arns = [
-    aws_cloudfront_distribution.intercode_assets_test.arn,
-    module.assets_neilhosting_net_cloudfront.cloudfront_distribution.arn,
-  ]
+  cloudfront_distribution_arns = [module.assets_neilhosting_net_cloudfront.cloudfront_distribution.arn]
 
   # Reuse the account's existing GitHub Actions OIDC provider (it can only have one).
   github_repository        = "neinteractiveliterature/intercode"
@@ -53,4 +48,30 @@ output "intercode_assets_bucket_name" {
 output "intercode_assets_upload_role_arn" {
   description = "Value for the intercode repository's ASSETS_UPLOAD_ROLE_ARN variable."
   value       = module.intercode_assets_bucket.release_upload_role_arn
+}
+
+# CORS for the assets distribution. CloudFront adds the header on every response, cache hits included, whereas the
+# bucket's own CORS configuration only answers requests that carry an Origin header, and the distribution caches without
+# Origin in the key, so a hit on an object first cached without one would have no CORS header. Sending it for every
+# origin and method matches what Rails and the assets nginx did before.
+resource "aws_cloudfront_response_headers_policy" "intercode_assets_cors" {
+  name    = "intercode-assets-cors"
+  comment = "Always allow cross-origin GET/HEAD of Intercode assets, as Rails and the assets nginx do"
+
+  cors_config {
+    access_control_allow_credentials = false
+    origin_override                  = true
+
+    access_control_allow_headers {
+      items = ["*"]
+    }
+
+    access_control_allow_methods {
+      items = ["GET", "HEAD"]
+    }
+
+    access_control_allow_origins {
+      items = ["*"]
+    }
+  }
 }
