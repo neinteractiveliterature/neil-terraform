@@ -3,8 +3,44 @@
 # A separate bucket from intercode_assets_bucket.tf: each release upload marks every file under its prefix that the
 # new release lacks as obsolete, so two builds sharing a bucket would mark each other's files.
 #
-# The test distribution has no aliases, so it is only reachable on its cloudfront.net domain, with a convention's domain
-# in the Host header. Nothing points at it, and it serves no real traffic. To roll back, delete this file.
+# The test distribution has the alias h.interconlarp.org, but DNS for h still points at Fly, so it serves no real
+# traffic. To test it, send requests to its cloudfront.net address with the real hostname (CloudFront rejects a Host
+# header that isn't one of its aliases, so a Host override on the cloudfront.net name doesn't work):
+#
+#   curl --resolve h.interconlarp.org:443:$(dig +short <cloudfront.net domain> | head -1) https://h.interconlarp.org/
+#
+# To roll back, delete this file.
+locals {
+  # A past convention that is not behind CloudFront, so nothing else holds this alias. Its DNS is not changed here.
+  intercode_framework_shell_test_hostname = "h.interconlarp.org"
+}
+
+resource "aws_acm_certificate" "intercode_framework_shell_test" {
+  domain_name       = local.intercode_framework_shell_test_hostname
+  validation_method = "DNS"
+}
+
+resource "cloudflare_dns_record" "intercode_framework_shell_test_acm_validation" {
+  for_each = {
+    for dvo in aws_acm_certificate.intercode_framework_shell_test.domain_validation_options : dvo.domain_name => {
+      name  = trimsuffix(dvo.resource_record_name, ".")
+      type  = dvo.resource_record_type
+      value = trimsuffix(dvo.resource_record_value, ".")
+    }
+  }
+
+  zone_id = cloudflare_zone.interconlarp_org.id
+  name    = each.value.name
+  type    = each.value.type
+  content = each.value.value
+  ttl     = 60
+}
+
+resource "aws_acm_certificate_validation" "intercode_framework_shell_test" {
+  certificate_arn         = aws_acm_certificate.intercode_framework_shell_test.arn
+  validation_record_fqdns = [for dvo in aws_acm_certificate.intercode_framework_shell_test.domain_validation_options : trimsuffix(dvo.resource_record_name, ".")]
+}
+
 module "intercode_framework_shell_bucket" {
   source = "github.com/neinteractiveliterature/intercode//terraform/modules/assets_bucket_intercode?ref=main&depth=1"
 
@@ -37,6 +73,8 @@ module "intercode_framework_shell_test_cloudfront" {
   name                 = "framework-shell-test"
   rails_origin_domain  = "www.neilhosting.net"
   assets_origin_domain = "assets.neilhosting.net"
+  aliases              = [local.intercode_framework_shell_test_hostname]
+  acm_certificate_arn  = aws_acm_certificate_validation.intercode_framework_shell_test.certificate_arn
 
   static_shell_enabled                  = true
   static_shell_bucket_domain_name       = module.intercode_framework_shell_bucket.bucket_regional_domain_name
