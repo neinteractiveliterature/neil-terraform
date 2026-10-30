@@ -325,6 +325,10 @@ module "interconlarp_org_cloudfront_intercode" {
 
   access_logs_enabled                 = true
   access_log_delivery_destination_arn = module.cloudfront_intercode_logging.delivery_destination_arn
+
+  static_shell_enabled                  = true
+  static_shell_bucket_domain_name       = module.intercode_framework_shell_bucket.bucket_regional_domain_name
+  static_shell_origin_access_control_id = module.intercode_framework_shell_bucket.origin_access_control_id
 }
 
 module "interconlarp_org_cloudfront_forwardemail_receiving_domain" {

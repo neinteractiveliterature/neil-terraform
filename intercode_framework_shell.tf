@@ -47,10 +47,16 @@ module "intercode_framework_shell_bucket" {
   bucket_name    = "intercode2-production-framework-shell"
   retention_days = 30
 
-  # cloudfront_intercode doesn't output the ARN, so build it from the distribution ID.
-  cloudfront_distribution_arns = [
-    "arn:aws:cloudfront::${data.aws_caller_identity.current.account_id}:distribution/${module.intercode_framework_shell_test_cloudfront.distribution_id}"
-  ]
+  # cloudfront_intercode doesn't output the ARN, so build it from the distribution ID. The bucket policy only lets these
+  # distributions read through the origin access control, so any distribution that sets static_shell_enabled against this
+  # bucket has to be listed here or it gets a 403 from S3.
+  cloudfront_distribution_arns = concat(
+    ["arn:aws:cloudfront::${data.aws_caller_identity.current.account_id}:distribution/${module.intercode_framework_shell_test_cloudfront.distribution_id}"],
+    [
+      for dist in module.interconlarp_org_cloudfront_intercode :
+      "arn:aws:cloudfront::${data.aws_caller_identity.current.account_id}:distribution/${dist.distribution_id}"
+    ],
+  )
 
   github_repository        = "neinteractiveliterature/intercode"
   github_oidc_provider_arn = module.github-oidc.oidc_provider_arn
