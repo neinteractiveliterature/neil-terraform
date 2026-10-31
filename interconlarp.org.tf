@@ -3,6 +3,12 @@ locals {
   # convention behind CloudFront, add its subdomain here and remove it from interconlarp_org_intercode_subdomains.
   interconlarp_org_cloudfront_subdomains = toset(["i", "p"])
 
+  # Temporary: convention subdomains served by the intercode-canary Fly app instead of intercode (intercode#12260). To
+  # roll back, empty this map. Remove along with the canary.
+  interconlarp_org_canary_subdomains = {
+    "w" = { ipv4 = "66.241.124.129", ipv6 = "2a09:8280:1::1db:a470:0" }
+  }
+
   interconlarp_org_forward_only_subdomains = toset([])
   interconlarp_org_intercode_subdomains = toset([
     "d",
@@ -175,7 +181,7 @@ resource "cloudflare_dns_record" "interconlarp_org_convention_subdomain_cname" {
   zone_id = cloudflare_zone.interconlarp_org.id
   name    = "${each.value}.interconlarp.org"
   type    = "A"
-  content = "137.66.59.126"
+  content = try(local.interconlarp_org_canary_subdomains[each.value].ipv4, "137.66.59.126")
   ttl     = 1
 }
 
@@ -185,7 +191,7 @@ resource "cloudflare_dns_record" "interconlarp_org_convention_subdomain_aaaa" {
   zone_id = cloudflare_zone.interconlarp_org.id
   name    = "${each.value}.interconlarp.org"
   type    = "AAAA"
-  content = "2a09:8280:1::4e:bee4"
+  content = try(local.interconlarp_org_canary_subdomains[each.value].ipv6, "2a09:8280:1::4e:bee4")
   ttl     = 1
 }
 
