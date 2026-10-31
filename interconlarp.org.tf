@@ -189,6 +189,24 @@ resource "cloudflare_dns_record" "interconlarp_org_convention_subdomain_aaaa" {
   ttl     = 1
 }
 
+# Temporary: lets the intercode-canary Fly app get a certificate for w.interconlarp.org before w's A/AAAA records move
+# to it (intercode#12260). w still points at the intercode app, so Fly can't validate by HTTP. Remove with the canary.
+resource "cloudflare_dns_record" "interconlarp_org_w_canary_acme_challenge_cname" {
+  zone_id = cloudflare_zone.interconlarp_org.id
+  name    = "_acme-challenge.w.interconlarp.org"
+  type    = "CNAME"
+  content = "w.interconlarp.org.d6o5ojq.flydns.net"
+  ttl     = 1
+}
+
+resource "cloudflare_dns_record" "interconlarp_org_w_canary_fly_ownership" {
+  zone_id = cloudflare_zone.interconlarp_org.id
+  name    = "_fly-ownership.w.interconlarp.org"
+  type    = "TXT"
+  content = "app-d6o5ojq"
+  ttl     = 1
+}
+
 module "interconlarp_org_convention_subdomain_forwardemail_receiving_domain" {
   for_each = toset([for subdomain in local.interconlarp_org_intercode_subdomains : "${subdomain}.interconlarp.org"])
   source   = "github.com/neinteractiveliterature/neil-terraform-modules//forwardemail_receiving_domain?ref=main"
