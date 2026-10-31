@@ -28,7 +28,11 @@ resource "aws_iam_role" "intercode_chamber" {
           "oidc.fly.io/${local.fly_org_slug}:aud" = "sts.amazonaws.com"
         }
         StringLike = {
-          "oidc.fly.io/${local.fly_org_slug}:sub" = "${local.fly_org_slug}:intercode:*"
+          "oidc.fly.io/${local.fly_org_slug}:sub" = [
+            "${local.fly_org_slug}:intercode:*",
+            # Temporary: a canary of the Intercode 9.0.0 cutover (intercode#12260). Remove along with the app.
+            "${local.fly_org_slug}:intercode-canary:*",
+          ]
         }
       }
     }]
