@@ -20,12 +20,13 @@ locals {
   # template0/template1/rdsadmin are RDS-managed, so left alone.
   production_admin_databases = toset(["postgres"])
 
-  # Databases whose app role also needs CREATE on the database itself: the two
-  # whose drizzle migrators run CREATE SCHEMA IF NOT EXISTS "drizzle" on every
-  # deploy (which failed with "permission denied for database" once the role had
-  # only CONNECT), and tapestries_furniture_production, whose role owns its
-  # database and so had CREATE before the grants below took it away.
+  # Databases whose app role also needs CREATE on the database itself: the
+  # ones whose drizzle migrators run CREATE SCHEMA IF NOT EXISTS "drizzle" on
+  # every deploy (which failed with "permission denied for database" once the
+  # role had only CONNECT), and tapestries_furniture_production, whose role owns
+  # its database and so had CREATE before the grants below took it away.
   production_databases_with_create = toset([
+    "larp_library_production",
     "rotator_production",
     "tapestries_furniture_production",
     "www_interactiveliterature_org_production",
