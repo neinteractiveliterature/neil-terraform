@@ -195,6 +195,25 @@ resource "github_actions_secret" "larp_library_fly_api_token" {
   value       = local.secrets["larp_library_fly_api_token"]
 }
 
+# Deploys the app with SST (see the larp_library repo's sst.config.ts and release workflow), the way rotator and gamewrap
+# are deployed. This creates the deploy role the release workflow assumes and the AWS_OIDC_ROLE / CLOUDFLARE_* secrets it
+# reads. "library.interactiveliterature.org" redirects to the app, so SST needs to write that zone as well as larplibrary.org.
+module "larp_library_sst_github_deployment" {
+  source = "github.com/neinteractiveliterature/neil-terraform-modules//sst_github_deployment?ref=main"
+
+  app_name              = "larp-library"
+  cloudflare_account_id = cloudflare_account.neil.id
+  github_repository = {
+    name      = github_repository.larp_library.name
+    full_name = github_repository.larp_library.full_name
+  }
+  oidc_provider_arn = module.github-oidc.oidc_provider_arn
+  writable_cloudflare_zones = [
+    cloudflare_zone.larplibrary_org.id,
+    cloudflare_zone.interactiveliterature_org.id,
+  ]
+}
+
 resource "sentry_project" "larp_library" {
   organization = sentry_organization.neil.slug
 
@@ -202,6 +221,24 @@ resource "sentry_project" "larp_library" {
   name     = "Larp Library"
   slug     = "larp-library"
   platform = "ruby-rails"
+}
+
+resource "github_actions_secret" "larp_library_sentry_org" {
+  repository  = github_repository.larp_library.name
+  secret_name = "SENTRY_ORG"
+  value       = sentry_organization.neil.slug
+}
+
+resource "github_actions_secret" "larp_library_sentry_project" {
+  repository  = github_repository.larp_library.name
+  secret_name = "SENTRY_PROJECT"
+  value       = sentry_project.larp_library.slug
+}
+
+resource "github_actions_secret" "larp_library_sentry_auth_token" {
+  repository  = github_repository.larp_library.name
+  secret_name = "SENTRY_AUTH_TOKEN"
+  value       = var.sentry_auth_token
 }
 
 data "sentry_all_keys" "larp_library" {
