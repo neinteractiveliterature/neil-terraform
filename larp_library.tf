@@ -130,14 +130,6 @@ resource "cloudflare_dns_record" "larplibrary_org_spf" {
   ttl     = 1
 }
 
-resource "cloudflare_dns_record" "larplibrary_org_www" {
-  zone_id = cloudflare_zone.larplibrary_org.id
-  name    = "www.larplibrary.org"
-  type    = "CNAME"
-  content = "larp-library.fly.dev"
-  ttl     = 1
-}
-
 module "larplibrary_org_forwardemail_receiving_domain" {
   source = "github.com/neinteractiveliterature/neil-terraform-modules//forwardemail_receiving_domain?ref=main"
 
@@ -165,14 +157,6 @@ module "assets_larplibrary_org_cloudfront" {
   add_security_headers_arn = aws_lambda_function.addSecurityHeaders.qualified_arn
   zone_id                  = cloudflare_zone.larplibrary_org.id
   compress                 = true
-}
-
-resource "cloudflare_dns_record" "interactiveliterature_org_library_cname" {
-  zone_id = cloudflare_zone.interactiveliterature_org.id
-  name    = "library.interactiveliterature.org"
-  type    = "CNAME"
-  content = "larp-library.fly.dev"
-  ttl     = 1
 }
 
 resource "github_repository" "larp_library" {
