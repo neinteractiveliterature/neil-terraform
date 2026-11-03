@@ -238,3 +238,39 @@ data "sentry_all_keys" "larp_library" {
 #   flyctl secrets set --app larp-library \
 #     SENTRY_RELEASE_TOKEN=$(tofu output -raw larp_library_sentry_release_token)
 
+
+# The deploy role's own S3 statement is scoped to "larp-library-production-*", which doesn't match this bucket (it has no
+# suffix). SST imports the bucket rather than creating it, so the role needs to read its configuration. Read-only: the
+# bucket itself stays managed here.
+resource "aws_iam_role_policy" "larp_library_deploy_read_uploads_bucket" {
+  name = "read-uploads-bucket"
+  role = reverse(split("/", module.larp_library_sst_github_deployment.aws_deploy_oidc_role))[0]
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid    = "ReadUploadsBucketConfiguration"
+        Effect = "Allow"
+        Action = [
+          "s3:ListBucket",
+          "s3:GetBucketTagging",
+          "s3:GetBucketPolicy",
+          "s3:GetBucketAcl",
+          "s3:GetBucketCORS",
+          "s3:GetBucketWebsite",
+          "s3:GetBucketVersioning",
+          "s3:GetAccelerateConfiguration",
+          "s3:GetBucketRequestPayment",
+          "s3:GetBucketLogging",
+          "s3:GetLifecycleConfiguration",
+          "s3:GetReplicationConfiguration",
+          "s3:GetEncryptionConfiguration",
+          "s3:GetBucketObjectLockConfiguration",
+          "s3:GetBucketPublicAccessBlock",
+        ]
+        Resource = aws_s3_bucket.larp_library_production.arn
+      }
+    ]
+  })
+}
