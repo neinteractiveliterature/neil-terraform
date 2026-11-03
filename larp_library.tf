@@ -254,6 +254,7 @@ resource "aws_iam_role_policy" "larp_library_deploy_read_uploads_bucket" {
         Effect = "Allow"
         Action = [
           "s3:ListBucket",
+          "s3:ListTagsForResource",
           "s3:GetBucketTagging",
           "s3:GetBucketPolicy",
           "s3:GetBucketAcl",
@@ -277,8 +278,12 @@ resource "aws_iam_role_policy" "larp_library_deploy_read_uploads_bucket" {
 
 # The sst_github_deployment module's policy has no IAM role actions and a log-group statement that doesn't match how the
 # AWS provider reads log groups, so it can't deploy a stack that creates its own Lambda functions (the web function and
-# the migrator). This fills the gap for this app only, scoped to the "larp-lib*-production-" name pattern SST gives (S3 bucket names get "larp-library" shortened to "larp-lib")
-# everything it creates, plus the read-only calls the provider makes while refreshing state.
+# the migrator). This fills the gap for this app only. Everything SST creates is named "larp-lib*-production-*" (it
+# shortens "larp-library" to "larp-lib" in S3 bucket names).
+#
+# The actions are the ones CloudTrail showed the role using in the first successful deploy, plus the update and delete
+# counterparts of the ones it creates, which later deploys and teardowns need. CloudFront, ACM and SSM access comes from
+# the module's own policy.
 resource "aws_iam_role_policy" "larp_library_deploy_sst_resources" {
   name = "sst-resources"
   role = reverse(split("/", module.larp_library_sst_github_deployment.aws_deploy_oidc_role))[0]
@@ -293,15 +298,12 @@ resource "aws_iam_role_policy" "larp_library_deploy_sst_resources" {
           "iam:CreateRole",
           "iam:DeleteRole",
           "iam:GetRole",
-          "iam:UpdateRole",
           "iam:UpdateAssumeRolePolicy",
           "iam:TagRole",
           "iam:UntagRole",
           "iam:PutRolePolicy",
           "iam:GetRolePolicy",
           "iam:DeleteRolePolicy",
-          "iam:AttachRolePolicy",
-          "iam:DetachRolePolicy",
           "iam:ListRolePolicies",
           "iam:ListAttachedRolePolicies",
           "iam:ListInstanceProfilesForRole",
@@ -310,57 +312,97 @@ resource "aws_iam_role_policy" "larp_library_deploy_sst_resources" {
         Resource = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/larp-lib*-production-*"
       },
       {
-        Sid      = "ManageApplicationLogGroups"
+        # SST attaches only the basic Lambda logging policy to its function roles
+        Sid      = "AttachLambdaLoggingPolicy"
         Effect   = "Allow"
-        Action   = "logs:*"
+        Action   = ["iam:AttachRolePolicy", "iam:DetachRolePolicy"]
+        Resource = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/larp-lib*-production-*"
+        Condition = {
+          ArnEquals = {
+            "iam:PolicyARN" = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+          }
+        }
+      },
+      {
+        Sid    = "ManageApplicationLogGroups"
+        Effect = "Allow"
+        Action = [
+          "logs:CreateLogGroup",
+          "logs:DeleteLogGroup",
+          "logs:PutRetentionPolicy",
+          "logs:TagResource",
+          "logs:UntagResource",
+          "logs:ListTagsForResource",
+          "logs:ListTagsLogGroup",
+        ]
         Resource = "arn:aws:logs:us-east-1:${data.aws_caller_identity.current.account_id}:log-group:/aws/lambda/larp-lib*-production-*"
       },
       {
-        Sid      = "ManageApplicationFunctions"
+        # The provider reads a log group by listing them, which is only authorized against this resource
+        Sid      = "FindLogGroups"
         Effect   = "Allow"
-        Action   = "lambda:*"
+        Action   = "logs:DescribeLogGroups"
+        Resource = "arn:aws:logs:us-east-1:${data.aws_caller_identity.current.account_id}:log-group::log-stream:"
+      },
+      {
+        Sid    = "ManageApplicationFunctions"
+        Effect = "Allow"
+        Action = [
+          "lambda:CreateFunction",
+          "lambda:DeleteFunction",
+          "lambda:GetFunction",
+          "lambda:GetFunctionCodeSigningConfig",
+          "lambda:ListVersionsByFunction",
+          "lambda:UpdateFunctionCode",
+          "lambda:UpdateFunctionConfiguration",
+          "lambda:InvokeFunction",
+          "lambda:AddPermission",
+          "lambda:RemovePermission",
+          "lambda:GetPolicy",
+          "lambda:CreateFunctionUrlConfig",
+          "lambda:GetFunctionUrlConfig",
+          "lambda:UpdateFunctionUrlConfig",
+          "lambda:DeleteFunctionUrlConfig",
+          "lambda:TagResource",
+          "lambda:UntagResource",
+          "lambda:ListTags",
+        ]
         Resource = "arn:aws:lambda:us-east-1:${data.aws_caller_identity.current.account_id}:function:larp-lib*-production-*"
       },
       {
         Sid    = "ManageApplicationBuckets"
         Effect = "Allow"
-        Action = "s3:*"
-        Resource = [
-          "arn:aws:s3:::larp-lib*-production-*",
-          "arn:aws:s3:::larp-lib*-production-*/*",
+        Action = [
+          "s3:CreateBucket",
+          "s3:DeleteBucket",
+          "s3:PutBucketCORS",
+          "s3:PutBucketPolicy",
+          "s3:DeleteBucketPolicy",
+          "s3:PutBucketPublicAccessBlock",
+          "s3:PutBucketWebsite",
+          "s3:DeleteBucketWebsite",
+          "s3:PutBucketTagging",
+          "s3:GetBucket*",
+          "s3:GetAccelerateConfiguration",
+          "s3:GetLifecycleConfiguration",
+          "s3:GetReplicationConfiguration",
+          "s3:GetEncryptionConfiguration",
+          "s3:ListBucket",
+          "s3:ListTagsForResource",
         ]
+        Resource = "arn:aws:s3:::larp-lib*-production-*"
       },
       {
-        Sid    = "ManageCloudfrontOriginAccess"
+        Sid    = "ManageApplicationBucketObjects"
         Effect = "Allow"
         Action = [
-          "cloudfront:CreateOriginAccessControl",
-          "cloudfront:UpdateOriginAccessControl",
-          "cloudfront:DeleteOriginAccessControl",
-          "cloudfront:CreateInvalidation",
-          "cloudfront:UpdateFunction",
-          "cloudfront:PublishFunction",
+          "s3:GetObject",
+          "s3:GetObjectTagging",
+          "s3:PutObject",
+          "s3:PutObjectTagging",
+          "s3:DeleteObject",
         ]
-        Resource = "*"
-      },
-      {
-        Sid    = "ReadForStateRefresh"
-        Effect = "Allow"
-        Action = [
-          "iam:Get*",
-          "iam:List*",
-          "logs:Describe*",
-          "logs:List*",
-          "lambda:Get*",
-          "lambda:List*",
-          "s3:List*",
-          "cloudfront:Get*",
-          "cloudfront:List*",
-          "cloudfront:Describe*",
-          "acm:Describe*",
-          "acm:List*",
-        ]
-        Resource = "*"
+        Resource = "arn:aws:s3:::larp-lib*-production-*/*"
       },
     ]
   })
