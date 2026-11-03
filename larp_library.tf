@@ -277,7 +277,7 @@ resource "aws_iam_role_policy" "larp_library_deploy_read_uploads_bucket" {
 
 # The sst_github_deployment module's policy has no IAM role actions and a log-group statement that doesn't match how the
 # AWS provider reads log groups, so it can't deploy a stack that creates its own Lambda functions (the web function and
-# the migrator). This fills the gap for this app only, scoped to the "larp-library-production-" name prefix SST gives
+# the migrator). This fills the gap for this app only, scoped to the "larp-lib*-production-" name pattern SST gives (S3 bucket names get "larp-library" shortened to "larp-lib")
 # everything it creates, plus the read-only calls the provider makes while refreshing state.
 resource "aws_iam_role_policy" "larp_library_deploy_sst_resources" {
   name = "sst-resources"
@@ -307,27 +307,27 @@ resource "aws_iam_role_policy" "larp_library_deploy_sst_resources" {
           "iam:ListInstanceProfilesForRole",
           "iam:PassRole",
         ]
-        Resource = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/larp-library-production-*"
+        Resource = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/larp-lib*-production-*"
       },
       {
         Sid      = "ManageApplicationLogGroups"
         Effect   = "Allow"
         Action   = "logs:*"
-        Resource = "arn:aws:logs:us-east-1:${data.aws_caller_identity.current.account_id}:log-group:/aws/lambda/larp-library-production-*"
+        Resource = "arn:aws:logs:us-east-1:${data.aws_caller_identity.current.account_id}:log-group:/aws/lambda/larp-lib*-production-*"
       },
       {
         Sid      = "ManageApplicationFunctions"
         Effect   = "Allow"
         Action   = "lambda:*"
-        Resource = "arn:aws:lambda:us-east-1:${data.aws_caller_identity.current.account_id}:function:larp-library-production-*"
+        Resource = "arn:aws:lambda:us-east-1:${data.aws_caller_identity.current.account_id}:function:larp-lib*-production-*"
       },
       {
         Sid    = "ManageApplicationBuckets"
         Effect = "Allow"
         Action = "s3:*"
         Resource = [
-          "arn:aws:s3:::larp-library-production-*",
-          "arn:aws:s3:::larp-library-production-*/*",
+          "arn:aws:s3:::larp-lib*-production-*",
+          "arn:aws:s3:::larp-lib*-production-*/*",
         ]
       },
       {
