@@ -355,6 +355,8 @@ resource "aws_iam_role_policy" "larp_library_deploy_sst_resources" {
           "lambda:ListVersionsByFunction",
           "lambda:UpdateFunctionCode",
           "lambda:UpdateFunctionConfiguration",
+          "lambda:PutFunctionConcurrency",
+          "lambda:DeleteFunctionConcurrency",
           "lambda:InvokeFunction",
           "lambda:AddPermission",
           "lambda:RemovePermission",
