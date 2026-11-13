@@ -23,7 +23,7 @@ terraform {
     }
     stripe = {
       source  = "stripe/stripe"
-      version = "0.3.0"
+      version = "0.3.1"
     }
   }
   required_version = ">= 1.6"
