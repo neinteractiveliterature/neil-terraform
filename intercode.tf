@@ -139,7 +139,7 @@ module "intercode_aws_resources" {
     sms_number  = "+14156345010"
   }
 
-  assets_host          = "assets.neilhosting.net"
+  assets_host          = local.intercode_assets_host
   uploads_host         = "https://uploads.neilhosting.net"
   cloudwatch_log_group = "intercode2_production"
   intercode_host       = "www.neilhosting.net"
@@ -226,7 +226,7 @@ module "uploads_neilhosting_net_cloudfront" {
 
 resource "cloudflare_dns_record" "assets_neilhosting_net" {
   zone_id = cloudflare_zone.neilhosting_net.id
-  name    = "assets.neilhosting.net"
+  name    = local.intercode_assets_host
   type    = "CNAME"
   content = module.assets_neilhosting_net_cloudfront.cloudfront_distribution.domain_name
   ttl     = 1
@@ -235,7 +235,7 @@ resource "cloudflare_dns_record" "assets_neilhosting_net" {
 module "assets_neilhosting_net_cloudfront" {
   source = "github.com/neinteractiveliterature/neil-terraform-modules//cloudfront_with_acm?ref=main"
 
-  domain_name = "assets.neilhosting.net"
+  domain_name = local.intercode_assets_host
   origin_id   = "intercode"
 
   # Served from the assets bucket (intercode_assets_bucket.tf), which keeps previous releases' files, rather than from
