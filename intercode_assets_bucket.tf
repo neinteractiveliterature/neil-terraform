@@ -5,6 +5,14 @@
 # origin access control. Its distribution has to be listed in cloudfront_distribution_arns below, so that it can read
 # the bucket, and needs a root object that doesn't exist (otherwise "/" is a listing of the bucket) and the CORS
 # response headers policy at the end of this file.
+# The one place the assets host is named. The same value has to reach the assets distribution and its DNS record, the
+# production app containers' ASSETS_HOST, the framework-shell distributions' assets origin, and the repository's
+# ASSETS_HOST variable (the release workflow bakes it into the files it uploads). If any of them differed, browsers
+# would be sent to a host that doesn't serve the app's assets.
+locals {
+  intercode_assets_host = "assets.neilhosting.net"
+}
+
 module "intercode_assets_bucket" {
   source = "github.com/neinteractiveliterature/intercode//terraform/modules/assets_bucket_intercode?ref=main&depth=1"
 
@@ -38,6 +46,14 @@ resource "github_actions_variable" "intercode_assets_upload_role_arn" {
   repository    = github_repository.intercode.name
   variable_name = "ASSETS_UPLOAD_ROLE_ARN"
   value         = module.intercode_assets_bucket.release_upload_role_arn
+}
+
+# The release workflow's assets-bucket-release job bakes this host into the uploaded files (script/substituteAssetsHost.sh),
+# and fails when it is unset. See local.intercode_assets_host for why it must match the other users of the host.
+resource "github_actions_variable" "intercode_assets_host" {
+  repository    = github_repository.intercode.name
+  variable_name = "ASSETS_HOST"
+  value         = local.intercode_assets_host
 }
 
 output "intercode_assets_bucket_name" {
