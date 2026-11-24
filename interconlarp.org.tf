@@ -344,6 +344,7 @@ module "interconlarp_org_cloudfront_intercode" {
   name                 = "${each.value}-interconlarp-org"
   rails_origin_domain  = "www.neilhosting.net"
   assets_origin_domain = local.intercode_assets_host
+  shared_policies      = local.intercode_cloudfront_shared_policies
   aliases              = ["${each.value}.interconlarp.org"]
   acm_certificate_arn  = aws_acm_certificate_validation.interconlarp_org_cloudfront[each.value].certificate_arn
 

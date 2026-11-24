@@ -70,6 +70,7 @@ module "intercode_framework_shell_test_cloudfront" {
   name                 = "framework-shell-test"
   rails_origin_domain  = "www.neilhosting.net"
   assets_origin_domain = local.intercode_assets_host
+  shared_policies      = local.intercode_cloudfront_shared_policies
   aliases              = [local.intercode_framework_shell_test_hostname]
   acm_certificate_arn  = aws_acm_certificate_validation.intercode_framework_shell_test.certificate_arn
 
