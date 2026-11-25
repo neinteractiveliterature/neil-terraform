@@ -16,17 +16,6 @@ locals {
   }
 }
 
-# Adds a Server-Timing header with CloudFront's own timings. cdn-upstream-connect is the time spent opening a connection
-# to the origin, and is 0 when an existing one was reused.
-resource "aws_cloudfront_response_headers_policy" "intercode_server_timing" {
-  name = "intercode-server-timing"
-
-  server_timing_headers_config {
-    enabled       = true
-    sampling_rate = 100
-  }
-}
-
 # These were the policies of the i.interconlarp.org distribution's own set; they become the shared set.
 
 moved {
