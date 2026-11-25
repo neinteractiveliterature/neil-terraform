@@ -3,12 +3,6 @@ locals {
   # convention behind CloudFront, add its subdomain here and remove it from interconlarp_org_intercode_subdomains.
   interconlarp_org_cloudfront_subdomains = toset(["i", "p"])
 
-  # Temporary: convention subdomains served by the intercode-canary Fly app instead of intercode (intercode#12260). To
-  # roll back, empty this map. Remove along with the canary.
-  interconlarp_org_canary_subdomains = {
-    "w" = { ipv4 = "66.241.124.129", ipv6 = "2a09:8280:1::1db:a470:0" }
-  }
-
   interconlarp_org_forward_only_subdomains = toset([])
   interconlarp_org_intercode_subdomains = toset([
     "d",
@@ -181,7 +175,7 @@ resource "cloudflare_dns_record" "interconlarp_org_convention_subdomain_cname" {
   zone_id = cloudflare_zone.interconlarp_org.id
   name    = "${each.value}.interconlarp.org"
   type    = "A"
-  content = try(local.interconlarp_org_canary_subdomains[each.value].ipv4, "137.66.59.126")
+  content = "137.66.59.126"
   ttl     = 1
 }
 
@@ -191,25 +185,7 @@ resource "cloudflare_dns_record" "interconlarp_org_convention_subdomain_aaaa" {
   zone_id = cloudflare_zone.interconlarp_org.id
   name    = "${each.value}.interconlarp.org"
   type    = "AAAA"
-  content = try(local.interconlarp_org_canary_subdomains[each.value].ipv6, "2a09:8280:1::4e:bee4")
-  ttl     = 1
-}
-
-# Temporary: lets the intercode-canary Fly app get a certificate for w.interconlarp.org before w's A/AAAA records move
-# to it (intercode#12260). w still points at the intercode app, so Fly can't validate by HTTP. Remove with the canary.
-resource "cloudflare_dns_record" "interconlarp_org_w_canary_acme_challenge_cname" {
-  zone_id = cloudflare_zone.interconlarp_org.id
-  name    = "_acme-challenge.w.interconlarp.org"
-  type    = "CNAME"
-  content = "w.interconlarp.org.d6o5ojq.flydns.net"
-  ttl     = 1
-}
-
-resource "cloudflare_dns_record" "interconlarp_org_w_canary_fly_ownership" {
-  zone_id = cloudflare_zone.interconlarp_org.id
-  name    = "_fly-ownership.w.interconlarp.org"
-  type    = "TXT"
-  content = "app-d6o5ojq"
+  content = "2a09:8280:1::4e:bee4"
   ttl     = 1
 }
 
