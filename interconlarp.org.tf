@@ -327,6 +327,9 @@ module "interconlarp_org_cloudfront_intercode" {
   # Only "i", while we measure why API calls are often slower through CloudFront than straight to Fly
   rails_response_headers_policy_id = each.value == "i" ? aws_cloudfront_response_headers_policy.intercode_server_timing.id : null
 
+  # Fewer new connections to Rails. Only "i" until its Server-Timing numbers show whether it helps.
+  rails_origin_keepalive_timeout = each.value == "i" ? 60 : 5
+
   access_logs_enabled                 = true
   access_log_delivery_destination_arn = module.cloudfront_intercode_logging.delivery_destination_arn
 
