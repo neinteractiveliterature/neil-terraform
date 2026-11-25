@@ -4,6 +4,9 @@ module "intercode_cloudfront_policies" {
   source = "github.com/neinteractiveliterature/intercode//terraform/modules/cloudfront_intercode_policies?ref=main&depth=1"
 
   name = "intercode-shared"
+
+  # The release gives index.html stale-while-revalidate=300, and CloudFront cuts that window off at this maximum.
+  static_shell_max_ttl = 300
 }
 
 locals {
