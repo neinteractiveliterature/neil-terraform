@@ -324,6 +324,9 @@ module "interconlarp_org_cloudfront_intercode" {
   aliases              = ["${each.value}.interconlarp.org"]
   acm_certificate_arn  = aws_acm_certificate_validation.interconlarp_org_cloudfront[each.value].certificate_arn
 
+  # Only "i", while we measure why API calls are often slower through CloudFront than straight to Fly
+  rails_response_headers_policy_id = each.value == "i" ? aws_cloudfront_response_headers_policy.intercode_server_timing.id : null
+
   access_logs_enabled                 = true
   access_log_delivery_destination_arn = module.cloudfront_intercode_logging.delivery_destination_arn
 
