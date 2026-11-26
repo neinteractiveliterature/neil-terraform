@@ -6,7 +6,7 @@
 # the bucket, and needs a root object that doesn't exist (otherwise "/" is a listing of the bucket) and the CORS
 # response headers policy at the end of this file.
 # The one place the assets host is named. The same value has to reach the assets distribution and its DNS record, the
-# production app containers' ASSETS_HOST, the framework-shell distributions' assets origin, and the repository's
+# production app containers' ASSETS_HOST, and the repository's
 # ASSETS_HOST variable (the release workflow bakes it into the files it uploads). If any of them differed, browsers
 # would be sent to a host that doesn't serve the app's assets.
 locals {

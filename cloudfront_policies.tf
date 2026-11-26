@@ -34,18 +34,8 @@ moved {
 }
 
 moved {
-  from = module.interconlarp_org_cloudfront_intercode["i"].module.policies[0].aws_cloudfront_cache_policy.cdn_spa_shell
-  to   = module.intercode_cloudfront_policies.aws_cloudfront_cache_policy.cdn_spa_shell
-}
-
-moved {
   from = module.interconlarp_org_cloudfront_intercode["i"].module.policies[0].aws_cloudfront_cache_policy.og_shell
   to   = module.intercode_cloudfront_policies.aws_cloudfront_cache_policy.og_shell
-}
-
-moved {
-  from = module.interconlarp_org_cloudfront_intercode["i"].module.policies[0].aws_cloudfront_cache_policy.default_router
-  to   = module.intercode_cloudfront_policies.aws_cloudfront_cache_policy.default_router
 }
 
 moved {
