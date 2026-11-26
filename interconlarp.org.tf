@@ -317,12 +317,11 @@ module "interconlarp_org_cloudfront_intercode" {
     aws.us_east_1 = aws.us_east_1
   }
 
-  name                 = "${each.value}-interconlarp-org"
-  rails_origin_domain  = "www.neilhosting.net"
-  assets_origin_domain = local.intercode_assets_host
-  shared_policies      = local.intercode_cloudfront_shared_policies
-  aliases              = ["${each.value}.interconlarp.org"]
-  acm_certificate_arn  = aws_acm_certificate_validation.interconlarp_org_cloudfront[each.value].certificate_arn
+  name                = "${each.value}-interconlarp-org"
+  rails_origin_domain = "www.neilhosting.net"
+  shared_policies     = local.intercode_cloudfront_shared_policies
+  aliases             = ["${each.value}.interconlarp.org"]
+  acm_certificate_arn = aws_acm_certificate_validation.interconlarp_org_cloudfront[each.value].certificate_arn
 
   # Opening a new connection from CloudFront to Rails adds about 75 ms to an API call, so keep idle ones for longer
   rails_origin_keepalive_timeout = 60
@@ -330,7 +329,6 @@ module "interconlarp_org_cloudfront_intercode" {
   access_logs_enabled                 = true
   access_log_delivery_destination_arn = module.cloudfront_intercode_logging.delivery_destination_arn
 
-  static_shell_enabled                  = true
   static_shell_bucket_domain_name       = module.intercode_framework_shell_bucket.bucket_regional_domain_name
   static_shell_origin_access_control_id = module.intercode_framework_shell_bucket.origin_access_control_id
 }
