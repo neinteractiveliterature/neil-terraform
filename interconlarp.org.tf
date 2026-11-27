@@ -254,19 +254,3 @@ resource "cloudflare_dns_record" "interconlarp_org_furniture_cname" {
   content = "intercon-furniture.fly.dev"
   ttl     = 1
 }
-
-# ---------------------------------------------------------------------------
-# CloudFront logging for Intercode
-# ---------------------------------------------------------------------------
-
-# Access logs and a 5xx alarm shared by every cloudfront_intercode distribution
-module "cloudfront_intercode_logging" {
-  source = "github.com/neinteractiveliterature/intercode//terraform/modules/cloudfront_intercode_logging?ref=main&depth=1"
-
-  providers = {
-    aws.us_east_1 = aws.us_east_1
-  }
-
-  name          = "intercode-cloudfront"
-  alarm_actions = [module.intercode_aws_resources.alarm_sns_topic_arn]
-}
