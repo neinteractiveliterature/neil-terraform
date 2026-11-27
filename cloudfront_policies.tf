@@ -15,30 +15,3 @@ locals {
     origin_request_policy_ids = module.intercode_cloudfront_policies.origin_request_policy_ids
   }
 }
-
-# These were the policies of the i.interconlarp.org distribution's own set; they become the shared set.
-
-moved {
-  from = module.interconlarp_org_cloudfront_intercode["i"].module.policies[0].aws_cloudfront_origin_request_policy.forward_all
-  to   = module.intercode_cloudfront_policies.aws_cloudfront_origin_request_policy.forward_all
-}
-
-moved {
-  from = module.interconlarp_org_cloudfront_intercode["i"].module.policies[0].aws_cloudfront_origin_request_policy.og_shell
-  to   = module.intercode_cloudfront_policies.aws_cloudfront_origin_request_policy.og_shell
-}
-
-moved {
-  from = module.interconlarp_org_cloudfront_intercode["i"].module.policies[0].aws_cloudfront_cache_policy.no_cache
-  to   = module.intercode_cloudfront_policies.aws_cloudfront_cache_policy.no_cache
-}
-
-moved {
-  from = module.interconlarp_org_cloudfront_intercode["i"].module.policies[0].aws_cloudfront_cache_policy.og_shell
-  to   = module.intercode_cloudfront_policies.aws_cloudfront_cache_policy.og_shell
-}
-
-moved {
-  from = module.interconlarp_org_cloudfront_intercode["i"].module.policies[0].aws_cloudfront_cache_policy.static_shell
-  to   = module.intercode_cloudfront_policies.aws_cloudfront_cache_policy.static_shell
-}

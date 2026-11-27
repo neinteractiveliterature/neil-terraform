@@ -1,8 +1,4 @@
 locals {
-  # Convention subdomains served through their own cloudfront_intercode distribution. To move another past
-  # convention behind CloudFront, add its subdomain here and remove it from interconlarp_org_intercode_subdomains.
-  interconlarp_org_cloudfront_subdomains = toset(["i", "p"])
-
   interconlarp_org_forward_only_subdomains = toset([])
   interconlarp_org_intercode_subdomains = toset([
     "d",
@@ -10,14 +6,14 @@ locals {
     "f",
     "g",
     "h",
-    # "i" is served via its own cloudfront_intercode distribution
+    "i",
     "j",
     "k",
     "l",
     "m",
     "n",
     "o",
-    # "p" is served via its own cloudfront_intercode distribution
+    "p",
     "q",
     "r",
     "s",
@@ -207,11 +203,10 @@ module "interconlarp_org_forward_only_subdomain_forwardemail_receiving_domain" {
   verification_code = module.forwardemail_receiving.verification_records_by_domain[each.value]
 }
 
-# Covers CloudFront-served conventions too: their events.<subdomain> mail domains stay in this group.
 module "interconlarp_org_convention_subdomain_events_forwardemail_receiving_domain" {
   for_each = setintersection(
     keys(module.forwardemail_receiving.verification_records_by_domain),
-    [for subdomain in setunion(local.interconlarp_org_intercode_subdomains, local.interconlarp_org_cloudfront_subdomains) : "events.${subdomain}.interconlarp.org"]
+    [for subdomain in local.interconlarp_org_intercode_subdomains : "events.${subdomain}.interconlarp.org"]
   )
   source = "github.com/neinteractiveliterature/neil-terraform-modules//forwardemail_receiving_domain?ref=main"
 
@@ -261,40 +256,8 @@ resource "cloudflare_dns_record" "interconlarp_org_furniture_cname" {
 }
 
 # ---------------------------------------------------------------------------
-# Convention subdomains served via cloudfront_intercode (OG shell + SPA shell)
+# CloudFront logging for Intercode
 # ---------------------------------------------------------------------------
-
-resource "aws_acm_certificate" "interconlarp_org_cloudfront" {
-  for_each = local.interconlarp_org_cloudfront_subdomains
-
-  domain_name       = "${each.value}.interconlarp.org"
-  validation_method = "DNS"
-}
-
-resource "cloudflare_dns_record" "interconlarp_org_cloudfront_acm_validation" {
-  for_each = merge([
-    for certificate in aws_acm_certificate.interconlarp_org_cloudfront : {
-      for dvo in certificate.domain_validation_options : dvo.domain_name => {
-        name  = trimsuffix(dvo.resource_record_name, ".")
-        type  = dvo.resource_record_type
-        value = trimsuffix(dvo.resource_record_value, ".")
-      }
-    }
-  ]...)
-
-  zone_id = cloudflare_zone.interconlarp_org.id
-  name    = each.value.name
-  type    = each.value.type
-  content = each.value.value
-  ttl     = 60
-}
-
-resource "aws_acm_certificate_validation" "interconlarp_org_cloudfront" {
-  for_each = local.interconlarp_org_cloudfront_subdomains
-
-  certificate_arn         = aws_acm_certificate.interconlarp_org_cloudfront[each.value].arn
-  validation_record_fqdns = [for dvo in aws_acm_certificate.interconlarp_org_cloudfront[each.value].domain_validation_options : trimsuffix(dvo.resource_record_name, ".")]
-}
 
 # Access logs and a 5xx alarm shared by every cloudfront_intercode distribution
 module "cloudfront_intercode_logging" {
@@ -306,48 +269,4 @@ module "cloudfront_intercode_logging" {
 
   name          = "intercode-cloudfront"
   alarm_actions = [module.intercode_aws_resources.alarm_sns_topic_arn]
-}
-
-module "interconlarp_org_cloudfront_intercode" {
-  for_each = local.interconlarp_org_cloudfront_subdomains
-  source   = "github.com/neinteractiveliterature/intercode//terraform/modules/cloudfront_intercode?ref=main&depth=1"
-
-  providers = {
-    aws           = aws
-    aws.us_east_1 = aws.us_east_1
-  }
-
-  name                = "${each.value}-interconlarp-org"
-  rails_origin_domain = "www.neilhosting.net"
-  shared_policies     = local.intercode_cloudfront_shared_policies
-  aliases             = ["${each.value}.interconlarp.org"]
-  acm_certificate_arn = aws_acm_certificate_validation.interconlarp_org_cloudfront[each.value].certificate_arn
-
-  # Opening a new connection from CloudFront to Rails adds about 75 ms to an API call, so keep idle ones for longer
-  rails_origin_keepalive_timeout = 60
-
-  access_logs_enabled                 = true
-  access_log_delivery_destination_arn = module.cloudfront_intercode_logging.delivery_destination_arn
-
-  static_shell_bucket_domain_name       = module.intercode_framework_shell_bucket.bucket_regional_domain_name
-  static_shell_origin_access_control_id = module.intercode_framework_shell_bucket.origin_access_control_id
-}
-
-module "interconlarp_org_cloudfront_forwardemail_receiving_domain" {
-  for_each = local.interconlarp_org_cloudfront_subdomains
-  source   = "github.com/neinteractiveliterature/neil-terraform-modules//forwardemail_receiving_domain?ref=main"
-
-  zone_id           = cloudflare_zone.interconlarp_org.id
-  name              = "${each.value}.interconlarp.org"
-  verification_code = module.forwardemail_receiving.verification_records_by_domain["${each.value}.interconlarp.org"]
-}
-
-resource "cloudflare_dns_record" "interconlarp_org_cloudfront_cname" {
-  for_each = local.interconlarp_org_cloudfront_subdomains
-
-  zone_id = cloudflare_zone.interconlarp_org.id
-  name    = "${each.value}.interconlarp.org"
-  type    = "CNAME"
-  content = module.interconlarp_org_cloudfront_intercode[each.value].distribution_domain_name
-  ttl     = 1
 }
